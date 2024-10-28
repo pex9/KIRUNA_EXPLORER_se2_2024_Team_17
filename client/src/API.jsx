@@ -74,6 +74,12 @@ async function getUserInfo() {
 
 // API DOCUMENTS CALL 
 
+
+// API TYPES DOCUMENTS CALL
+
+
+// API STAKEHOLDERS CALL
+
 // API DOCUMENTS CONNECTION CALL 
 
 const API = { getUsers, login, logout, getUserInfo };

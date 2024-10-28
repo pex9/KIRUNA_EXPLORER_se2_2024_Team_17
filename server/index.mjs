@@ -3,12 +3,13 @@
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-import { check, validationResult } from 'express-validator';
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import session from 'express-session';
-import userDao from './dao/user-dao.js'; // Aggiungi questa riga per importare userDao correttamente
-
+import userDao from './dao/user-dao.js'; 
+import documentDao from './dao/document-dao.js';
+import stakeholderDao from './dao/stakeholder-dao.js';
+import typeDocumentDao from './dao/typeDocument-dao.js';
 /*** Set up Passport ***/
 // set up the "username and password" login strategy
 passport.use(new LocalStrategy(
@@ -76,6 +77,14 @@ const isLoggedIn = (req, res, next) => {
   return res.status(401).json({ error: 'Not authenticated' });
 }
 
+const isUrbanPlanner = (req, res, next) => {
+  if (req.isAuthenticated() && req.user.role == 'Urban Planner')
+    return next();
+  else if (req.isAuthenticated() && req.user.role != 'Urban Planner'){
+    return res.status(403 ).json({ error: '(Forbidden), user is authenticated but does not have the necessary privileges to access a resource.' });
+  }
+  return res.status(401).json({ error: 'Not authenticated' });
+}
 /*** User APIs ***/
 
 // POST /api/sessions 
@@ -111,6 +120,60 @@ app.get('/api/sessions/current', (req, res) => {
   else
     res.status(401).json({ error: 'Unauthenticated user!' });
 });
+
+
+// API DOCUMENTS
+
+// GET /api/documents, only possible for authenticated users and if he/she is a urban planner
+app.post('/api/documents', isUrbanPlanner, (req, res) => {
+  const document = req.body;
+  if (!document.title || !document.idStakeholder) {
+    res.status(400).json({ error: 'The request body must contain all the fields' });
+    return
+  }
+  documentDao.addDocument(document.title, document.idStakeholder, document.scale, document.issuance_Date, document.language, document.pages, document.description, document.idtype)
+    .then(document => res.status(201).json(document))
+    .catch(() => res.status(500).end());
+});
+
+// API TYPES
+app.get('/api/types', (req, res) => {
+  typeDocumentDao.getTypes()
+    .then(types => res.json(types))
+    .catch(() => res.status(500).end());
+}); 
+app.get('/api/types/:typeid', (req, res) => {
+  typeDocumentDao.getType(req.params.typeid)
+    .then(type => {
+      if (type)
+        res.json(type);
+      else
+        res.status(404).json({ error: 'Type not found' });
+    })
+    .catch(() => res.status(500).end());
+});
+
+// API STAKEHOLDERS
+
+app.get('/api/stakeholders', (req, res) => {
+  stakeholderDao.getStakeholders()
+    .then(stakeholders => res.json(stakeholders))
+    .catch(() => res.status(500).end());
+});
+
+app.get('/api/stakeholders/:stakeholderid', (req, res) => {
+  stakeholderDao.getStakeholderById(req.params.stakeholderid)
+    .then(stakeholder => {
+      if (stakeholder)
+        res.json(stakeholder);
+      else
+        res.status(404).json({ error: 'Stakeholder not found' });
+    })
+    .catch(() => res.status(500).end());
+});
+
+
+//API DOCUMENTCONNECTION
 
 
 // activate the server
