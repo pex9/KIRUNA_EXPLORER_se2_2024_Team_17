@@ -21,6 +21,8 @@ export function MyNavbar() {
               <>
                 <Navbar.Text>
                   {'Signed in as: ' + loginState.user.name}
+                  
+                  {' Role: ' + loginState.user.role}
                 </Navbar.Text>
                 <Button className='mx-2 rounded-pill' variant='info' onClick={() => navigate('/')}>
                   {'Home '}

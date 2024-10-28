@@ -1,6 +1,7 @@
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-function DefaultRoute() {
+
+function Default() {
     const navigate = useNavigate();
     return (
         <Container fluid>
@@ -9,10 +10,10 @@ function DefaultRoute() {
                 <Col>
                     <Card>
                         <Card.Header>
-                            <Card.Title as='h1'>Nessuna informazione trovata</Card.Title>
+                            <Card.Title as='h1'>No information found</Card.Title>
                         </Card.Header>
                         <Card.Body>
-                            <Card.Subtitle as='h4'>Questa route non è quella che stai cercando!</Card.Subtitle>
+                            <Card.Subtitle as='h4'>This route is not what you're looking for!</Card.Subtitle>
                             <Row className="my-2 text-center">
                                 <Col>
                                     <Button className='rounded-pill' variant="dark" onClick={() => {
@@ -28,8 +29,7 @@ function DefaultRoute() {
                 <Col></Col>
             </Row>
         </Container>
-
     );
 }
 
-export default DefaultRoute;
+export default Default;

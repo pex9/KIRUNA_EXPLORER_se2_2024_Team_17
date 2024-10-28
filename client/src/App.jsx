@@ -7,6 +7,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LoginRoute from './components/Authentication';
 import DefaultRoute from './components/DefaultRoute';
 import HomeRoute from './components/HomeRoute';
+import DocumentRoute from './components/DocumentRoute';
+import AddDocumentRoute from './components/AddDocumentRoute';
+import DocumentsRoute from './components/DocumentsRoute';
 import API from './API';
 function App() {
   // stato per tenere traccia dello stato di autenticazione dell'utente
@@ -52,7 +55,14 @@ function App() {
         <Routes>
           <Route path='/login' element={<LoginRoute />} />
           <Route path='/' element={<HomeRoute />} />
+          <Route path='/addDocument' element={<DocumentRoute />} />
+          <Route path='/documents' element={<DocumentsRoute />} />
+          <Route path='/documents/:documentId/addConnection' element={<AddDocumentRoute />} />
+
+          
+          
           <Route path='/*' element={<DefaultRoute />} />
+
         </Routes>
       </AppContext.Provider>
     </BrowserRouter>

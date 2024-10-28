@@ -7,7 +7,11 @@ describe('User API', () => {
             .post('/api/sessions')
             .send({ username: 'mario@test.it', password: 'pwd' });
         expect(response.status).toBe(200);
+        console.log(response.body);
         expect(response.body).toHaveProperty('email', 'mario@test.it');
+        expect(response.body).toHaveProperty('name', 'Mario');
+        expect(response.body).toHaveProperty('surname', 'Test');
+        expect(response.body).toHaveProperty('role', 'Urban Planner');
     });
 
     it('should fail login with invalid credentials', async () => {
@@ -38,6 +42,9 @@ describe('User API', () => {
         const response = await agent.get('/api/sessions/current');
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('email', 'mario@test.it');
+        expect(response.body).toHaveProperty('name', 'Mario');
+        expect(response.body).toHaveProperty('surname', 'Test');
+        expect(response.body).toHaveProperty('role', 'Urban Planner');
     });
 
     it('should return 401 if not authenticated', async () => {

@@ -8,72 +8,14 @@
     animation: logo-spin infinite 20s linear;
   }
 }
-
-.card {
-  padding: 2em;
+.leaflet-container {
+  height: 90vh;
+  width: 90%;
+  border-radius: 2rem;
 }
-
-.card-image-comp {
-  width: 50rem;
-
-}
-
-.navbar-title {
-  color: white;
-  text-align: center;
-  flex: 1;
-}
-
-.form-group-custom {
-  margin-bottom: 20px;
-}
-
-.countdown-timer {
-  text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #ff0000;
-}
-
-.card-header-custom {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-}
-
-.card-subtitle-custom {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.card-profile-costom {
-  max-width: 400px;
-  width: 100%;
-  margin: 'auto';
-  height: 100%;
-}
-
-.custom-list-group-item {
-  padding: 10px;
-}
-
-.site-title {
-  color: white;
-  font-size: 3rem;
-  font-weight: bold;
-}
-
-.meme-view-style {
-  padding: 1rem;
-}
-
-.correct {
-  color: green;
-}
-
-.incorrect {
-  color: red;
+.mapContainer{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }

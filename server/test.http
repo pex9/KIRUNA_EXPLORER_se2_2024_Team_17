@@ -1,1 +1,57 @@
 #place where test the api with the help of http request
+
+### TEST USER API
+
+### Test login successfully with valid credentials
+POST http://localhost:3001/api/sessions
+Content-Type: application/json
+
+{
+    "username": "mario@test.it",
+    "password": "pwd"
+}
+
+### Test fail login with invalid credentials
+POST http://localhost:3001/api/sessions
+Content-Type: application/json
+
+{
+    "username": "invalidUser",
+    "password": "invalidPassword"
+}
+
+### Test logout successfully
+POST http://localhost:3001/api/sessions
+Content-Type: application/json
+
+{
+    "username": "mario@test.it",
+    "password": "pwd"
+}
+
+DELETE http://localhost:3001/api/sessions/current
+
+### Test checking current session when authenticated
+POST http://localhost:3001/api/sessions
+Content-Type: application/json
+
+{
+    "username": "mario@test.it",
+    "password": "pwd"
+}
+
+GET http://localhost:3001/api/sessions/current
+
+### Test checking current session when not authenticated
+DELETE http://localhost:3001/api/sessions/current
+
+GET http://localhost:3001/api/sessions/current
+
+
+### TEST DOCUMENT API
+
+
+
+
+
+### TEST DOCUMENT CONNECTION API

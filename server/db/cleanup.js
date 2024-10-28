@@ -16,7 +16,14 @@ function runQuery(query) {
 }
 
 async function cleanup() {
-    //await runQuery("DELETE FROM COUNTER_SERVICE");
+    await runQuery("DELETE FROM Document");
+    await runQuery("DELETE FROM DocumentConnection");
+    await runQuery("DELETE FROM Connection");
+    await runQuery("DELETE FROM TypeDocument");
+    await runQuery("DELETE FROM Stakeholder");
+    await runQuery("DELETE FROM Location");
+    await runQuery("DELETE FROM User");
+    
 }
 
 module.exports = { cleanup }; // Export the cleanup function
