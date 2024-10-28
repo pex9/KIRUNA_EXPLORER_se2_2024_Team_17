@@ -34,7 +34,7 @@ To run the web app refer to the following step:
 
 ## API Server
 
-### Authentication
+### USER API
 
 - POST `/api/sessions`
     - Description: Unauthenticated, creates a new session.
@@ -69,6 +69,38 @@ To run the web app refer to the following step:
             "role" : "Urban Planner"
     }
     ```
+## DOCUMENT API
+- POST  `/api/documents`
+    - Description: Allows the authenticated user to upload a new document to the system. This endpoint validates the user’s authorization level to ensure they have permission to add documents.
+    - Request: The request body should contain a JSON object with the document's metadata.
+      ```json
+      {
+          "title": "Sample Title",
+          "idStakeholder": 1,
+          "scale": "National",
+          "issuance_Date": "04/2019",
+          "language": "English",
+          "pages": 50,
+          "description": "A description for the document",
+          "idType": 2
+      }
+      ```
+    - Response: returns `201 Created OK` (created) or `400 Bad Request` (invalid data ) or `401 Unauthorized` (If the user is unauthenticated or lacks sufficient permissions) or `500 Internal Server Error `If an unexpected error occurs.
+    - Response Body: On success (`201 Created`), the body contains an object with the details of the created document.
+      ```json
+      {
+          "documentId": 123,
+          "title": "Sample Title",
+          "idStakeholder": 1,
+          "scale": "National",
+          "issuance_Date": "04/2019",
+          "language": "English",
+          "pages": 50,
+          "description": "A description for the document",
+          "idType": 2,
+      }
+      ```
+
 
 ## Database Tables
 

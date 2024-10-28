@@ -25,7 +25,7 @@ POST http://localhost:3001/api/sessions
 Content-Type: application/json
 
 {
-    "username": "mario@test.it",
+    "username": "marco@test.it",
     "password": "pwd"
 }
 
@@ -50,8 +50,94 @@ GET http://localhost:3001/api/sessions/current
 
 ### TEST DOCUMENT API
 
+### test insertion of document if urban planner
+
+POST http://localhost:3001/api/sessions
+Content-Type: application/json
+
+{
+    "username": "mario@test.it",
+    "password": "pwd"
+}
+
+POST http://localhost:3001/api/documents
+Content-Type: application/json
+
+{
+    "title": "Sample Document",
+    "idStakeholder": 1,
+    "scale": "National",
+    "issuance_Date": "04/2019",
+    "language": "English",
+    "pages": 50,
+    "description": "Description of the document.",
+    "idtype": 2
+}
+
+### test insertion of document if not authenticated or not urban planner
 
 
+DELETE http://localhost:3001/api/sessions/current
 
+POST http://localhost:3001/api/documents
+Content-Type: application/json
+
+{
+    "title": "Sample Document",
+    "idStakeholder": 1,
+    "scale": "National",
+    "issuance_Date": "04/2019",
+    "language": "English",
+    "pages": 50,
+    "description": "Description of the document.",
+    "idtype": 2
+}
+
+# 401 Unauthorized
+# {
+#    "error": "Not authenticated"
+# }
+
+### test insertion of document if urban planner but some field not present
+
+POST http://localhost:3001/api/sessions
+Content-Type: application/json
+
+{
+    "username": "mario@test.it",
+    "password": "pwd"
+}
+
+POST http://localhost:3001/api/documents
+Content-Type: application/json
+
+{
+    "scale": "National",
+    "issuance_Date": "04/2019",
+    "language": "English",
+    "pages": 50,
+    "description": "Description of the document.",
+    "idtype": 2
+}
+
+# 400 Bad Request
+# {
+#   "error": "The request body must contain all the fields"
+# }
+
+### test to get all documents to be done
+
+### Test to get all types
+GET http://localhost:3001/api/types
+
+### Test to get a type by id
+GET http://localhost:3001/api/types/1
+
+### test to get all stakeholder
+
+GET http://localhost:3001/api/stakeholders
+
+### Test to get a stakeholder by id
+GET http://localhost:3001/api/stakeholders/1
 
 ### TEST DOCUMENT CONNECTION API
