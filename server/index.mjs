@@ -124,7 +124,7 @@ app.get('/api/sessions/current', (req, res) => {
 
 // API DOCUMENTS
 
-// GET /api/documents, only possible for authenticated users and if he/she is a urban planner
+// POST /api/documents, only possible for authenticated users and if he/she is a urban planner
 app.post('/api/documents', isUrbanPlanner, (req, res) => {
   const document = req.body;
   if (!document.title || !document.idStakeholder) {
@@ -135,6 +135,10 @@ app.post('/api/documents', isUrbanPlanner, (req, res) => {
     .then(document => res.status(201).json(document))
     .catch(() => res.status(500).end());
 });
+
+// GET /api/documents
+
+// GET /api/documents/:documentid
 
 // API TYPES
 app.get('/api/types', (req, res) => {

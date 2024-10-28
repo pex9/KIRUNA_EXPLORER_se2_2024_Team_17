@@ -31,6 +31,7 @@ exports.addDocument = (title, idStakeholder, scale, issuance_Date, language, pag
             const newdocument = new Document(this.lastID, title, idStakeholder, scale, issuance_Date, language, pages, description, idtype);
             resolve(newdocument);
         });
+        //here possibile call to add link
     });
 }
 // here other function es get document

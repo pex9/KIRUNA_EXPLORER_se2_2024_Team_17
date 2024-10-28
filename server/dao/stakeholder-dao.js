@@ -18,7 +18,7 @@ exports.getStakeholders = () => {
                 reject(err);
                 return;
             }
-            const stakeholders = rows.map(row => new stakeholder(row.IdStakeholder, row.Name, row.Description, row.IconSrc));
+            const stakeholders = rows.map(row => new stakeholder(row.IdStakeholder, row.Name, row.Color));
             resolve(stakeholders);
         });
     });
@@ -38,7 +38,7 @@ exports.getStakeholderById = (id) => {
             } else if (row === undefined) {
                 resolve({ error: 'Stakeholder not found.' });
             } else {
-                const stakeholder = new stakeholder(row.IdStakeholder, row.Name, row.Description, row.IconSrc);
+                const stakeholder = new stakeholder(row.IdStakeholder, row.Name, row.Color);
                 resolve(stakeholder);
             }
         });
