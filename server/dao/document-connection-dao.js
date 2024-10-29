@@ -9,26 +9,40 @@ const DocumentConnection = require("../models/document-connection"); // Import t
  * Creates a new connection between two documents.
  * @param {Number} documentId1 - ID of the first document
  * @param {Number} documentId2 - ID of the second document
- * @param {Number} connectionId - ID of the connection type
+ * @param {String} connectionType - Type of the connection type
  * @returns {Promise<Boolean>} Resolves to true if the connection was created successfully, false otherwise
  */
 
-exports.createConnection = (documentId1, documentId2, connectionId) => {
+exports.createConnection = (documentId1, documentId2, connectionType) => {
   return new Promise((resolve, reject) => {
-    const sql =
-      "INSERT INTO DocumentConnection (IdDocument1, IdDocument2, IdConnection) VALUES (?, ?, ?)";
-    db.run(sql, [documentId1, documentId2, connectionId], function (err) {
+    // First get the connection ID from the type
+    const sqlGetId = "SELECT IdConnection FROM Connection WHERE Type = ?";
+    db.get(sqlGetId, [connectionType], (err, row) => {
       if (err) {
         reject(err);
         return;
       }
-      const newConnection = new DocumentConnection(
-        this.lastID,
-        documentId1,
-        documentId2,
-        connectionId
-      );
-      resolve(newConnection);
+      if (!row) {
+        reject(new Error("Invalid connection type"));
+        return;
+      }
+
+      // Then create the connection with the found ID
+      const sql =
+        "INSERT INTO DocumentConnection (IdDocument1, IdDocument2, IdConnection) VALUES (?, ?, ?)";
+      db.run(sql, [documentId1, documentId2, row.IdConnection], function (err) {
+        if (err) {
+          reject(err);
+          return;
+        }
+        const newConnection = new DocumentConnection(
+          this.lastID,
+          documentId1,
+          documentId2,
+          row.IdConnection
+        );
+        resolve(newConnection);
+      });
     });
   });
 };
