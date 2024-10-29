@@ -1,5 +1,7 @@
 # KIRUNA_EXPLORER_se2_2024_Team_17
+
 ## How to run the Web app
+
 To run the web app refer to the following step:
 (Note: VS Code is used as a reference IDE)
 
@@ -10,6 +12,7 @@ To run the web app refer to the following step:
   - `npm i`
   - `nodemon index.mjs` (to start the server)
 - In terminal 2, type the following commands:
+
   - `cd client`
   - `npm i`
   - `npm run dev` (to start the client)
@@ -21,6 +24,7 @@ To run the web app refer to the following step:
 - Open a terminal
 
 - In the terminal, type the following commands:
+
   - `cd server`
   - Decide what you want to test between users,documents then run the appropriate command (for example, to test users):
     - `npm test users`
@@ -37,76 +41,109 @@ To run the web app refer to the following step:
 ### USER API
 
 - POST `/api/sessions`
-    - Description: Unauthenticated, creates a new session.
-    - Request: The body contains an object with authentication credentials (Content-Type: `application/json`).
 
-    ```json
-    {
-            "username": "mario@test.it",
-            "password": "pwd"
-    }
-    ```
+  - Description: Unauthenticated, creates a new session.
+  - Request: The body contains an object with authentication credentials (Content-Type: `application/json`).
 
-    - Response: returns `200 OK` (success), `401 Unauthorized` (wrong credentials) or `500 Internal Server Error` (generic error). In case of success, the body contains an object with the authenticated user's information (Content-Type: `application/json`).
+  ```json
+  {
+    "username": "mario@test.it",
+    "password": "pwd"
+  }
+  ```
+
+  - Response: returns `200 OK` (success), `401 Unauthorized` (wrong credentials) or `500 Internal Server Error` (generic error). In case of success, the body contains an object with the authenticated user's information (Content-Type: `application/json`).
 
 - DELETE `/api/sessions/current`
-    - Description: Authenticated, deletes the current session.
-    - Request: No body.
-    - Response: returns `200 OK` (success), `401 Unauthorized` (unauthenticated user) or `500 Internal Server Error` (generic error). No body.
+
+  - Description: Authenticated, deletes the current session.
+  - Request: No body.
+  - Response: returns `200 OK` (success), `401 Unauthorized` (unauthenticated user) or `500 Internal Server Error` (generic error). No body.
 
 - GET `/api/sessions/current`
-    - Description: Authenticated, verifies that the current session is still valid and returns the authenticated user's information.
-    - Request: No body.
-    - Response: returns `200 OK` (success) or `401 Unauthorized` (unauthenticated user).
-    - Response body: In case of success, the body contains an object with the information of the user associated with the current session (Content-Type: `application/json`).
+
+  - Description: Authenticated, verifies that the current session is still valid and returns the authenticated user's information.
+  - Request: No body.
+  - Response: returns `200 OK` (success) or `401 Unauthorized` (unauthenticated user).
+  - Response body: In case of success, the body contains an object with the information of the user associated with the current session (Content-Type: `application/json`).
+
+  ```json
+  {
+    "id": 2,
+    "email": "mario@test.it",
+    "name": "Mario",
+    "surname": "Test",
+    "role": "Urban Planner"
+  }
+  ```
+
+## DOCUMENT API
+
+- POST `/api/documents`
+  - Description: Allows the authenticated user to upload a new document to the system. This endpoint validates the user’s authorization level to ensure they have permission to add documents.
+  - Request: The request body should contain a JSON object with the document's metadata.
+    ```json
+    {
+      "title": "Sample Title",
+      "idStakeholder": 1,
+      "scale": "National",
+      "issuance_Date": "04/2019",
+      "language": "English",
+      "pages": 50,
+      "description": "A description for the document",
+      "idType": 2
+    }
+    ```
+  - Response: returns `201 Created OK` (created) or `400 Bad Request` (invalid data ) or `401 Unauthorized` (If the user is unauthenticated or lacks sufficient permissions) or `500 Internal Server Error `If an unexpected error occurs.
+  - Response Body: On success (`201 Created`), the body contains an object with the details of the created document.
+    ```json
+    {
+      "documentId": 123,
+      "title": "Sample Title",
+      "idStakeholder": 1,
+      "scale": "National",
+      "issuance_Date": "04/2019",
+      "language": "English",
+      "pages": 50,
+      "description": "A description for the document",
+      "idType": 2
+    }
+    ```
+
+# DOCUMENT CONNECTION API
+
+- POST `/api/document-connections`
+
+  - Description: Creates a connection between two documents in the system. This endpoint validates that the user has urban planner permissions and ensures documents can be properly linked.
+  - Request: The request body should contain a JSON object with the connection details.
 
     ```json
     {
-            "id": 2,
-            "email": "mario@test.it",
-            "name": "Mario",
-            "surname" : "Test",
-            "role" : "Urban Planner"
+      "IdDocument1": "1",
+      "IdDocument2": "2",
+      "connection_type": "Projection"
     }
     ```
-## DOCUMENT API
-- POST  `/api/documents`
-    - Description: Allows the authenticated user to upload a new document to the system. This endpoint validates the user’s authorization level to ensure they have permission to add documents.
-    - Request: The request body should contain a JSON object with the document's metadata.
-      ```json
-      {
-          "title": "Sample Title",
-          "idStakeholder": 1,
-          "scale": "National",
-          "issuance_Date": "04/2019",
-          "language": "English",
-          "pages": 50,
-          "description": "A description for the document",
-          "idType": 2
-      }
-      ```
-    - Response: returns `201 Created OK` (created) or `400 Bad Request` (invalid data ) or `401 Unauthorized` (If the user is unauthenticated or lacks sufficient permissions) or `500 Internal Server Error `If an unexpected error occurs.
-    - Response Body: On success (`201 Created`), the body contains an object with the details of the created document.
-      ```json
-      {
-          "documentId": 123,
-          "title": "Sample Title",
-          "idStakeholder": 1,
-          "scale": "National",
-          "issuance_Date": "04/2019",
-          "language": "English",
-          "pages": 50,
-          "description": "A description for the document",
-          "idType": 2,
-      }
-      ```
 
+  - Response: returns `201 Created OK` (created) or `400 Bad Request` (invalid data ) or `401 Unauthorized` (If the user is unauthenticated or lacks sufficient permissions) or `500 Internal Server Error `If an unexpected error occurs.
+
+  - Response Body: On success (`201 Created`), returns the created connection
+
+    ```json
+    {
+      "id": "1",
+      "IdDocument1": "1",
+      "IdDocument2": "2",
+      "connection_type": "Projection"
+    }
+    ```
 
 ## Database Tables
 
 ### Tables and Fields
 
 **User**
+
 - **IdUser**: Unique identifier for the user
 - **Email**: Unique email address of the user
 - **PasswordHash**: Hashed password of the user
@@ -116,11 +153,13 @@ To run the web app refer to the following step:
 - **Surname**: Last name of the user
 
 **Stakeholder**
+
 - **IdStakeholder**: Unique identifier for each stakeholder
 - **Name**: Name of the stakeholder
 - **Color**: Hex color code representing the stakeholder (e.g., `#FFFFFF`)
 
 **Location**
+
 - **IdLocation**: Unique identifier for each location
 - **Location_Type**: Type of location (e.g., `point` or `area`)
 - **Latitude**: Latitude coordinate (for point locations)
@@ -128,11 +167,13 @@ To run the web app refer to the following step:
 - **Area_Coordinates**: Array of coordinate pairs forming an area (used if location is an area)
 
 **TypeDocument**
+
 - **IdType**: Unique identifier for each document type
 - **IconSrc**: Path or URL to the icon representing this type
 - **Type**: Name of the document type (e.g., Report, Policy)
 
 **Document**
+
 - **IdDocument**: Unique identifier for each document
 - **Title**: Title of the document
 - **IdStakeholder**: Reference to the stakeholder responsible for this document
@@ -145,18 +186,18 @@ To run the web app refer to the following step:
 - **IdLocation**: Reference to the location associated with this document
 
 **Connection**
+
 - **IdConnection**: Unique identifier for each connection type
 - **Type**: Type of connection between documents (e.g., Collateral, Direct Consequence)
 - **Description**: Description of the connection type
 
 **DocumentConnection**
+
 - **IdConnectionDocuments**: Unique identifier for each document connection
 - **IdDocument1**: Reference to the first document in the connection
 - **IdDocument2**: Reference to the second document in the connection
 - **IdConnection**: Reference to the type of connection between the documents
 
-
 ## Main React Components
-
 
 ## Screenshot
