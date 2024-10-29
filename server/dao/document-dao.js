@@ -3,8 +3,7 @@
 /* Data Access Object (DAO) module for accessing document infomration */
 
 const db = require("../db/db");
-const Document = require('../models/document'); // Import the Document class
-
+const Document = require("../models/document"); // Import the Document class
 
 /**
  * Adds a new document to the database.
@@ -18,20 +17,63 @@ const Document = require('../models/document'); // Import the Document class
  * @param {Number} pages - The number of pages in the document.
  * @param {String} description - A brief description of the document's contents.
  * @param {Number} idtype - Unique identifier of the document type.
+ * @param {Number} idlocation - The location of a specific document
  * @returns {Promise<Number>} Resolves with newly object.
  */
-exports.addDocument = (title, idStakeholder, scale, issuance_Date, language, pages, description, idtype) => {
-    return new Promise((resolve, reject) => {
-        const sql = 'INSERT INTO Document (Title, IdStakeholder, Scale, Issuance_Date, Language, Pages, Description, IdType) VALUES (?,?,?,?,?,?,?,?)';
-        db.run(sql, [title, idStakeholder, scale, issuance_Date, language, pages, description, idtype], function (err) {
-            if (err) {
-                reject(err);
-                return;
-            }
-            const newdocument = new Document(this.lastID, title, idStakeholder, scale, issuance_Date, language, pages, description, idtype);
-            resolve(newdocument);
-        });
-        //here possibile call to add link
-    });
-}
+exports.addDocument = (
+  title,
+  idStakeholder,
+  scale,
+  issuance_Date,
+  language,
+  pages,
+  description,
+  idtype,
+  idlocation
+) => {
+  return new Promise((resolve, reject) => {
+    const sql =
+      "INSERT INTO Document (Title, IdStakeholder, Scale, Issuance_Date, Language, Pages, Description, IdType, IdLocation) VALUES (?,?,?,?,?,?,?,?,?)";
+    db.run(
+      sql,
+      [
+        title,
+        idStakeholder,
+        scale,
+        issuance_Date,
+        language,
+        pages,
+        description,
+        idtype,
+        idlocation,
+      ],
+      function (err) {
+        if (err) {
+          reject(err);
+          return;
+        }
+        const newdocument = new Document(
+          this.lastID,
+          title,
+          idStakeholder,
+          scale,
+          issuance_Date,
+          language,
+          pages,
+          description,
+          idtype,
+          idlocation
+        );
+        resolve(newdocument);
+      }
+    );
+    //here possibile call to add link
+  });
+};
 // here other function es get document
+
+/*
+ *
+ *
+ *
+ */
