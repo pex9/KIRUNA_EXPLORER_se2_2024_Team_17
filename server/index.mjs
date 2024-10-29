@@ -199,7 +199,7 @@ app.get("/api/stakeholders/:stakeholderid", (req, res) => {
 
 //API DOCUMENTCONNECTION
 
-// POST /document-connections
+// POST /api/document-connections
 //  Creates a new connection between two documents
 app.post("/api/document-connections", isUrbanPlanner, (req, res) => {
   const connection = req.body;
