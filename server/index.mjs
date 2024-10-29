@@ -138,7 +138,25 @@ app.post('/api/documents', isUrbanPlanner, (req, res) => {
 
 // GET /api/documents
 
+app.get('/api/documents', (req, res) => {
+  documentDao.getDocuments()
+    .then(documents => res.json(documents))
+    .catch(() => res.status(500).end());
+});
+
 // GET /api/documents/:documentid
+
+app.get('/api/documents/:documentid', (req, res) => {
+  documentDao.getDocumentById(req.params.documentid)
+    .then(document => {
+      if (document)
+        res.json(document);
+      else
+        res.status(404).json({ error: 'Document not found' });
+    })
+    .catch(() => res.status(500).end());
+});
+
 
 // API TYPES
 app.get('/api/types', (req, res) => {
@@ -164,6 +182,7 @@ app.get('/api/stakeholders', (req, res) => {
     .then(stakeholders => res.json(stakeholders))
     .catch(() => res.status(500).end());
 });
+
 
 app.get('/api/stakeholders/:stakeholderid', (req, res) => {
   stakeholderDao.getStakeholderById(req.params.stakeholderid)
