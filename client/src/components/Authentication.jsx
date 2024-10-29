@@ -1,6 +1,7 @@
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Row, Col, Form, Alert, Button, Container, Card, FloatingLabel } from 'react-bootstrap';
 import { useContext, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import API from '../API';
 import AppContext from '../AppContext';
 import MyNavbar from './MyNavbar';
@@ -42,16 +43,15 @@ function LoginForm(props) {
             doLogIn(credentials);
     }
 
+    /*
     return (
-        <Container>
-            <Row className='my-5'>
-                <Col className='col-3'></Col>
+        <Container >
+            <Row className='my-5 justify-content-center'>
                 <Col className='col-6'>
                     <Row>
-                        <Col className='col-2'></Col>
                         <Col>
-                            <Card>
-                                <Card.Header as='h2'>Login</Card.Header>
+                            <Card className='form border-color-main'>
+                                <Card.Header as='h2' className='bg-color-main'>Login</Card.Header>
                                 <Card.Body>
                                     <Form onSubmit={handleSubmit}>
                                         {errMsg ? <Alert variant='danger' dismissible onClick={() => setErrMsg('')}>{errMsg}</Alert> : undefined}
@@ -69,13 +69,36 @@ function LoginForm(props) {
                                 </Card.Body>
                             </Card>
                         </Col>
-                        <Col className='col-2'></Col>
                     </Row>
                 </Col>
-                <Col className='col-3'></Col>
             </Row>
         </Container>
     );
+
+    */
+
+    return (
+      <Container className='my-5 col-9 col-md-6 col-lg-4'>
+        <Card className='px-5 pb-3 form border-color-main bg-color-main-light'>
+          <Form onSubmit={handleSubmit}>
+            <Form.Label as='h2' className='my-4 text-center'>Login</Form.Label>
+            {errMsg ? <Alert variant='danger' dismissible onClick={() => setErrMsg('')}>{errMsg}</Alert> : undefined}
+            <Form.Group className='col-3 d-flex justify-content-center '>
+              <FloatingLabel controlId="username" label="Username" className="mb-3">
+                  <Form.Control type="email" name='username' value={username} onChange={ev => setUsername(ev.target.value)} />
+              </FloatingLabel>
+            </Form.Group>
+            <FloatingLabel controlId="password" label="Password" className="mb-3">
+                <Form.Control type="password" name='password' value={password} onChange={ev => setPassword(ev.target.value)} />
+            </FloatingLabel>
+            <Button type='submit' className='my-2 p-2 px-4 rounded-pill bg-color-main border-color-main' style={{fontWeight:600, fontSize:18}}>Confirm</Button>
+            {/*<Button className='mx-3 rounded-pill' variant='danger' onClick={() => {
+                navigate('/');
+            }} >Cancel</Button>*/}
+          </Form>
+        </Card>
+      </Container>
+  );
 
 }
 
@@ -83,7 +106,10 @@ function LoginRoute() {
 
     return (
         <>
-            <MyNavbar />
+            <Link to={'..'}>
+              <i className="bi bi-arrow-left-circle-fill main-color d-sm-block" style={{ fontSize:'40px', position:'fixed', top:'10px',left:'30px'}}></i>
+            </Link>
+            <h1 style={{fontSize:80,fontWeight:600, fontFamily:'Calibri'}} className='main-color my-5'>Kiruna eXplorer</h1>
             <LoginForm />
         </>
     );

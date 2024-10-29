@@ -19,3 +19,25 @@
   align-items: center;
   height: 100vh;
 }
+
+.form {
+  border-radius: 14px;
+  border-width: 3px;
+}
+
+.main-color {
+  color: #33B7CE;
+}
+
+.border-color-main {
+  border-color: #33B7CE;
+}
+
+.bg-color-main {
+  background-color: #33B7CE;
+  color:white;
+}
+.bg-color-main-light {
+  background-color: rgba(194, 232, 239, 0.41);
+  color:black;
+}
