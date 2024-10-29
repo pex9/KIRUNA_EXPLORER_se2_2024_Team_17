@@ -157,6 +157,33 @@ const getTypeDocument = (id) => {
   });
 };
 
+
+// API DOCUMENT CONNECTIONS CALL
+
+const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/document-connections", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ IdDocument1, IdDocument2, connection_type }),
+      credentials: "include",
+
+    }).then((response) => {
+      if (response.ok) {
+        resolve(response.json());
+      } else {
+        response.json().then((message) => {
+          reject(message);
+        });
+      }
+    }).catch(() => {
+      reject({ error: "Cannot communicate with the server!" });
+    });
+  });
+};
+
 // API STAKEHOLDERS CALL
 
 const getAllStakeholders = () => {
@@ -214,6 +241,6 @@ const getStakeholder = (id) => {
 
 // API DOCUMENTS CONNECTION CALL 
 
-const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument};
+const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection};
 
 export default API;
