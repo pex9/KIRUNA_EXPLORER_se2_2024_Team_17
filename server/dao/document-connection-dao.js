@@ -7,10 +7,10 @@ const DocumentConnection = require("../models/document-connection"); // Import t
 
 /**
  * Creates a new connection between two documents.
- * @param {Number} documentId1 - ID of the first document.
- * @param {Number} documentId2 - ID of the second document.
+ * @param {Number} documentId1 - ID of the first document
+ * @param {Number} documentId2 - ID of the second document
  * @param {Number} connectionId - ID of the connection type
- * @returns {Promise<Boolean>} Resolves to true if the connection was created successfully, false otherwise.
+ * @returns {Promise<Boolean>} Resolves to true if the connection was created successfully, false otherwise
  */
 
 exports.createConnection = (documentId1, documentId2, connectionId) => {
@@ -22,15 +22,21 @@ exports.createConnection = (documentId1, documentId2, connectionId) => {
         reject(err);
         return;
       }
-      resolve(true);
+      const newConnection = new DocumentConnection(
+        this.lastID,
+        documentId1,
+        documentId2,
+        connectionId
+      );
+      resolve(newConnection);
     });
   });
 };
 
 /**
- * Retrieving all connections for a specific document from the DocumentConnection table.
- * @param {Number} documentId - ID of the document to retrieve connections for.
- * @returns {Promise<Array>} Resolves to an array of connection objects for the document.
+ * Retrieving all connections for a specific document from the DocumentConnection table
+ * @param {Number} documentId - ID of the document to retrieve connections for
+ * @returns {Promise<Array>} Resolves to an array of connection objects for the document
  */
 
 exports.getConnections = (documentId) => {
@@ -48,10 +54,10 @@ exports.getConnections = (documentId) => {
 };
 
 /**
- * Updating the connection type of an existing document connection in the DocumentConnection table.
- * @param {Number} connectionIdDocuments - ID of the document connection to update.
- * @param {Number} newConnectionId - The new connection ID to set for the connection.
- * @returns {Promise<Boolean>} Resolves to true if the connection was updated successfully, false otherwise.
+ * Updating the connection type of an existing document connection in the DocumentConnection table
+ * @param {Number} connectionIdDocuments - ID of the document connection to update
+ * @param {Number} newConnectionId - The new connection ID to set for the connection
+ * @returns {Promise<Boolean>} Resolves to true if the connection was updated successfully, false otherwise
  */
 exports.updateConnection = (connectionIdDocuments, newConnectionId) => {
   return new Promise((resolve, reject) => {
@@ -68,9 +74,9 @@ exports.updateConnection = (connectionIdDocuments, newConnectionId) => {
 };
 
 /**
- * Deleting a document connection by its ID from the DocumentConnection table.
- * @param {Number} connectionIdDocuments - ID of the document connection to delete.
- * @returns {Promise<Boolean>} Resolves to true if the connection was deleted successfully, false otherwise.
+ * Deleting a document connection by its ID from the DocumentConnection table
+ * @param {Number} connectionIdDocuments - ID of the document connection to delete
+ * @returns {Promise<Boolean>} Resolves to true if the connection was deleted successfully, false otherwise
  */
 exports.deleteConnection = (connectionIdDocuments) => {
   return new Promise((resolve, reject) => {
@@ -87,12 +93,12 @@ exports.deleteConnection = (connectionIdDocuments) => {
 };
 
 /**
- * Updating the connection type of an existing document connection in the DocumentConnection table.
- * @param {Number} connectionIdDocuments - ID of the document connection to update.
- * @param {Number} newDocumentId1 - The new ID for the first document.
- * @param {Number} newDocumentId2 - The new ID for the second document.
- * @param {Number} newConnectionId - The new connection ID to set for the connection type.
- * @returns {Promise<Boolean>} Resolves to true if the connection was updated successfully, false otherwise.
+ * Updating the connection type of an existing document connection in the DocumentConnection table
+ * @param {Number} connectionIdDocuments - ID of the document connection to update
+ * @param {Number} newDocumentId1 - The new ID for the first document
+ * @param {Number} newDocumentId2 - The new ID for the second document
+ * @param {Number} newConnectionId - The new connection ID to set for the connection type
+ * @returns {Promise<Boolean>} Resolves to true if the connection was updated successfully, false otherwise
  */
 exports.updateConnection = (
   connectionIdDocuments,
