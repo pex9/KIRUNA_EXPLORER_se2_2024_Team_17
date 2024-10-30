@@ -109,6 +109,56 @@ To run the web app refer to the following step:
       "idType": 2
     }
     ```
+- GET `/api/documents`
+  - Description: Allows all user to get all documents of the system.
+  - Request: No request.
+  - Response: returns `200 OK` (created) or `400 Bad Request` (invalid data ) or `500 Internal Server Error `If an unexpected error occurs.
+  - Response Body: On success (`200 OK`), the body contains an array of objects with the details of the documents.
+    ```json
+    [
+    {
+      "documentId": 123,
+      "title": "Sample Title",
+      "idStakeholder": 1,
+      "scale": "National",
+      "issuance_Date": "04/2019",
+      "language": "English",
+      "pages": 50,
+      "description": "A description for the document",
+      "idType": 2
+    },
+    {
+      "documentId": 124,
+      "title": "Sample Title v2",
+      "idStakeholder": 1,
+      "scale": "National",
+      "issuance_Date": "04/2019",
+      "language": "English",
+      "pages": 44,
+      "description": "A description for the document v2",
+      "idType": 2
+    }
+    ]
+    ```
+- GET `/api/documents/:documentId`
+  - Description: Allows all user to get the document of the system by giving id. 
+  - Request: No request.
+  - Response: returns `200 OK` (created) or `400 Bad Request` (invalid data ) or `500 Internal Server Error `If an unexpected error occurs or `404 Not Found`.
+  - Response Body: On success (`200 OK`), the body contains the object with the details of the documents.
+    ```json
+    {
+      "documentId": 123,
+      "title": "Sample Title",
+      "idStakeholder": 1,
+      "scale": "National",
+      "issuance_Date": "04/2019",
+      "language": "English",
+      "pages": 50,
+      "description": "A description for the document",
+      "idType": 2
+    }
+    ```
+
 
 # DOCUMENT CONNECTION API
 
@@ -129,7 +179,7 @@ To run the web app refer to the following step:
     }
   ]
     ```
-  - GET `/api/document-connections/:idDocument`
+- GET `/api/document-connections/:idDocument`
 
   - Description:  return all the connections for specific document.
 

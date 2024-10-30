@@ -38,8 +38,8 @@ exports.getStakeholderById = (id) => {
             } else if (row === undefined) {
                 resolve({ error: 'Stakeholder not found.' });
             } else {
-                const stakeholder = new stakeholder(row.IdStakeholder, row.Name, row.Color);
-                resolve(stakeholder);
+                const stakeholder1 = new stakeholder(row.IdStakeholder, row.Name, row.Color);
+                resolve(stakeholder1);
             }
         });
     });

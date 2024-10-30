@@ -129,6 +129,20 @@ Content-Type: application/json
 ### test the update of a document if urban planner
 
 
+### test the get of all documents
+GET http://localhost:3001/api/documents
+
+### test the get of a document by id
+GET http://localhost:3001/api/documents/1
+
+### test the get of a document by id if id is not present
+GET http://localhost:3001/api/documents/100
+# 404 Not Found
+# {
+#   "error": "Document not found
+# }
+
+
 
 ### test to get all documents to be done
 
