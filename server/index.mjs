@@ -161,10 +161,14 @@ app.post("/api/documents", isUrbanPlanner, (req, res) => {
 
 // GET /api/documents/:documentid
 
+
+// PUT /api/documents/:documentid to modify a document by its id
+
 // PATCH /api/documents/:documentId/connection
 app.patch("/api/documents/:documentId/connection", async (req, res) => {
   const documentId = parseInt(req.params.documentId);
-  const { newDocumentId2, newConnectionId } = req.body;
+  const newDocumentId2 = parseInt(req.body.IdDocument2);
+  const newConnectionId= parseInt(req.body.IdConnection);
 
   if (!newDocumentId2 || !newConnectionId) {
     return res
@@ -254,6 +258,12 @@ app.get("/api/stakeholders/:stakeholderid", (req, res) => {
 // Retrievs all list of connection documents
 app.get("/api/document-connections", (req, res) => {
   DocumentConnectionDao.getAllConnections()
+    .then((connections) => res.status(200).json(connections))
+    .catch((err) => res.status(500).json({ error: "Internal server error" }));
+});
+
+app.get("/api/document-connections/:documentId", (req, res) => {
+  DocumentConnectionDao.getConnections(req.params.documentId)
     .then((connections) => res.status(200).json(connections))
     .catch((err) => res.status(500).json({ error: "Internal server error" }));
 });

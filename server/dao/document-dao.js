@@ -20,50 +20,18 @@ const Document = require("../models/document"); // Import the Document class
  * @param {Number} idlocation - The location of a specific document
  * @returns {Promise<Number>} Resolves with newly object.
  */
-exports.addDocument = (
-  title,
-  idStakeholder,
-  scale,
-  issuance_Date,
-  language,
-  pages,
-  description,
-  idtype,
-  idlocation
-) => {
+exports.addDocument = (title,idStakeholder,scale,issuance_Date,language,pages,description,idtype,idlocation) => {
   return new Promise((resolve, reject) => {
     const sql =
       "INSERT INTO Document (Title, IdStakeholder, Scale, Issuance_Date, Language, Pages, Description, IdType, IdLocation) VALUES (?,?,?,?,?,?,?,?,?)";
     db.run(
-      sql,
-      [
-        title,
-        idStakeholder,
-        scale,
-        issuance_Date,
-        language,
-        pages,
-        description,
-        idtype,
-        idlocation,
-      ],
+      sql,[title,idStakeholder,scale,issuance_Date,language,pages,description,idtype,idlocation,],
       function (err) {
         if (err) {
           reject(err);
           return;
         }
-        const newdocument = new Document(
-          this.lastID,
-          title,
-          idStakeholder,
-          scale,
-          issuance_Date,
-          language,
-          pages,
-          description,
-          idtype,
-          idlocation
-        );
+        const newdocument = new Document(this.lastID,title,idStakeholder,scale,issuance_Date,language,pages,description,idtype,idlocation);
         resolve(newdocument);
       }
     );
@@ -72,11 +40,6 @@ exports.addDocument = (
 };
 // here other function es get document
 
-/*
- *
- *
- *
- */
 /**
  * Updating the georeferencing location of a document.
  * @param {Number} documentId - ID of the document to update.
@@ -95,3 +58,20 @@ exports.updateDocumentGeolocation = (documentId, idLocation) => {
     });
   });
 };
+
+/**
+ * Updating the document id of a document.
+ * @param {Number} documentId - ID of the document to update.
+ * @returns {Promise<Boolean>} resolved with the new object update.
+ */
+exports.updateDocument = (documentId, title,idStakeholder,scale,issuance_Date,language,pages,description,idtype,idlocation) => {
+  return new Promise((resolve, reject) => {
+    const sql = "UPDATE Document SET Title = ?, IdStakeholder = ?, Scale = ?, Issuance_Date = ?, Language = ?, Pages = ?, Description = ?, IdType = ?, IdLocation = ? WHERE IdDocument = ?";
+    db.run(sql, [title,idStakeholder,scale,issuance_Date,language,pages,description,idtype,idlocation,documentId], function (err) {
+      if (err) {
+        reject(new Error("Failed to update document."));
+        return;
+      }
+      resolve(true);
+    });
+  })};

@@ -186,6 +186,25 @@ const getAllDocumentConnections = () => {
       });
   });
 };
+const getDocumentConnection =(id) => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/document-connections/" + id, {
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((connection) => {
+            resolve(connection);
+          }
+          );
+        } else {
+          response.json().then((message) => {
+            reject(message);
+          });
+        }
+      }
+    )});
+};
 
 const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => {
   return new Promise((resolve, reject) => {
@@ -210,6 +229,8 @@ const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => 
     });
   });
 };
+
+// PATCH to update the connections
 
 // API STAKEHOLDERS CALL
 
@@ -269,6 +290,6 @@ const getStakeholder = (id) => {
 
 // API DOCUMENTS CONNECTION CALL 
 
-const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection, getAllDocumentConnections};
+const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection, getAllDocumentConnections,getDocumentConnection};
 
 export default API;

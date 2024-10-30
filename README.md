@@ -118,7 +118,34 @@ To run the web app refer to the following step:
 
   - Request: No Body.
   - Response: returns `200 OK` (success) or `500 Internal Server Error` If an unexpected error occurs.
+  - Response body in case of success :
+   ```json
+   [
+    {
+    "IdConnectionDocuments": 1,
+    "IdDocument1": 1,
+    "IdDocument2": 2,
+    "IdConnection": 1
+    }
+  ]
+    ```
+  - GET `/api/document-connections/:idDocument`
 
+  - Description:  return all the connections for specific document.
+
+  - Request: No Body.
+  - Response: returns `200 OK` (success) or `500 Internal Server Error` If an unexpected error occurs.
+  - Response body in case of success :
+   ```json
+   [
+    {
+    "IdConnectionDocuments": 1,
+    "IdDocument1": 1,
+    "IdDocument2": 2,
+    "IdConnection": 1
+    }
+  ]
+    ```
 - POST `/api/document-connections`
 
   - Description: Creates a connection between two documents in the system. This endpoint validates that the user has urban planner permissions and ensures documents can be properly linked.
