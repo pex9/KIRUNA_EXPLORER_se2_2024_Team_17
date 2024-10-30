@@ -207,7 +207,7 @@ app.post("/api/document-connections", isUrbanPlanner, (req, res) => {
   if (
     !connection.IdDocument1 ||
     !connection.IdDocument2 ||
-    !connection.connection_type
+    !connection.IdConnection
   ) {
     res
       .status(400)
@@ -223,7 +223,7 @@ app.post("/api/document-connections", isUrbanPlanner, (req, res) => {
   DocumentConnectionDao.createConnection(
     connection.IdDocument1,
     connection.IdDocument2,
-    connection.connection_type
+    connection.IdConnection
   )
     .then((newConnection) => res.status(201).json(newConnection))
     .catch(() => res.status(500).end());

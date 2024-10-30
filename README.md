@@ -119,9 +119,9 @@ To run the web app refer to the following step:
 
     ```json
     {
-      "IdDocument1": "1",
-      "IdDocument2": "2",
-      "connection_type": "Projection"
+      "IdDocument1": 1,
+      "IdDocument2": 2,
+      "IdConnection": 1
     }
     ```
 
@@ -131,10 +131,10 @@ To run the web app refer to the following step:
 
     ```json
     {
-      "id": "1",
-      "IdDocument1": "1",
-      "IdDocument2": "2",
-      "connection_type": "Projection"
+      "id": 1,
+      "IdDocument1": 1,
+      "IdDocument2": 2,
+      "IdConnection": 1
     }
     ```
 
