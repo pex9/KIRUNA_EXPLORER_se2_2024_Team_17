@@ -150,6 +150,16 @@ POST http://localhost:3001/api/document-connections
 Content-Type: application/json
 
 {
+    "IdDocument1": 1,
+    "IdDocument2": 2,
+    "IdConnection": 1
+}
+
+### test to create a new connection between two documents
+POST http://localhost:3001/api/document-connections
+Content-Type: application/json
+
+{
     "IdDocument1": 4,
     "IdDocument2": 2,
     "IdConnection": 3
