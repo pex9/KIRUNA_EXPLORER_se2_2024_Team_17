@@ -83,11 +83,9 @@ function LoginForm(props) {
           <Form onSubmit={handleSubmit}>
             <Form.Label as='h2' className='my-4 text-center'>Login</Form.Label>
             {errMsg ? <Alert variant='danger' dismissible onClick={() => setErrMsg('')}>{errMsg}</Alert> : undefined}
-            <Form.Group className='col-3 d-flex justify-content-center '>
-              <FloatingLabel controlId="username" label="Username" className="mb-3">
+            <FloatingLabel controlId="username" label="Username" className="mb-3">
                   <Form.Control type="email" name='username' value={username} onChange={ev => setUsername(ev.target.value)} />
-              </FloatingLabel>
-            </Form.Group>
+            </FloatingLabel>
             <FloatingLabel controlId="password" label="Password" className="mb-3">
                 <Form.Control type="password" name='password' value={password} onChange={ev => setPassword(ev.target.value)} />
             </FloatingLabel>
