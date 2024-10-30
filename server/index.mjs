@@ -199,6 +199,14 @@ app.get("/api/stakeholders/:stakeholderid", (req, res) => {
 
 //API DOCUMENTCONNECTION
 
+// GET /api/document-connections
+// Retrievs all list of connection documents
+app.get("/api/document-connections", (req, res) => {
+  DocumentConnectionDao.getAllConnections()
+    .then((connections) => res.status(200).json(connections))
+    .catch((err) => res.status(500).json({ error: "Internal server error" }));
+});
+
 // POST /api/document-connections
 //  Creates a new connection between two documents
 app.post("/api/document-connections", isUrbanPlanner, (req, res) => {

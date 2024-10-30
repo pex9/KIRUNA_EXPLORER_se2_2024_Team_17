@@ -34,6 +34,23 @@ exports.createConnection = (documentId1, documentId2, connectionId) => {
 };
 
 /**
+ * Retrieving all document Connections
+ */
+
+exports.getAllConnections = () => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM DocumentConnection";
+    db.all(sql, (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+};
+
+/**
  * Retrieving all connections for a specific document from the DocumentConnection table
  * @param {Number} documentId - ID of the document to retrieve connections for
  * @returns {Promise<Array>} Resolves to an array of connection objects for the document

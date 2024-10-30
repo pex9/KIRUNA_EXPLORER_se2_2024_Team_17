@@ -155,3 +155,6 @@ Content-Type: application/json
     "IdConnection": 1
 }
 
+### test to get all document-connections
+GET http://localhost:3001/api/document-connections
+
