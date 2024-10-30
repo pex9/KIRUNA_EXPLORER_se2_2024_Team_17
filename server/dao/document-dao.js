@@ -40,6 +40,35 @@ exports.addDocument = (title,idStakeholder,scale,issuance_Date,language,pages,de
 };
 // here other function es get document
 
+exports.getDocuments = () => {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT title, idStakeholder, scale, issuance_Date, language, pages, description, idtype, idlocation FROM Document';
+
+        db.all(sql, (err, row) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row)
+                };
+            })
+    });
+};
+
+exports.getDocumentById = (documentId) => {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT * FROM Document WHERE IdDocument = ?';
+
+        db.get(sql, [documentId], (err, row) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row)
+            };
+            }) 
+        });
+    };
+
+
 /**
  * Updating the georeferencing location of a document.
  * @param {Number} documentId - ID of the document to update.
