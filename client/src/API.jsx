@@ -160,6 +160,23 @@ const getTypeDocument = (id) => {
 
 // API DOCUMENT CONNECTIONS CALL
 
+export const getAllDocumentConnections = () => {
+  return fetch(URL + "/document-connections", {
+    method: "GET",
+    credentials: "include",
+  }).then((response) => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      return response.json().then((data) => {
+        throw new Error(data.error);
+      });
+    }
+  }).catch((error) => {
+    throw new Error("Cannot communicate with the server!");
+  });
+};
+
 const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => {
   return new Promise((resolve, reject) => {
     fetch(URL + "/document-connections", {
