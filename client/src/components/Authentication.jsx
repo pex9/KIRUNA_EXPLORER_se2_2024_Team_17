@@ -102,7 +102,7 @@ function LoginForm(props) {
 
 }
 
-function LoginRoute() {
+function Login() {
 
     return (
         <>
@@ -115,4 +115,4 @@ function LoginRoute() {
     );
 }
 
-export default LoginRoute;
+export default Login;

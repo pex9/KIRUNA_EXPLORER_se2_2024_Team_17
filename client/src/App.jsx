@@ -4,13 +4,17 @@ import './App.css'
 import { useState, useEffect } from 'react'
 import AppContext from './AppContext'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import LoginRoute from './components/Authentication';
-import DefaultRoute from './components/DefaultRoute';
-import HomeRoute from './components/HomeRoute';
-import DocumentRoute from './components/DocumentRoute';
-import AddDocumentRoute from './components/AddDocumentRoute';
-import DocumentsRoute from './components/DocumentsRoute';
+import Login from './components/Authentication';
+import Default from './components/Default';
+import Home from './components/Home';
+import Document from './components/Document';
+import AddDocument from './components/AddDocument';
+import Documents from './components/Documents';
 import API from './API';
+import CreateDocument from './components/CreateDocument';
+import ModifyDocument from './components/ModifyDocument';
+
+
 function App() {
   // stato per tenere traccia dello stato di autenticazione dell'utente
   const [user, setUser] = useState(undefined);
@@ -53,16 +57,15 @@ function App() {
       }}
       >
         <Routes>
-          <Route path='/login' element={<LoginRoute />} />
-          <Route path='/' element={<HomeRoute />} />
-          <Route path='/addDocument' element={<DocumentRoute />} />
-          <Route path='/documents' element={<DocumentsRoute />} />
-          <Route path='/documents/:documentId/addConnection' element={<AddDocumentRoute />} />
-
+          <Route path='/login' element={<Login />} />
+          <Route path='/' element={<Home />} />
+          <Route path='/addDocument' element={<Document />} />
+          <Route path='/documents' element={<Documents />} />
+          <Route path='/documents/:documentId/addConnection' element={<AddDocument />} />
+          {/* <Route path="/modify-document/:documentId" element={<ModifyDocument documents={documents} onUpdate={handleUpdate} />} /> */}
+          <Route path='/documents/create-document' element={<CreateDocument/>} />
+          <Route path='/*' element={<Default/>} />
           
-          
-          <Route path='/*' element={<DefaultRoute />} />
-
         </Routes>
       </AppContext.Provider>
     </BrowserRouter>
