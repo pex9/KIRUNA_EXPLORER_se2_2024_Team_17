@@ -100,7 +100,59 @@ const addDocument = (title,idStakeholder, scale, issuance_Date,language,pages,de
 
 };
 
+const getAllDocuments = () => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/documents", {
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((documents) => {
+            resolve(documents);
+          });
+        } else {
+          response
+            .json()
+            .then((message) => {
+              reject(message);
+            })
+            .catch(() => {
+              reject({ error: "Cannot parse server response." });
+            });
+        }
+      })
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });
+      });
+  });
+};
 
+const getDocumentById = (documentId) => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/documents/" + documentId, {
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((document) => {
+            resolve(document);
+          });
+        } else {
+          response
+            .json()
+            .then((message) => {
+              reject(message);
+            })
+            .catch(() => {
+              reject({ error: "Cannot parse server response." });
+            });
+        }
+      })
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });
+      });
+  });
+};
 
 // API TYPES DOCUMENTS CALL
 
@@ -214,6 +266,6 @@ const getStakeholder = (id) => {
 
 // API DOCUMENTS CONNECTION CALL 
 
-const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument};
+const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument,getAllDocuments,getDocumentById};
 
 export default API;
