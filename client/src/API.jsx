@@ -209,6 +209,81 @@ const getTypeDocument = (id) => {
   });
 };
 
+
+// API DOCUMENT CONNECTIONS CALL
+const getAllDocumentConnections = () => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/document-connections", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((connections) => {
+            resolve(connections);
+          });
+        } else {
+          response
+            .json()
+            .then((message) => {
+              reject(message);
+            })
+            .catch(() => {
+              reject({ error: "Cannot parse server response." });
+            });
+        }
+      })
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });
+      });
+  });
+};
+const getDocumentConnection =(id) => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/document-connections/" + id, {
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((connection) => {
+            resolve(connection);
+          }
+          );
+        } else {
+          response.json().then((message) => {
+            reject(message);
+          });
+        }
+      }
+    )});
+};
+
+const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/document-connections", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ IdDocument1, IdDocument2, connection_type }),
+      credentials: "include",
+
+    }).then((response) => {
+      if (response.ok) {
+        resolve(response.json());
+      } else {
+        response.json().then((message) => {
+          reject(message);
+        });
+      }
+    }).catch(() => {
+      reject({ error: "Cannot communicate with the server!" });
+    });
+  });
+};
+
+// PATCH to update the connections
+
 // API STAKEHOLDERS CALL
 
 const getAllStakeholders = () => {
@@ -228,15 +303,16 @@ const getAllStakeholders = () => {
               reject(message);
             })
             .catch(() => {
-              reject({ error: "Cannot parse server response." });
+              reject({ error: "Cannot parse server response!" });
             });
         }
       })
       .catch(() => {
-        reject({ error: "Cannot communicate with the server." });
+        reject({ error: "Cannot communicate with the server!" });
       });
   });
 };
+
 const getStakeholder = (id) => {
   return new Promise((resolve, reject) => {
     fetch(URL + "/stakeholders/" + id, {
@@ -266,6 +342,6 @@ const getStakeholder = (id) => {
 
 // API DOCUMENTS CONNECTION CALL 
 
-const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument,getAllDocuments,getDocumentById};
+const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection, getAllDocumentConnections,getDocumentConnection};
 
 export default API;
