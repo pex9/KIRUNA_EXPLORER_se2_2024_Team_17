@@ -112,6 +112,13 @@ To run the web app refer to the following step:
 
 # DOCUMENT CONNECTION API
 
+- GET `/api/document-connections`
+
+  - Description: lists all document connection entries in the table.
+
+  - Request: No Body.
+  - Response: returns `200 OK` (success) or `500 Internal Server Error` If an unexpected error occurs.
+
 - POST `/api/document-connections`
 
   - Description: Creates a connection between two documents in the system. This endpoint validates that the user has urban planner permissions and ensures documents can be properly linked.
