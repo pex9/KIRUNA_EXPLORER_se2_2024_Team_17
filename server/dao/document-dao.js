@@ -77,3 +77,21 @@ exports.addDocument = (
  *
  *
  */
+/**
+ * Updating the georeferencing location of a document.
+ * @param {Number} documentId - ID of the document to update.
+ * @param {Number} idLocation - New georeferencing location ID of the document.
+ * @returns {Promise<Boolean>} Resolves to true if the geolocation was updated successfully, false otherwise.
+ */
+exports.updateDocumentGeolocation = (documentId, idLocation) => {
+  return new Promise((resolve, reject) => {
+    const sql = "UPDATE Document SET IdLocation = ? WHERE IdDocument = ?";
+    db.run(sql, [idLocation, documentId], function (err) {
+      if (err) {
+        reject(new Error("Failed to update document geolocation."));
+        return;
+      }
+      resolve(true);
+    });
+  });
+};

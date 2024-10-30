@@ -121,6 +121,31 @@ exports.updateConnection_2 = (
 };
 
 /**
+ * Updating the connection of a document.
+ * @param {Number} documentId - ID of the first document (existing document connection ID).
+ * @param {Number} newDocumentId2 - ID of the new second document for the connection.
+ * @param {Number} newConnectionId - New connection type ID for the document connection.
+ * @returns {Promise<Boolean>} Resolves to true if the connection was updated successfully, false otherwise.
+ */
+exports.updateDocumentConnection = (
+  documentId,
+  newDocumentId2,
+  newConnectionId
+) => {
+  return new Promise((resolve, reject) => {
+    const sql =
+      "UPDATE DocumentConnection SET IdDocument2 = ?, IdConnection = ? WHERE IdDocument1 = ?";
+    db.run(sql, [newDocumentId2, newConnectionId, documentId], function (err) {
+      if (err) {
+        reject(new Error("Failed to update document connection."));
+        return;
+      }
+      resolve(true);
+    });
+  });
+};
+
+/**
  * Deleting a document connection by its ID from the DocumentConnection table
  * @param {Number} connectionIdDocuments - ID of the document connection to delete
  * @returns {Promise<Boolean>} Resolves to true if the connection was deleted successfully, false otherwise

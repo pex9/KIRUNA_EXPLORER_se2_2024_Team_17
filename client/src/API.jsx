@@ -159,21 +159,31 @@ const getTypeDocument = (id) => {
 
 
 // API DOCUMENT CONNECTIONS CALL
-
-export const getAllDocumentConnections = () => {
-  return fetch(URL + "/document-connections", {
-    method: "GET",
-    credentials: "include",
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      return response.json().then((data) => {
-        throw new Error(data.error);
+const getAllDocumentConnections = () => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/document-connections", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((connections) => {
+            resolve(connections);
+          });
+        } else {
+          response
+            .json()
+            .then((message) => {
+              reject(message);
+            })
+            .catch(() => {
+              reject({ error: "Cannot parse server response." });
+            });
+        }
+      })
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });
       });
-    }
-  }).catch((error) => {
-    throw new Error("Cannot communicate with the server!");
   });
 };
 
@@ -220,15 +230,16 @@ const getAllStakeholders = () => {
               reject(message);
             })
             .catch(() => {
-              reject({ error: "Cannot parse server response." });
+              reject({ error: "Cannot parse server response!" });
             });
         }
       })
       .catch(() => {
-        reject({ error: "Cannot communicate with the server." });
+        reject({ error: "Cannot communicate with the server!" });
       });
   });
 };
+
 const getStakeholder = (id) => {
   return new Promise((resolve, reject) => {
     fetch(URL + "/stakeholders/" + id, {
@@ -258,6 +269,6 @@ const getStakeholder = (id) => {
 
 // API DOCUMENTS CONNECTION CALL 
 
-const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection};
+const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection, getAllDocumentConnections};
 
 export default API;

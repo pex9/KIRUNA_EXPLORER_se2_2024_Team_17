@@ -131,7 +131,7 @@ app.get("/api/sessions/current", (req, res) => {
   } else res.status(401).json({ error: "Unauthenticated user!" });
 });
 
-// API DOCUMENTS
+///////// API DOCUMENTS  ////////
 
 // POST /api/documents, only possible for authenticated users and if he/she is a urban planner
 app.post("/api/documents", isUrbanPlanner, (req, res) => {
@@ -160,6 +160,57 @@ app.post("/api/documents", isUrbanPlanner, (req, res) => {
 // GET /api/documents
 
 // GET /api/documents/:documentid
+
+// PATCH /api/documents/:documentId/connection
+app.patch("/api/documents/:documentId/connection", async (req, res) => {
+  const documentId = parseInt(req.params.documentId);
+  const { newDocumentId2, newConnectionId } = req.body;
+
+  if (!newDocumentId2 || !newConnectionId) {
+    return res
+      .status(400)
+      .json({ error: "newDocumentId2 and newConnectionId are required." });
+  }
+
+  try {
+    const result = await DocumentConnectionDao.updateDocumentConnection(
+      documentId,
+      newDocumentId2,
+      newConnectionId
+    );
+    if (result) {
+      res.status(200).json({ message: "Connection updated successfully." });
+    } else {
+      res.status(500).json({ error: "Failed to update connection." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PATCH /api/documents/:documentId/geolocation
+app.patch("/api/documents/:documentId/geolocation", async (req, res) => {
+  const documentId = parseInt(req.params.documentId);
+  const { idLocation } = req.body;
+
+  if (!idLocation) {
+    return res.status(400).json({ error: "idLocation is required!" });
+  }
+
+  try {
+    const result = await documentDao.updateDocumentGeolocation(
+      documentId,
+      idLocation
+    );
+    if (result) {
+      res.status(200).json({ message: "Geolocation updated successfully." });
+    } else {
+      res.status(500).json({ error: "Failed to update geolocation." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // API TYPES
 app.get("/api/types", (req, res) => {
@@ -197,7 +248,7 @@ app.get("/api/stakeholders/:stakeholderid", (req, res) => {
     .catch(() => res.status(500).end());
 });
 
-//API DOCUMENTCONNECTION
+///////  API DOCUMENTCONNECTION   ///////
 
 // GET /api/document-connections
 // Retrievs all list of connection documents
