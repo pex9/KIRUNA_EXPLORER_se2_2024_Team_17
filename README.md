@@ -285,3 +285,6 @@ To run the web app refer to the following step:
 ## Main React Components
 
 ## Screenshot
+
+## License 
+This project is licensed under the MIT License.
