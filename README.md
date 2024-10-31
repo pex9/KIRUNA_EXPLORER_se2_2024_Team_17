@@ -27,7 +27,7 @@ To run the web app refer to the following step:
 
   - `cd server`
   - Decide what you want to test between users,documents then run the appropriate command (for example, to test users):
-    - `npm test users`
+  - `npm test users`
   - You will see the total time taken to execute these tests and the different API calls.
 
   ## React Client Application Routes
