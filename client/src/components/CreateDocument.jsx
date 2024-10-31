@@ -1,120 +1,153 @@
 import React, { useState } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
+import { Button, Form, Modal, ListGroup, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 function CreateDocument() {
     const [showAddConnection, setShowAddConnection] = useState(false);
+    const [title, setTitle] = useState('');
+    const [scale, setScale] = useState('');
+    const [issuanceDate, setIssuanceDate] = useState('');
+    const [description, setDescription] = useState('');
     const [selectedDocument, setSelectedDocument] = useState('');
     const [connectionType, setConnectionType] = useState('');
-    const [connections, setConnections] = useState([]); // To store added connections
-    const navigate = useNavigate(); // Hook for navigation
+    const [connections, setConnections] = useState([]); // List of added connections
+    const navigate = useNavigate();
 
     const handleConfirm = () => {
-        // Logic for confirming the document creation
-        console.log('Document created!'); // You can replace this with actual logic
-        navigate('/'); // Navigate back to the home page
+        // Logic to save the document
+        console.log('Document created:', { title, scale, issuanceDate, description, connections });
+        navigate('/'); // Redirect to home after confirmation
     };
 
     const handleAddConnection = () => {
-        // Add the selected connection to the list
         if (selectedDocument && connectionType) {
-            const newConnection = { document: selectedDocument, type: connectionType };
-            setConnections([...connections, newConnection]); // Update connections state
-            // Reset the modal fields
+            setConnections([...connections, { document: selectedDocument, type: connectionType }]);
             setSelectedDocument('');
             setConnectionType('');
-            setShowAddConnection(false); // Close the modal
+            setShowAddConnection(false);
         } else {
-            alert("Please fill in all fields."); // Simple validation
+            alert("Please complete all fields to add a connection.");
         }
     };
 
     return (
-        <div className="container mt-5">
-            <h3>Create Document</h3>
-            <Form>
-                <Form.Group controlId="title">
-                    <Form.Label>Title</Form.Label>
-                    <Form.Control type="text" placeholder="Enter document title" />
-                </Form.Group>
+        <Container className="my-5 p-4 bg-light rounded">
+            <h3 className="text-center mb-4">Create Document</h3>
+            <Row>
+                {/* Left Column: Document Fields and Connections */}
+                <Col md={6}>
+                    <Form>
+                        <Form.Group controlId="title" className="mb-3">
+                            <Form.Label>Title</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter document title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="scale" className="mb-3">
+                            <Form.Label>Scale</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter scale"
+                                value={scale}
+                                onChange={(e) => setScale(e.target.value)}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="issuanceDate" className="mb-3">
+                            <Form.Label>Issuance Date</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={issuanceDate}
+                                onChange={(e) => setIssuanceDate(e.target.value)}
+                            />
+                        </Form.Group>
 
-                <Form.Group controlId="scale">
-                    <Form.Label>Scale</Form.Label>
-                    <Form.Control type="text" placeholder="Enter scale" />
-                </Form.Group>
+                        <div className="mb-3">
+                            <Form.Label>Connections</Form.Label>
+                            {connections.length > 0 ? (
+                                <ListGroup variant="flush" className="mb-2">
+                                    {connections.map((conn, index) => (
+                                        <ListGroup.Item key={index}>
+                                            {conn.document} - {conn.type}
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                            ) : (
+                                <p className="text-muted">No connections added yet.</p>
+                            )}
+                            <Button variant="outline-primary" onClick={() => setShowAddConnection(true)}>
+                                Add Connection
+                            </Button>
+                        </div>
+                    </Form>
+                </Col>
 
-                <Form.Group controlId="issuanceDate">
-                    <Form.Label>Issuance Date</Form.Label>
-                    <Form.Control type="date" />
-                </Form.Group>
+                {/* Right Column: Description and Action Buttons */}
+                <Col md={6}>
+                    <Form.Group controlId="description" className="mb-4">
+                        <Form.Label>Description</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={8}
+                            placeholder="Enter description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
+                    </Form.Group>
 
-                <Form.Group controlId="description">
-                    <Form.Label>Description</Form.Label>
-                    <Form.Control as="textarea" rows={3} placeholder="Enter description" />
-                </Form.Group>
+                    <div className="d-flex justify-content-between">
+                        <Button variant="secondary" onClick={() => navigate('/')}>
+                            Cancel
+                        </Button>
+                        <Button variant="success" onClick={handleConfirm}>
+                            Save
+                        </Button>
+                    </div>
+                </Col>
+            </Row>
 
-                <div className="mt-3">
-                    <Form.Label>Connections</Form.Label>
-                    {connections.length > 0 ? (
-                        connections.map((conn, index) => (
-                            <p key={index}>
-                                {conn.document} - {conn.type}
-                            </p>
-                        ))
-                    ) : (
-                        <p>No connections added yet</p>
-                    )}
-                    <Button variant="secondary" onClick={() => setShowAddConnection(true)}>
-                        Add Connection
-                    </Button>
-                </div>
-
-                <div className="mt-4">
-                    <Button variant="danger" className="me-2" onClick={() => navigate('/')}>
-                        Cancel
-                    </Button>
-                    <Button variant="success" onClick={handleConfirm}>
-                        Confirm
-                    </Button>
-                </div>
-            </Form>
-
-            {/* Add Connection Modal */}
+            {/* Modal for Adding a Connection */}
             <Modal show={showAddConnection} onHide={() => setShowAddConnection(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Add Connection</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form.Group controlId="connectionDocument">
+                    <Form.Group controlId="connectionDocument" className="mb-3">
                         <Form.Label>Select Document</Form.Label>
                         <Form.Control
                             type="text"
-                            placeholder="Choose document..."
+                            placeholder="Enter document name"
                             value={selectedDocument}
-                            onChange={(e) => setSelectedDocument(e.target.value)} // Update state
+                            onChange={(e) => setSelectedDocument(e.target.value)}
                         />
                     </Form.Group>
-                    <Form.Group controlId="connectionType" className="mt-2">
+                    <Form.Group controlId="connectionType">
                         <Form.Label>Connection Type</Form.Label>
                         <Form.Control
                             type="text"
                             placeholder="Enter connection type"
                             value={connectionType}
-                            onChange={(e) => setConnectionType(e.target.value)} // Update state
+                            onChange={(e) => setConnectionType(e.target.value)}
                         />
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowAddConnection(false)}>
+                    <Button variant="outline-secondary" onClick={() => setShowAddConnection(false)}>
                         Cancel
                     </Button>
                     <Button variant="primary" onClick={handleAddConnection}>
-                        Confirm
+                        Add Connection
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </div>
+        </Container>
     );
 }
 
 export default CreateDocument;
+
+
+
+
