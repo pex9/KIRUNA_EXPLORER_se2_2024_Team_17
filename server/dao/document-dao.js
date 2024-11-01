@@ -41,7 +41,7 @@ exports.addDocument = async (title,idStakeholder,scale,issuance_Date,language,pa
 // here other function es get document
 exports.getDocuments = () => {
     return new Promise((resolve, reject) => {
-        const sql = 'SELECT title, idStakeholder, scale, issuance_Date, language, pages, description, idtype, idlocation FROM Document';
+        const sql = 'SELECT * FROM Document';
 
         db.all(sql, (err, row) => {
             if (err) {

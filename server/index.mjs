@@ -144,7 +144,6 @@ app.post("/api/documents", isUrbanPlanner, async (req, res) => {
     return;
   }
   const idLocation= await locationDao.addLocation(document.locationType, document.latitude, document.longitude, document.area_coordinates);
-  console.log(idLocation);
   if (!idLocation) {
     res.status(500).json({ error: "Failed to add location." });
     return;
@@ -328,7 +327,6 @@ app.get("/api/locations/:locationId", (req, res) => {
 
 app.post("/api/locations",isUrbanPlanner, async (req, res) => {
   const { locationType, latitude, longitude, areaCoordinates } = req.body;
-  console.log(req.body);
   if (!locationType) {
     return res.status(400).json({ error: "locationType is required." });
   }

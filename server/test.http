@@ -73,8 +73,8 @@ Content-Type: application/json
     "description": "Description of the document.",
     "idtype": 2,
     "locationType": "Point",
-    "latitude": 45.0,
-    "longitude": 9.0,
+    "latitude": 67.85,
+    "longitude": 20.22,
     "areaCoordinates": ""
 }
 
@@ -215,8 +215,8 @@ Content-Type: application/json
 
 {
     "locationType": "Point",
-    "latitude": 45.0,
-    "longitude": 9.0,
+    "latitude": 67.85,
+    "longitude": 20.22,
     "areaCoordinates": ""
 }
 

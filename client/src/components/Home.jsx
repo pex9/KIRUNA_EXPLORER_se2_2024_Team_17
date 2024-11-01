@@ -1,47 +1,65 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MyNavbar from './MyNavbar';
 import MapComponent from './Map';
 import { Button, ToggleButtonGroup, ToggleButton, ListGroup, Spinner, Card } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import { FaFileAlt } from 'react-icons/fa'; // Import document icon
+import API from '../API'; // Import API module
 
 function Home(props) {
     const [viewMode, setViewMode] = useState('map');
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedDocument, setSelectedDocument] = useState(null);
+    const [stakeholders, setStakeholders] = useState([]);
+    const [locations, setLocations] = useState([]);
+    const [selectedLocation, setSelectedLocation] = useState(null);
     const navigate = useNavigate();
-
-    // Simulated fetch for documents
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchDocuments = async () => {
-            setLoading(true);
-            setTimeout(() => {
-                setDocuments([
-                    { title: "Building Permit", description: "A permit for a new building.", scale: "1:100", issuanceDate: "2023-01-01", location: "Downtown", author: "City Planning Office" },
-                    { title: "Environmental Report", description: "Environmental impact assessment for the area.", scale: "1:500", issuanceDate: "2023-02-15", location: "North Park", author: "Green Solutions" },
-                    { title: "Site Plan", description: "Detailed layout of the construction site.", scale: "1:200", issuanceDate: "2023-03-12", location: "Eastside", author: "Urban Design Ltd" },
-                    { title: "Renovation License", description: "Approval for property renovation.", scale: "1:150", issuanceDate: "2023-04-05", location: "Uptown", author: "Historic Preservation Office" },
-                    { title: "Zoning Map", description: "Zoning regulations for the city area.", scale: "1:1000", issuanceDate: "2023-05-20", location: "City Center", author: "City Zoning Committee" },
-                    { title: "Traffic Study", description: "Analysis of traffic flow in the city.", scale: "1:200", issuanceDate: "2023-06-15", location: "Main Street", author: "Traffic Authority" },
-                    { title: "Historic Preservation Report", description: "Guidelines for historic site preservation.", scale: "1:250", issuanceDate: "2023-07-01", location: "Old Town", author: "Historic Society" },
-                    { title: "Community Engagement Plan", description: "Plan for community involvement in projects.", scale: "1:300", issuanceDate: "2023-08-10", location: "City Hall", author: "Community Development" },
-                    { title: "Urban Development Strategy", description: "Long-term strategy for urban growth.", scale: "1:500", issuanceDate: "2023-09-15", location: "West End", author: "Development Agency" },
-                    { title: "Public Transport Plan", description: "Plans for enhancing public transport.", scale: "1:600", issuanceDate: "2023-10-01", location: "Suburban Area", author: "Transit Authority" },
-                    { title: "City Green Spaces Initiative", description: "Proposal for new green spaces in urban areas.", scale: "1:800", issuanceDate: "2023-11-05", location: "Citywide", author: "Parks Department" },
-                    { title: "Waste Management Strategy", description: "Strategic plan for waste collection and recycling.", scale: "1:500", issuanceDate: "2023-11-15", location: "Metropolitan Area", author: "Environmental Agency" },
-                    { title: "Renewable Energy Plan", description: "Plan for implementing renewable energy sources.", scale: "1:1000", issuanceDate: "2023-12-01", location: "Citywide", author: "Energy Commission" },
-                    { title: "Public Safety Assessment", description: "Assessment of public safety measures in the city.", scale: "1:750", issuanceDate: "2024-01-10", location: "Downtown", author: "Public Safety Office" },
-                    { title: "Cultural Heritage Project", description: "Plan to promote and preserve cultural heritage.", scale: "1:1200", issuanceDate: "2024-02-20", location: "Historic District", author: "Cultural Affairs" },
-                    { title: "Smart City Implementation Plan", description: "Blueprint for implementing smart technologies in the city.", scale: "1:500", issuanceDate: "2024-03-15", location: "Citywide", author: "Smart City Initiative" },
-
-                ]);
-                setLoading(false);
-            }, 1000);
+            try {
+                const res = await API.getAllDocuments();
+                setDocuments(res);
+            } catch (err) {
+                console.error(err);
+            }
         };
 
-        fetchDocuments();
+        const fetchLocations = async () => {
+            setLoading(true);
+            API.getAllLocations()
+                .then((res) => {
+                    // Convert the array into an object with IdLocation as the key
+                    const locationsById = res.reduce((acc, location) => {
+                        acc[location.IdLocation] = location;
+                        return acc;
+                    }, {});
+                    // Set the transformed object to state
+                    setLocations(locationsById);
+                    setLoading(false);
+                })
+                .catch((err) => {
+                    console.error(err);
+                    setLoading(false);
+                });
+        };        
+      
+        const fetchStakeholders = async () => {
+            try {
+                const res = await API.getAllStakeholders();
+                setStakeholders(res);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        Promise.all([fetchDocuments(), fetchLocations(), fetchStakeholders()])
+            .then(() => setLoading(false))
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
+            });
     }, []);
 
     const handleToggle = (value) => {
@@ -55,7 +73,7 @@ function Home(props) {
 
     const handleModifyClick = () => {
         if (selectedDocument) {
-            navigate(`documents/modify-document/${selectedDocument.title}`); // Adjust route as needed
+            navigate(`documents/modify-document/${selectedDocument.title}`);
         }
     };
 
@@ -72,7 +90,11 @@ function Home(props) {
 
             <div className='d-flex mapContainer'>
                 {viewMode === 'map' ? (
-                    <MapComponent />
+                    loading || locations.length==0 || documents.length ==0 ? (
+                        <Spinner animation="border" variant="primary" />
+                    ) : (
+                        <MapComponent locations={locations} documents={documents} setSelectedLocation={setSelectedLocation} />
+                    )
                 ) : (
                     <Card className="w-100">
                         <div className='d-flex p-3'>
@@ -89,7 +111,7 @@ function Home(props) {
                                                     onClick={() => handleDocumentClick(doc)}
                                                     style={{ cursor: 'pointer', fontWeight: selectedDocument === doc ? 'bold' : 'normal' }}
                                                 >
-                                                    {doc.title}
+                                                    {doc.Title}
                                                 </ListGroup.Item>
                                             ))}
                                         </ListGroup>
@@ -102,16 +124,18 @@ function Home(props) {
                                     {selectedDocument ? (
                                         <>
                                             <Card.Header>
-                                                <strong>{selectedDocument.title}</strong>
-                                                <FaFileAlt style={{ float: 'right', fontSize: '1.5em' }} /> {/* Document icon */}
+                                                <strong>{selectedDocument.Title}</strong>
+                                                <FaFileAlt style={{ float: 'right', fontSize: '1.5em' }} />
                                             </Card.Header>
                                             <Card.Body>
                                                 <Card.Text>
-                                                    <strong>Description:</strong> {selectedDocument.description} <br />
-                                                    <strong>Scale:</strong> {selectedDocument.scale} <br />
-                                                    <strong>Issuance Date:</strong> {selectedDocument.issuanceDate} <br />
-                                                    <strong>Location:</strong> {selectedDocument.location} <br />
-                                                    <strong>Author:</strong> {selectedDocument.author}
+                                                    <strong>Description:</strong> {selectedDocument.Description} <br />
+                                                    <strong>Scale:</strong> {selectedDocument.Scale} <br />
+                                                    <strong>Issuance Date:</strong> {selectedDocument.Issuance_Date} <br />
+                                                    <strong>Location:</strong> Lat: {locations[selectedDocument.IdLocation].Latitude} Long: {locations[selectedDocument.IdLocation].Longitude} <br />
+                                                    <strong>StakeHolder:</strong> {stakeholders[selectedDocument.IdStakeholder - 1].name} <br />
+                                                    <strong>Language:</strong> {selectedDocument.Language} <br />
+                                                    <strong>Pages:</strong> {selectedDocument.Pages} <br />
                                                 </Card.Text>
                                                 <div className="text-center mt-3">
                                                     <Button variant="success" className="me-2">Add Connection</Button>
@@ -131,14 +155,24 @@ function Home(props) {
             </div>
 
             <div className='text-center mt-3'>
-                <Button
-                    variant="primary"
-                    size="lg"
-                    onClick={() => navigate('documents/create-document')}
-                >
-                    Add/Create Document
-                </Button>
-            </div>
+            {selectedLocation ? (
+                <div>
+                    <h4>Selected Location:</h4>
+                    <p>Latitude: {selectedLocation.lat.toFixed(4)}, Longitude: {selectedLocation.lng.toFixed(4)}</p>
+                </div>
+            ) : (
+                <h4 className="text-muted">No location selected.</h4>
+            )}
+            <Button
+                variant="primary"
+                size="lg"
+                onClick={() => navigate('documents/create-document', { state: { location: selectedLocation } })}
+                disabled={!selectedLocation} // Disable button if no location is selected
+            >
+                Add/Create Document
+            </Button>
+        </div>
+
         </>
     );
 }

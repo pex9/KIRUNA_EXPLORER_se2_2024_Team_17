@@ -101,6 +101,7 @@ const addDocument = (title,idStakeholder, scale, issuance_Date,language,pages,de
 };
 
 const getAllDocuments = () => {
+  console.log("GET ALL DOCUMENTS"); 
   return new Promise((resolve, reject) => {
     fetch(URL + "/documents", {
       credentials: "include",

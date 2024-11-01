@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { Button, Form, Modal, ListGroup, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import API from '../API';
+
 
 function CreateDocument() {
     const [showAddConnection, setShowAddConnection] = useState(false);
@@ -12,6 +15,23 @@ function CreateDocument() {
     const [connectionType, setConnectionType] = useState('');
     const [connections, setConnections] = useState([]); // List of added connections
     const navigate = useNavigate();
+
+    const location = useLocation();
+    const { location: selectedLocation } = location.state || {};
+    console.log("Selected Location:", selectedLocation);
+
+    useEffect(() => {
+        const getAllConnections = async () => {
+            try {
+                const res = await API.getAllTypesDocument();
+                setConnections(res);
+                console.log("Connections:", res);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        getAllConnections();
+    }, []);
 
     const handleConfirm = () => {
         // Logic to save the document
@@ -66,17 +86,7 @@ function CreateDocument() {
 
                         <div className="mb-3">
                             <Form.Label>Connections</Form.Label>
-                            {connections.length > 0 ? (
-                                <ListGroup variant="flush" className="mb-2">
-                                    {connections.map((conn, index) => (
-                                        <ListGroup.Item key={index}>
-                                            {conn.document} - {conn.type}
-                                        </ListGroup.Item>
-                                    ))}
-                                </ListGroup>
-                            ) : (
-                                <p className="text-muted">No connections added yet.</p>
-                            )}
+                            <p className="text-muted">No connections added yet.</p>
                             <Button variant="outline-primary" onClick={() => setShowAddConnection(true)}>
                                 Add Connection
                             </Button>
@@ -125,12 +135,22 @@ function CreateDocument() {
                     </Form.Group>
                     <Form.Group controlId="connectionType">
                         <Form.Label>Connection Type</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter connection type"
+                        <Form.Select
                             value={connectionType}
                             onChange={(e) => setConnectionType(e.target.value)}
-                        />
+                        >
+                            {/* Show a default option when no connections exist */}
+                            {connections.length === 0 ? (
+                                <option value="" disabled>No connections added yet</option>
+                            ) : (
+                                <>
+                                    <option value="">Select connection type</option>
+                                    {connections.map((conn, index) => (
+                                        <option key={index} value={conn.type}>{conn.type}</option>
+                                    ))}
+                                </>
+                            )}
+                        </Form.Select>
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
