@@ -91,7 +91,12 @@ To run the web app refer to the following step:
       "language": "English",
       "pages": 50,
       "description": "A description for the document",
-      "idType": 2
+      "idType": 2,
+      "locationType" : "Point",
+      "latitude": 19, 
+      "longitude": 23,
+      "area_coordinates" :""
+
     }
     ```
   - Response: returns `201 Created OK` (created) or `400 Bad Request` (invalid data ) or `401 Unauthorized` (If the user is unauthenticated or lacks sufficient permissions) or `500 Internal Server Error `If an unexpected error occurs.
@@ -106,7 +111,8 @@ To run the web app refer to the following step:
       "language": "English",
       "pages": 50,
       "description": "A description for the document",
-      "idType": 2
+      "idType": 2,
+      "idLocation" : 1
     }
     ```
 - GET `/api/documents`
@@ -125,7 +131,8 @@ To run the web app refer to the following step:
       "language": "English",
       "pages": 50,
       "description": "A description for the document",
-      "idType": 2
+      "idType": 2,
+      "idLocation" : 2
     },
     {
       "documentId": 124,
@@ -136,7 +143,8 @@ To run the web app refer to the following step:
       "language": "English",
       "pages": 44,
       "description": "A description for the document v2",
-      "idType": 2
+      "idType": 2,
+      "idLocation" : 1
     }
     ]
     ```
@@ -155,7 +163,8 @@ To run the web app refer to the following step:
       "language": "English",
       "pages": 50,
       "description": "A description for the document",
-      "idType": 2
+      "idType": 2,
+      "idLocation" : 1
     }
     ```
 
@@ -221,10 +230,141 @@ To run the web app refer to the following step:
       "IdConnection": 1
     }
     ```
+# LOCATION API
+- GET `/api/locations`
+
+  - **Description**: Retrieves a list of all locations.
+  - **Request**: No request body required.
+  - **Response**: Returns `200 OK` with a JSON array of locations if successful, or `500 Internal Server Error` if an unexpected error occurs.
+  - **Response Body on Success**:
+    ```json
+    [
+      {
+        "IdLocation": 1,
+        "LocationType": "Point",
+        "Latitude": 45.0,
+        "Longitude": 9.0,
+        "AreaCoordinates": null
+      }
+    ]
+    ```
+- GET `/api/locations/:locationId`
+
+  - **Description**: Retrieves a specific location by its ID.
+  - **Request Parameters**:
+    - `locationId` (Number, required): The ID of the location to retrieve.
+  - **Response**: Returns `200 OK` with the location data if found, `404 Not Found` if the location does not exist, or `500 Internal Server Error` if an unexpected error occurs.
+  - **Response Body on Success**:
+    ```json
+    {
+      "IdLocation": 1,
+      "LocationType": "Point",
+      "Latitude": 45.0,
+      "Longitude": 9.0,
+      "AreaCoordinates": null
+    }
+    ```
+- POST `/api/locations`
+
+  - **Description**: Creates a new location entry.
+  - **Authorization**: Requires `isUrbanPlanner` authorization.
+  - **Request Body**:
+    - `locationType` (String, required): The type of location (`"Point"` or `"Area"`).
+    - `latitude` (Number, required if `locationType` is `"Point"`): The latitude of the location.
+    - `longitude` (Number, required if `locationType` is `"Point"`): The longitude of the location.
+    - `areaCoordinates` (String, required if `locationType` is `"Area"`): The area coordinates in string format.
+  - **Response**: Returns `201 Created` with a success message if the location is created, or `400 Bad Request` if validation fails, or `500 Internal Server Error` if an error occurs.
+  - **Response Body on Success**:
+    ```json
+    {
+      "message": "Location added successfully."
+    }
+    ```
+- PATCH `/api/locations/:locationId`
+
+  - **Description**: Updates an existing location by its ID.
+  - **Authorization**: Requires `isUrbanPlanner` authorization.
+  - **Request Parameters**:
+    - `locationId` (Number, required): The ID of the location to update.
+  - **Request Body**:
+    - `locationType` (String, required): The type of location (`"Point"` or `"Area"`).
+    - `latitude` (Number, required if `locationType` is `"Point"`): The latitude of the location.
+    - `longitude` (Number, required if `locationType` is `"Point"`): The longitude of the location.
+    - `areaCoordinates` (String, required if `locationType` is `"Area"`): The area coordinates in string format.
+  - **Response**: Returns `200 OK` with a success message if the location is updated, `404 Not Found` if the location does not exist, `400 Bad Request` if validation fails, or `500 Internal Server Error` if an error occurs.
+  - **Response Body on Success**:
+    ```json
+    {
+      "message": "Location updated successfully."
+    }
+    ```
+# Stakeholder API
+
+- GET`/api/stakeholders`
+
+  - **Description**: Retrieves a list of all stakeholders.
+  - **Request**: No request body required.
+  - **Response**: Returns `200 OK` with a JSON array of stakeholders if successful, or `500 Internal Server Error` if an unexpected error occurs.
+  - **Response Body on Success**:
+    ```json
+    [
+      {
+        "IdStakeholder": 1,
+        "Name": "John Doe",
+        "Type": "Individual",
+        "Email": "johndoe@example.com"
+      }
+    ]
+    ```
+- GET `/api/stakeholders/:stakeholderid`
+
+  - **Description**: Retrieves a specific stakeholder by their ID.
+  - **Request Parameters**:
+    - `stakeholderid` (Number, required): The ID of the stakeholder to retrieve.
+  - **Response**: Returns `200 OK` with the stakeholder data if found, `404 Not Found` if the stakeholder does not exist, or `500 Internal Server Error` if an unexpected error occurs.
+  - **Response Body on Success**:
+    ```json
+    {
+      "IdStakeholder": 1,
+      "Name": "John Doe",
+      "Type": "Individual",
+      "Email": "johndoe@example.com"
+    }
+    ```
+# TYPEDOCUMENT API
+
+- GET `/api/types`
+
+  - **Description**: Retrieves a list of all document types.
+  - **Request**: No request body required.
+  - **Response**: Returns `200 OK` with a JSON array of document types if successful, or `500 Internal Server Error` if an unexpected error occurs.
+  - **Response Body on Success**:
+    ```json
+    [
+      {
+        "IdType": 1,
+        "Name": "Report",
+        "Description": "A detailed report document type."
+      }
+    ]
+    ```
+- GET `/api/types/:typeid`
+
+  - **Description**: Retrieves a specific document type by its ID.
+  - **Request Parameters**:
+    - `typeid` (Number, required): The ID of the document type to retrieve.
+  - **Response**: Returns `200 OK` with the document type data if found, `404 Not Found` if the type does not exist, or `500 Internal Server Error` if an unexpected error occurs.
+  - **Response Body on Success**:
+    ```json
+    {
+      "IdType": 1,
+      "Name": "Report",
+      "Description": "A detailed report document type."
+    }
+    ```
+
 
 ## Database Tables
-
-### Tables and Fields
 
 **User**
 

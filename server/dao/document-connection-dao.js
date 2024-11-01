@@ -34,7 +34,8 @@ exports.createConnection = (documentId1, documentId2, connectionId) => {
 };
 
 /**
- * Retrieving all document Connections
+ * Retrieve all connections of documents.
+ * @returns {Promise<Array>}  Resolves to an array of connection objects
  */
 
 exports.getAllConnections = () => {

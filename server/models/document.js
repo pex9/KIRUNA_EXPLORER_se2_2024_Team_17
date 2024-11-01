@@ -1,18 +1,7 @@
 const dayjs = require("dayjs");
 
 class Document {
-  constructor(
-    idDocument,
-    title,
-    idStakeholder,
-    scale,
-    issuance_Date,
-    language,
-    pages,
-    description,
-    idtype,
-    idlocation
-  ) {
+  constructor(idDocument,title,idStakeholder,scale,issuance_Date,language,pages,description,idtype,idlocation) {
     this.idDocument = idDocument; // id of the document
     this.title = title;
     this.idStakeholder = idStakeholder; // id of the stakeholder who owns the document
@@ -22,8 +11,7 @@ class Document {
     this.pages = pages;
     this.description = description;
     this.idtype = idtype; // type of document
-    //TODO add idlocation to specify the location of the document
-    this.idlocation = idlocation; // location of the document
+    this.idlocation = idlocation; // location of the document id
   }
 }
 

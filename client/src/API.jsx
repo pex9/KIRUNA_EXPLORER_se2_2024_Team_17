@@ -74,14 +74,14 @@ async function getUserInfo() {
 
 // API DOCUMENTS CALL 
 
-const addDocument = (title,idStakeholder, scale, issuance_Date,language,pages,description, idtype) => {
+const addDocument = (title,idStakeholder, scale, issuance_Date,language,pages,description, idtype,locationType, latitude, longitude, area_coordinates ) => {
   return new Promise((resolve, reject) => {
     fetch(URL + "/documents", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ title,idStakeholder, scale, issuance_Date,language,pages,description, idtype}),
+      body: JSON.stringify({ title,idStakeholder, scale, issuance_Date,language,pages,description, idtype,locationType, latitude, longitude, area_coordinates }),
       credentials: "include",
     })
       .then((response) => {
@@ -153,6 +153,8 @@ const getDocumentById = (documentId) => {
       });
   });
 };
+
+
 
 // API TYPES DOCUMENTS CALL
 
@@ -340,8 +342,78 @@ const getStakeholder = (id) => {
   });
 };
 
-// API DOCUMENTS CONNECTION CALL 
+// API LOCATIONS CALL
+const getAllLocations = () => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/locations", {
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((locations) => {
+            resolve(locations);
+          });
+        } else {
+          response
+            .json()
+            .then((message) => {
+              reject(message);
+            })
+            .catch(() => {
+              reject({ error: "Cannot parse server response." });
+            });
+        }
+      })
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });
+      });
+  });
+}
 
-const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection, getAllDocumentConnections,getDocumentConnection};
+const getLocationById= (id) => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/locations/" + id, {
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((location) => {
+            resolve(location);
+          });
+        } else {
+          response.json().then((message) => {
+            reject(message);
+          });
+        }
+      });
+  });
+};
+
+const updateLocationDocument = (id, location_type, latitude, longitude, area_coordinates) => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/locations/" + id, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ location_type, latitude, longitude, area_coordinates }),
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          resolve();
+        } else {
+          response.json().then((message) => {
+            reject(message);
+          });
+        }
+      })
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });
+      });
+  });
+};
+
+const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection, getAllDocumentConnections,getDocumentConnection,getAllDocuments,getDocumentById,getAllLocations,updateLocationDocument,getLocationById};
 
 export default API;
