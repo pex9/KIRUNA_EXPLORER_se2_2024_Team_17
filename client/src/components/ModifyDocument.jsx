@@ -1,20 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Card, Row, Col, Container, Modal, ListGroup } from 'react-bootstrap';
+import { Button, Form, Card, Row, Col, Container, Modal, ListGroup, FloatingLabel, FormGroup } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import API from '../API';
 function ModifyDocument() {
     const { documentId } = useParams();
     const [showAddConnection, setShowAddConnection] = useState(false);
+    // document fields
     const [title, setTitle] = useState('');
     const [scale, setScale] = useState('');
     const [issuanceDate, setIssuanceDate] = useState('');
     const [description, setDescription] = useState('');
+    const [language, setLanguage] = useState('');
+    const [pages, setPages] = useState('');
+    const [stakeholder, setStakeholder] = useState([]);
+    const [type, setType] = useState('');
+
     const [selectedDocument, setSelectedDocument] = useState('');
     const [connectionType, setConnectionType] = useState('');
     const [connections, setConnections] = useState([]); // List of added connections
     const navigate = useNavigate();
     const [document, setDocument] = useState(null);
+    const [stakeholders, setStakeholders] = useState([]);
+    const [types, setTypes] = useState([]);
+
     useEffect(() => {
+        const getStakeholders = async () => {
+            try {
+                const res = await API.getAllStakeholders();
+                console.log(res);
+                setStakeholders(res);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        const getTypes = async () => {
+          try {
+              const res = await API.getAllTypesDocument();
+              console.log(res);
+              setTypes(res);
+          } catch (err) {
+              console.error(err);
+          }
+      }
         const fetchDocument = async () => {
             try {
                 const res = await API.getDocumentById(documentId);
@@ -22,15 +49,28 @@ function ModifyDocument() {
                 setDocument(res);
                 setTitle(res.Title);
                 setScale(res.Scale);
-                setIssuanceDate(res.IssuanceDate);
+                setLanguage(res.Language);
+                setPages(res.Pages);
+                setIssuanceDate(res.Issuance_Date);
                 setDescription(res.Description);
+
+                const stakeholder = await API.getStakeholder(res.IdStakeholder);
+                setStakeholder(stakeholder);
+                const type = await API.getTypeDocument(res.IdType);
+                setType(type);
             } catch (err) {
                 console.error(err);
             }
         };
-        fetchDocument();
+
+        getStakeholders();
+        getTypes();
+
+        if(documentId)
+          fetchDocument();
+        
         console.log(document);
-    });
+    },[]);
     const handleUpdate = () => {
         if (document) {
             //onUpdate(documentId, document);
@@ -50,38 +90,63 @@ function ModifyDocument() {
         }
     };
     return (
-        <Container className="my-5 p-4 bg-light rounded">
-            <h3 className="text-center mb-4">Update Document</h3>
+        <Card className="container my-5 p-4 bg-light rounded form">
+            <h3 className="text-center mb-4">{documentId ? 'Update' : 'Create'} Document</h3>
             <Row>
                 {/* Left Column: Document Fields and Connections */}
                 <Col md={6}>
                     <Form>
                         <Form.Group controlId="title" className="mb-3">
-                            <Form.Label>Title</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter document title"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                            />
+                            <FloatingLabel controlId="title" label="Title" className="mb-3">
+                              <Form.Control
+                                  type="text"
+                                  value={title}
+                                  onChange={(e) => setTitle(e.target.value)}
+                              />
+                          </FloatingLabel>
                         </Form.Group>
+                        
                         <Form.Group controlId="scale" className="mb-3">
-                            <Form.Label>Scale</Form.Label>
+                          <FloatingLabel controlId="scale" label="Scale" className="mb-3">
                             <Form.Control
                                 type="text"
-                                placeholder="Enter scale"
                                 value={scale}
                                 onChange={(e) => setScale(e.target.value)}
                             />
+                          </FloatingLabel>
                         </Form.Group>
-                        <Form.Group controlId="issuanceDate" className="mb-3">
-                            <Form.Label>Issuance Date</Form.Label>
+                        
+                        <Form.Group controlId="language" className="mb-3">
+                          <FloatingLabel controlId="language" label="Language" className="mb-3">
                             <Form.Control
-                                type="date"
+                                type="text"
+                                value={language}
+                                onChange={(e) => setScale(e.target.value)}
+                            />
+                          </FloatingLabel>
+                        </Form.Group>
+                        
+                        <Form.Group controlId="pages" className="mb-3">
+                          <FloatingLabel controlId="pages" label="Pages" className="mb-3">
+                            <Form.Control
+                                type="number"
+                                value={pages}
+                                onChange={(e) => setScale(e.target.value)}
+                            />
+                          </FloatingLabel>
+                        </Form.Group>
+                        
+                        <Form.Group controlId="issuanceDate" className="mb-3">
+                          <FloatingLabel controlId="issuanceDate" label="Issuance Date" className="mb-3">
+                            <Form.Control
+                                type="date('mm-yyyy')"
+                                
                                 value={issuanceDate}
                                 onChange={(e) => setIssuanceDate(e.target.value)}
                             />
+                          </FloatingLabel>
                         </Form.Group>
+
 
                         <div className="mb-3">
                             <Form.Label>Connections</Form.Label>
@@ -105,22 +170,45 @@ function ModifyDocument() {
 
                 {/* Right Column: Description and Action Buttons */}
                 <Col md={6}>
+                
+                <FormGroup controlId="stakeholder" className="mb-3">
+                          <FloatingLabel controlId="stakeholder" label="Stakeholder" className="mb-3">
+                            <Form.Select value={stakeholder.id} onChange={(e) => setStakeholder(e.target.value)}>
+                              {stakeholders.map((stk) => 
+                                <option key={stk.id} value={stk.id}>{stk.name}</option>
+                                )
+                              }
+                            </Form.Select>
+                          </FloatingLabel>  
+                        </FormGroup>
+                        
+                        <FormGroup controlId="type" className="mb-3">
+                          <FloatingLabel controlId="type" label="Document Type" className="mb-3">
+                            <Form.Select value={type.id} onChange={(e) => setType(e.target.value)} >
+                              {types.map((tp) => 
+                                <option key={tp.id} value={tp.id}>{tp.type}</option>
+                                )
+                              }
+                            </Form.Select>
+                          </FloatingLabel>  
+                        </FormGroup>
                     <Form.Group controlId="description" className="mb-4">
-                        <Form.Label>Description</Form.Label>
+                      <FloatingLabel  
+                        controlId="description" label="Description" className="mb-3">
                         <Form.Control
                             as="textarea"
-                            rows={8}
-                            placeholder="Enter description"
+                            style={{height: '205px'}}
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
+                      </FloatingLabel>
                     </Form.Group>
 
-                    <div className="d-flex justify-content-between">
-                        <Button variant="secondary" onClick={() => navigate('/')}>
+                    <div className="d-flex justify-content-center">
+                        <Button variant="secondary" className='mx-3' onClick={() => navigate('/')}>
                             Cancel
                         </Button>
-                        <Button variant="success" onClick={handleUpdate}>
+                        <Button variant="success" className='mx-3' onClick={handleUpdate}>
                             Save
                         </Button>
                     </div>
@@ -128,7 +216,7 @@ function ModifyDocument() {
             </Row>
 
             {/* Modal for Adding a Connection */}
-            <Modal show={showAddConnection} onHide={() => setShowAddConnection(false)}>
+            <Modal show={showAddConnection} centered onHide={() => setShowAddConnection(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Add Connection</Modal.Title>
                 </Modal.Header>
@@ -161,7 +249,7 @@ function ModifyDocument() {
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </Container>
+        </Card>
     );
 }
 

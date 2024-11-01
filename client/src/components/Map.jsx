@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button, Modal, Card, Form, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import AppContext from '../AppContext';
 function MapComponent(locations, documents ,setSelectedLocation) {
 
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -11,7 +12,8 @@ function MapComponent(locations, documents ,setSelectedLocation) {
   const [selectedDocument, setSelectedDocument] = useState('');
   const [connectionType, setConnectionType] = useState('');
   const navigate = useNavigate();
-
+  const context = useContext(AppContext);
+  const isLogged = context.loginState.loggedIn;
 
   const handleMarkerClick = (marker) => {
     console.log("Marker clicked:", marker);
@@ -59,7 +61,6 @@ function MapComponent(locations, documents ,setSelectedLocation) {
           center={[67.8558, 20.2253]}
           zoom={13}
           scrollWheelZoom={false}
-          style={{ height: "80vh", width: "100%" }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -83,28 +84,39 @@ function MapComponent(locations, documents ,setSelectedLocation) {
   {/* Modal to display selected marker details */}
   <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>{selectedMarker?.title}</Modal.Title>
+          <Modal.Title>{selectedMarker?.Title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Card>
             <Card.Body>
-              <Card.Text>
-                <strong>Title:</strong> {selectedMarker?.Title}
-              </Card.Text>
               <Card.Text>
                 <strong>Description:</strong> {selectedMarker?.Description}
               </Card.Text>
               <Card.Text>
                 <strong>Date:</strong> {selectedMarker?.Issuance_Date}
               </Card.Text>
+              <Card.Text>
+                <strong>Scale:</strong> {selectedMarker?.Scale}
+              </Card.Text>
+              <Card.Text>
+                <strong>Language:</strong> {selectedMarker?.Language}
+              </Card.Text>
+              <Card.Text>
+                <strong>Pages:</strong> {selectedMarker?.Pages}
+              </Card.Text>
+              <Card.Text>
+                <strong>Latitude:</strong> <br></br>
+                <strong>Longitude:</strong>              
+              </Card.Text>
             </Card.Body>
           </Card>
         </Modal.Body>
+        {isLogged && (
         <Modal.Footer>
           <Button variant="primary" onClick={() => setShowAddConnection(true)}>Add Connection</Button>
           <Button variant="secondary" onClick={handleModifyDocument}>Modify</Button>
-          <Button variant="outline-secondary" onClick={() => setShowModal(false)}>Close</Button>
         </Modal.Footer>
+        )}
       </Modal>
 
       {/* Add Connection Modal */}

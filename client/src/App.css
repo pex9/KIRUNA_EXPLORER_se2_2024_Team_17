@@ -9,15 +9,13 @@
   }
 }
 .leaflet-container {
-  height: 90vh;
-  width: 90%;
+  height: 60vh;
   border-radius: 2rem;
 }
 .mapContainer{
-  display: flex;
+  
   justify-content: center;
   align-items: center;
-  height: 100vh;
 }
 
 .form {
@@ -40,4 +38,21 @@
 .bg-color-main-light {
   background-color: rgba(194, 232, 239, 0.41);
   color:black;
+}
+
+
+.btn-main {
+  background-color: #33B7CE;
+  color:white;
+  border-color: #33B7CE;
+}
+.btn-logout {
+  background-color: #B52C92;
+  color:white;
+  border-color: #B52C92;
+}
+.btn-document {
+  background-color: #A89559;
+  color:white;
+  border-color: #A89559;
 }
