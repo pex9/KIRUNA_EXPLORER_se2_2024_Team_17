@@ -71,7 +71,11 @@ Content-Type: application/json
     "language": "English",
     "pages": 50,
     "description": "Description of the document.",
-    "idtype": 2
+    "idtype": 2,
+    "locationType": "Point",
+    "latitude": 45.0,
+    "longitude": 9.0,
+    "areaCoordinates": ""
 }
 
 ### test insertion of document if not authenticated or not urban planner
@@ -91,7 +95,8 @@ Content-Type: application/json
     "language": "English",
     "pages": 50,
     "description": "Description of the document.",
-    "idtype": 2
+    "idtype": 2,
+
 }
 
 # 401 Unauthorized
@@ -118,7 +123,8 @@ Content-Type: application/json
     "language": "English",
     "pages": 50,
     "description": "Description of the document.",
-    "idtype": 2
+    "idtype": 2,
+    
 }
 
 # 400 Bad Request
@@ -198,4 +204,154 @@ GET http://localhost:3001/api/document-connections
 
 ### test to get all document-connections of a document id
 GET http://localhost:3001/api/document-connections/1
+
+### TEST LOCATION API
+GET http://localhost:3001/api/locations
+
+GET http://localhost:3001/api/locations/1
+
+POST http://localhost:3001/api/locations
+Content-Type: application/json
+
+{
+    "locationType": "Point",
+    "latitude": 45.0,
+    "longitude": 9.0,
+    "areaCoordinates": ""
+}
+
+POST http://localhost:3001/api/locations
+Content-Type: application/json
+
+{
+    "latitude": 45.0,
+    "longitude": 9.0,
+    "areaCoordinates": ""
+}
+
+# 400 Bad Request
+# {
+#  "error":  "locationType is required."
+# }
+
+POST http://localhost:3001/api/locations
+Content-Type: application/json
+
+{
+    "locationType": "Point",
+    "areaCoordinates": ""
+}
+
+# 400 Bad Request
+# {
+#  "error":  "For 'Point' locationType, both latitude and longitude are required."
+# }
+
+POST http://localhost:3001/api/locations
+Content-Type: application/json
+
+{
+    "locationType": "Area",
+    "latitude": 45.0,
+    "longitude": 9.0
+}
+
+# 400 Bad Request
+# {
+#  "error":  "For For 'Area' locationType, areaCoordinates are required."
+# }
+
+
+
+
+PATCH http://localhost:3001/api/locations/1
+Content-Type: application/json
+
+{
+    "locationType": "Point",
+    "latitude": 30.0,
+    "longitude": 9.0,
+    "areaCoordinates": ""
+}
+
+# 200 OK
+# {
+#  "error":  "Location updated successfully."
+# }
+
+
+PATCH http://localhost:3001/api/locations/2
+Content-Type: application/json
+
+{
+    "locationType": "Point",
+    "latitude": 30.0,
+    "longitude": 9.0,
+    "areaCoordinates": ""
+}
+
+# 404 NOT FOUND 
+# {
+#  "error":  "Location not found"
+# }
+
+PATCH http://localhost:3001/api/locations/1
+Content-Type: application/json
+
+{
+    "locationType": "Point",
+    "areaCoordinates": ""
+}
+
+# 400 BAD REQUEST 
+# {
+#  "error":  "For 'Point' locationType, both latitude and longitude are required."
+# }
+
+PATCH http://localhost:3001/api/locations/1
+Content-Type: application/json
+
+{
+ 
+    "locationType": "Area",
+    "latitude": 30.0,
+    "longitude": 9.0,
+    
+}
+
+# 400 BAD REQUEST 
+# {
+#  "error":  "For For 'Area' locationType, areaCoordinates are required."
+# }
+
+
+PATCH http://localhost:3001/api/locations/1
+Content-Type: application/json
+
+{
+ 
+    "latitude": 30.0,
+    "longitude": 9.0,
+    "areaCoordinates": ""
+}
+
+# 400 BAD REQUEST 
+# {
+#  "error":  "locationType is required."
+# }
+
+PATCH http://localhost:3001/api/locations/2
+Content-Type: application/json
+
+{
+    "locationType": "Point",
+    "latitude": 30.0,
+    "longitude": 9.0,
+    "areaCoordinates": ""
+}
+
+# 404 NOT FOUND 
+# {
+#  "error":  "Location not found"
+# }
 
