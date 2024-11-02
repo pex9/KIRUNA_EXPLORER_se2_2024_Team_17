@@ -186,31 +186,15 @@ const getAllTypesDocument = () => {
       });
   });
 };
-const getTypeDocument = (id) => {
-  return new Promise((resolve, reject) => {
-    fetch(URL + "/types/" + id, {
+const getTypeDocument = async (id) => {
+    const response = await fetch(URL + "/types/" + id, {
       credentials: "include",
-    })
-      .then((response) => {
+    });
         if (response.ok) {
-          response.json().then((type) => {
-            resolve(type);
-          });
+          return await response.json();
         } else {
-          response
-            .json()
-            .then((message) => {
-              reject(message);
-            })
-            .catch(() => {
-              reject({ error: "Cannot parse server response." });
-            });
+          return await response.json().error;
         }
-      })
-      .catch(() => {
-        reject({ error: "Cannot communicate with the server." });
-      });
-  });
 };
 
 
