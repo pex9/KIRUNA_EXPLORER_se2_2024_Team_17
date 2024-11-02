@@ -150,10 +150,84 @@ describe("Document Connections API", () => {
     });
   });
 
-  // Close the server after all tests have run
-  afterAll(async () => {
-    await new Promise((resolve) => {
-      server.close(resolve);
+  describe("PATCH /api/documents/:documentId/connection", () => {
+    it("should update the document connection successfully", async () => {
+      const documentId = 1;
+      const requestBody = {
+        IdDocument2: 2,
+        IdConnection: 3,
+      };
+
+      DocumentConnectionDao.updateDocumentConnection.mockResolvedValue(true);
+
+      const response = await agent
+        .patch(`/api/documents/${documentId}/connection`)
+        .send(requestBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        message: "Connection updated successfully.",
+      });
+    });
+
+    it("should return 400 if newDocumentId2 or newConnectionId is missing", async () => {
+      const documentId = 1;
+      const incompleteRequestBody = {
+        IdDocument2: 2,
+        // Missing IdConnection
+      };
+
+      const response = await agent
+        .patch(`/api/documents/${documentId}/connection`)
+        .send(incompleteRequestBody);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: "newDocumentId2 and newConnectionId are required.",
+      });
+    });
+
+    it("should return 500 if updating the document connection fails", async () => {
+      const documentId = 1;
+      const requestBody = {
+        IdDocument2: 2,
+        IdConnection: 3,
+      };
+
+      DocumentConnectionDao.updateDocumentConnection.mockResolvedValue(false);
+
+      const response = await agent
+        .patch(`/api/documents/${documentId}/connection`)
+        .send(requestBody);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ error: "Failed to update connection." });
+    });
+
+    it("should return 500 for database errors", async () => {
+      const documentId = 1;
+      const requestBody = {
+        IdDocument2: 2,
+        IdConnection: 3,
+      };
+
+      DocumentConnectionDao.updateDocumentConnection.mockRejectedValue(
+        new Error("Database error")
+      );
+
+      const response = await agent
+        .patch(`/api/documents/${documentId}/connection`)
+        .send(requestBody);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ error: "Database error" });
+    });
+
+    // Close the server after all tests have run
+    afterAll(async () => {
+      await new Promise((resolve) => {
+        server.close(resolve);
+      });
     });
   });
 });
