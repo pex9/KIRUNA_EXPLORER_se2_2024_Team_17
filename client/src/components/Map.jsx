@@ -1,9 +1,14 @@
 import { useContext, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents,  } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button, Modal, Card, Form, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import AppContext from '../AppContext';
+import L from 'leaflet';
+import API from '../API';
+import '../App.css';
+
+
 function MapComponent(locations, documents ,setSelectedLocation) {
 
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -11,6 +16,7 @@ function MapComponent(locations, documents ,setSelectedLocation) {
   const [showAddConnection, setShowAddConnection] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState('');
   const [connectionType, setConnectionType] = useState('');
+  const [iconsVector, setIconsVector] = useState([]);
   const navigate = useNavigate();
   const context = useContext(AppContext);
   const isLogged = context.loginState.loggedIn;
@@ -26,6 +32,24 @@ function MapComponent(locations, documents ,setSelectedLocation) {
     }
   };
 
+  useState(() => {
+
+    const getTypeById = async (id) => {
+      try {
+        const type = await API.getTypeDocument(id);
+        //console.log(type);
+        setIconsVector((prev) => [...prev, type.iconsrc]);
+      } catch (err) {
+        throw console.error(err);
+      }
+    };
+    
+    locations.documents.forEach(async (document) => {
+      await getTypeById(document.IdType);
+    });
+
+
+  },[]);
 
   const handleAddConnection = () => {
     if (selectedDocument && connectionType) {
@@ -52,6 +76,9 @@ function MapComponent(locations, documents ,setSelectedLocation) {
     });
     return null;
   }
+
+  console.log(locations);
+
   return (
     <>
       {documents.length  === 0  || locations.length === 0? (
@@ -70,6 +97,16 @@ function MapComponent(locations, documents ,setSelectedLocation) {
           {
           locations.documents.map((document,index) => (
             <Marker
+              icon={new L.Icon({
+                  iconUrl: `src/icon/${iconsVector[index]}`,
+                  iconSize: [32, 32],
+                  iconAnchor: [16, 32],
+                  popupAnchor: [0, -32],
+                  html: `<span style="red" />`
+
+                })
+              }
+              className='red'
               key={index}
               position={[locations.locations[document.IdLocation].Latitude, locations.locations[document.IdLocation].Longitude]}
               eventHandlers={{
