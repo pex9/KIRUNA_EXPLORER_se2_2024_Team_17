@@ -10,7 +10,6 @@ import Home from './components/Home';
 import Document from './components/Document';
 import Documents from './components/Documents';
 import API from './API';
-import CreateDocument from './components/CreateDocument';
 import ModifyDocument from './components/ModifyDocument';
 import MyNavbar from './components/MyNavbar';
 

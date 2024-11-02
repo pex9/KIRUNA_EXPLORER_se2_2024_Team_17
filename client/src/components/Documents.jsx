@@ -11,6 +11,7 @@ function DocumentsRoute() {
       try {
         const fetchedDocuments = await API.getDocuments(); // Fetch all documents
         setDocuments(fetchedDocuments);
+        console.log('Documents fetched:', fetchedDocuments);
       } catch (error) {
         console.error('Error fetching documents:', error);
       }

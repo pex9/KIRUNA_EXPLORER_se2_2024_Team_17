@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Form, Card, Row, Col, Container, Modal, ListGroup, FloatingLabel, FormGroup } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Button, Form, Card, Row, Col, Modal, ListGroup, FloatingLabel, FormGroup } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import API from '../API';
 function ModifyDocument() {
@@ -22,13 +23,20 @@ function ModifyDocument() {
     const [document, setDocument] = useState(null);
     const [stakeholders, setStakeholders] = useState([]);
     const [types, setTypes] = useState([]);
+    const [typeConnections, setTypeConnections] = useState([]);  
+
+    const [documents, setDocuments] = useState([]); // List of all documents
+    const [filteredDocuments, setFilteredDocuments] = useState([]); // used to filter documents
+
+    const location = useLocation(); 
+    const { location: selectedLocation } = location.state || {};
 
     useEffect(() => {
         const getStakeholders = async () => {
             try {
                 const res = await API.getAllStakeholders();
-                console.log(res);
                 setStakeholders(res);
+                setStakeholder(res[0].id);
             } catch (err) {
                 console.error(err);
             }
@@ -36,16 +44,24 @@ function ModifyDocument() {
         const getTypes = async () => {
           try {
               const res = await API.getAllTypesDocument();
-              console.log(res);
               setTypes(res);
+              setType(res[0].id);
           } catch (err) {
               console.error(err);
           }
-      }
+        }
+        const fetchDocuments = async () => {
+            try {
+                const res = await API.getAllDocuments();
+                setDocuments(res);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchDocuments();
         const fetchDocument = async () => {
             try {
                 const res = await API.getDocumentById(documentId);
-                console.log(res);
                 setDocument(res);
                 setTitle(res.Title);
                 setScale(res.Scale);
@@ -63,31 +79,89 @@ function ModifyDocument() {
             }
         };
 
+        const getAllTypeConnections = async () => {
+            try {
+                const res = await API.getAllTypeConnections();
+
+                const typeConnectionId = res.reduce((acc, conn) => {
+                    acc[conn.IdConnection] = conn;
+                    return acc;
+                }, {});
+                setTypeConnections(typeConnectionId);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        const getDocumentConnections = async () => {
+            try {
+                const res = await API.getDocumentConnection(documentId);
+                setConnections(res);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
         getStakeholders();
         getTypes();
+        getAllTypeConnections();
+        getDocumentConnections();
 
         if(documentId)
           fetchDocument();
-        
-        console.log(document);
     },[]);
-    const handleUpdate = () => {
+    const handleUpdate = async() => {
         if (document) {
             //onUpdate(documentId, document);
             navigate('/');
         } else {
-            alert("Document not found. Unable to update.");
+            if(selectedLocation.lat != null && selectedLocation.lng != null){
+                // insert the document which is a point 
+                //console.log(selectedLocation);
+                //console.log({ title, scale, issuanceDate, description, connections, language, pages, stakeholder: stakeholder, type: type, locationType : "Point", latitude : selectedLocation.lat , longitude: selectedLocation.lng, area_coordinates :"" });
+                const result= await API.addDocument( title,stakeholder, scale, issuanceDate, language, pages,description,  type,  "Point",  selectedLocation.lat , selectedLocation.lng, "" );
+                navigate('/');
+            }
+            else if (selectedLocation.coordinates != null){
+                // insert the document which is a polygon
+            }
+            // insert the document
+            /*const result= await API.addDocument({ title, scale, issuanceDate, description, connections, language, pages, stakeholder: stakeholder.id, type: type.id });
+            console.log(result);
+            navigate('/');*/
         }
     };
-    const handleAddConnection = () => {
+    const handleAddConnection = async() => {
         if (selectedDocument && connectionType) {
-            setConnections([...connections, { document: selectedDocument, type: connectionType }]);
+            /*setConnections([...connections, { document: selectedDocument, type: connectionType }]);*/
+            await API.createDocumentConnection(documentId, selectedDocument.IdDocument, connectionType);
+            // now i have to call again the document to update the connections
+            const res = await API.getDocumentConnection(documentId);
+            setConnections(res);
             setSelectedDocument('');
             setConnectionType('');
             setShowAddConnection(false);
         } else {
             alert("Please complete all fields to add a connection.");
         }
+    };
+
+    const handleSearchChange = (e) => {
+        const searchValue = e.target.value;
+        setSelectedDocument(searchValue);
+
+        // Filter documents that match the input
+        if (searchValue.length > 0) {
+        const filtered = documents.filter((doc) =>
+            doc.Title.toLowerCase().includes(searchValue.toLowerCase()) && doc.IdDocument != documentId
+        );
+        setFilteredDocuments(filtered);
+        } else {
+        setFilteredDocuments([]);
+        }
+    };
+    const handleSelectDocument = (doc) => {
+        setSelectedDocument(doc);
+        setFilteredDocuments([]); // Clear suggestions after selection
     };
     return (
         <Card className="container my-5 p-4 bg-light rounded form">
@@ -121,7 +195,7 @@ function ModifyDocument() {
                             <Form.Control
                                 type="text"
                                 value={language}
-                                onChange={(e) => setScale(e.target.value)}
+                                onChange={(e) => setLanguage(e.target.value)}
                             />
                           </FloatingLabel>
                         </Form.Group>
@@ -131,7 +205,7 @@ function ModifyDocument() {
                             <Form.Control
                                 type="number"
                                 value={pages}
-                                onChange={(e) => setScale(e.target.value)}
+                                onChange={(e) => setPages(e.target.value)}
                             />
                           </FloatingLabel>
                         </Form.Group>
@@ -154,7 +228,7 @@ function ModifyDocument() {
                                 <ListGroup variant="flush" className="mb-2">
                                     {connections.map((conn, index) => (
                                         <ListGroup.Item key={index}>
-                                            {conn.document} - {conn.type}
+                                            {conn.IdDocument1 === documentId ? `${conn.IdDocument2} - ${typeConnections[conn.IdConnection].Type}` : `${conn.IdDocument1} - ${typeConnections[conn.IdConnection].Type}`}
                                         </ListGroup.Item>
                                     ))}
                                 </ListGroup>
@@ -170,8 +244,7 @@ function ModifyDocument() {
 
                 {/* Right Column: Description and Action Buttons */}
                 <Col md={6}>
-                
-                <FormGroup controlId="stakeholder" className="mb-3">
+                    <FormGroup controlId="stakeholder" className="mb-3">
                           <FloatingLabel controlId="stakeholder" label="Stakeholder" className="mb-3">
                             <Form.Select value={stakeholder.id} onChange={(e) => setStakeholder(e.target.value)}>
                               {stakeholders.map((stk) => 
@@ -191,7 +264,7 @@ function ModifyDocument() {
                               }
                             </Form.Select>
                           </FloatingLabel>  
-                        </FormGroup>
+                    </FormGroup>
                     <Form.Group controlId="description" className="mb-4">
                       <FloatingLabel  
                         controlId="description" label="Description" className="mb-3">
@@ -221,23 +294,44 @@ function ModifyDocument() {
                     <Modal.Title>Add Connection</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form.Group controlId="connectionDocument" className="mb-3">
-                        <Form.Label>Select Document</Form.Label>
+                    <Form.Group controlId="formDocument" style={{ position: 'relative' }}>
+                        <Form.Label>Document</Form.Label>
                         <Form.Control
                             type="text"
                             placeholder="Enter document name"
-                            value={selectedDocument}
-                            onChange={(e) => setSelectedDocument(e.target.value)}
+                            value={selectedDocument.Title}
+                            onChange={handleSearchChange}
+                            autoComplete="off" // Prevents browser autocomplete
                         />
+
+                        {/* Render the dropdown list of suggestions */}
+                        {filteredDocuments.length > 0 && (
+                            <ListGroup style={{ position: 'absolute', top: '100%', zIndex: 1, width: '100%' }}>
+                            {filteredDocuments.map((doc) => (
+                                <ListGroup.Item
+                                key={doc.IdDocument}
+                                action
+                                onClick={() => handleSelectDocument(doc)}
+                                >
+                                {doc.Title}
+                                </ListGroup.Item>
+                            ))}
+                            </ListGroup>
+                        )}
                     </Form.Group>
-                    <Form.Group controlId="connectionType">
+                    <Form.Group controlId="connectionTypeSelect" className="mb-3">
                         <Form.Label>Connection Type</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter connection type"
+                        <Form.Select
                             value={connectionType}
                             onChange={(e) => setConnectionType(e.target.value)}
-                        />
+                        >
+                            <option value="">Select connection type</option>
+                            {Object.values(typeConnections).map((type) => (
+                                <option key={type.IdConnection} value={type.IdConnection}>
+                                    {type.Type}
+                                </option>
+                            ))}
+                        </Form.Select>
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>

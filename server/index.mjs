@@ -137,7 +137,8 @@ app.get("/api/sessions/current", (req, res) => {
 // POST /api/documents, only possible for authenticated users and if he/she is a urban planner
 app.post("/api/documents", isUrbanPlanner, async (req, res) => {
   const document = req.body;
-  if (!document.title || !document.idStakeholder) {
+  console.log(document);
+  if (!document.title || !document.idStakeholder || !document.idtype) {
     res
       .status(400)
       .json({ error: "The request body must contain all the fields" });
@@ -149,7 +150,7 @@ app.post("/api/documents", isUrbanPlanner, async (req, res) => {
     return;
   }
   documentDao
-    .addDocument(document.title,document.idStakeholder,document.scale,document.issuance_Date,document.language,document.pages,document.description,document.idtype,idLocation)
+    .addDocument(document.title,parseInt(document.idStakeholder),document.scale,document.issuance_Date,document.language,parseInt(document.pages),document.description,parseInt(document.idtype),idLocation)
     .then((document) => res.status(201).json(document))
     .catch(() => res.status(500).end());
 });
@@ -260,6 +261,16 @@ app.get("/api/stakeholders/:stakeholderid", (req, res) => {
     })
     .catch(() => res.status(500).end());
 });
+
+// API CONNECTIONS
+
+app.get("/api/connections", (req, res) => {
+  DocumentConnectionDao.getAllConnectionsType()
+    .then((connections) => res.status(200).json(connections))
+    .catch((err) => res.status(500).json({ error: "Internal server error" }));
+});
+
+
 
 // API DOCUMENTCONNECTION  
 

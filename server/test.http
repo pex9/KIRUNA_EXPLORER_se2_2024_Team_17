@@ -165,7 +165,8 @@ GET http://localhost:3001/api/stakeholders
 ### Test to get a stakeholder by id
 GET http://localhost:3001/api/stakeholders/1
 
-
+### Test to get all connection type
+GET http://localhost:3001/api/connections
 
 ### TEST DOCUMENT CONNECTION API
 

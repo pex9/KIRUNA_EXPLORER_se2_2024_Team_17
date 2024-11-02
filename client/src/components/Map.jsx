@@ -14,7 +14,6 @@ function MapComponent(locations, documents ,setSelectedLocation) {
   const navigate = useNavigate();
   const context = useContext(AppContext);
   const isLogged = context.loginState.loggedIn;
-
   const handleMarkerClick = (marker) => {
     console.log("Marker clicked:", marker);
     setSelectedMarker(marker);
@@ -26,6 +25,7 @@ function MapComponent(locations, documents ,setSelectedLocation) {
       navigate(`/documents/modify-document/${selectedMarker.IdDocument}`);
     }
   };
+
 
   const handleAddConnection = () => {
     if (selectedDocument && connectionType) {
@@ -105,15 +105,16 @@ function MapComponent(locations, documents ,setSelectedLocation) {
                 <strong>Pages:</strong> {selectedMarker?.Pages}
               </Card.Text>
               <Card.Text>
-                <strong>Latitude:</strong> <br></br>
-                <strong>Longitude:</strong>              
+                <strong>Latitude:</strong> {locations.locations[selectedMarker?.IdLocation]?.Latitude.toFixed(2)}         
+              </Card.Text>
+              <Card.Text>
+                <strong>Longitude:</strong> {locations.locations[selectedMarker?.IdLocation]?.Longitude.toFixed(2)}           
               </Card.Text>
             </Card.Body>
           </Card>
         </Modal.Body>
         {isLogged && (
         <Modal.Footer>
-          <Button variant="primary" onClick={() => setShowAddConnection(true)}>Add Connection</Button>
           <Button variant="secondary" onClick={handleModifyDocument}>Modify</Button>
         </Modal.Footer>
         )}

@@ -75,6 +75,7 @@ async function getUserInfo() {
 // API DOCUMENTS CALL 
 
 const addDocument = (title,idStakeholder, scale, issuance_Date,language,pages,description, idtype,locationType, latitude, longitude, area_coordinates ) => {
+  console.log("ADD DOCUMENT");
   return new Promise((resolve, reject) => {
     fetch(URL + "/documents", {
       method: "POST",
@@ -268,7 +269,7 @@ const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => 
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ IdDocument1, IdDocument2, connection_type }),
+      body: JSON.stringify({IdDocument1: IdDocument1, IdDocument2: IdDocument2, IdConnection: connection_type}),
       credentials: "include",
 
     }).then((response) => {
@@ -415,6 +416,34 @@ const updateLocationDocument = (id, location_type, latitude, longitude, area_coo
   });
 };
 
-const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection, getAllDocumentConnections,getDocumentConnection,getAllDocuments,getDocumentById,getAllLocations,updateLocationDocument,getLocationById};
+const getAllTypeConnections = () => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/connections", {
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((typeConnections) => {
+            resolve(typeConnections);
+          });
+        } else {
+          response
+            .json()
+            .then((message) => {
+              reject(message);
+            })
+            .catch(() => {
+              reject({ error: "Cannot parse server response." });
+            });
+        }
+      })
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });
+      }
+      );
+  });
+};
+
+const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection, getAllDocumentConnections,getDocumentConnection,getAllDocuments,getDocumentById,getAllLocations,updateLocationDocument,getLocationById,getAllTypeConnections};
 
 export default API;

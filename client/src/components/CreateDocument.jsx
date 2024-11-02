@@ -14,7 +14,10 @@ function CreateDocument() {
     const [selectedDocument, setSelectedDocument] = useState('');
     const [connectionType, setConnectionType] = useState('');
     const [connections, setConnections] = useState([]); // List of added connections
+    const [documents, setDocuments] = useState([]); // List of all documents
     const navigate = useNavigate();
+    const [filteredDocuments, setFilteredDocuments] = useState([]); // used to filter documents
+
 
     const location = useLocation();
     const { location: selectedLocation } = location.state || {};
@@ -30,13 +33,41 @@ function CreateDocument() {
                 console.error(err);
             }
         };
+        const fetchDocuments = async () => {
+            try {
+                const res = await API.getAllDocuments();
+                console.log("Documents:", res);
+                setDocuments(res);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchDocuments();
         getAllConnections();
     }, []);
+
+
 
     const handleConfirm = () => {
         // Logic to save the document
         console.log('Document created:', { title, scale, issuanceDate, description, connections });
         navigate('/'); // Redirect to home after confirmation
+    };
+
+      // Handle input change and filter the document list
+    const handleSearchChange = (e) => {
+        const searchValue = e.target.value;
+        setSelectedDocument(searchValue);
+
+        // Filter documents that match the input
+        if (searchValue.length > 0) {
+        const filtered = documents.filter((doc) =>
+            doc.title.toLowerCase().includes(searchValue.toLowerCase())
+        );
+        setFilteredDocuments(filtered);
+        } else {
+        setFilteredDocuments([]);
+        }
     };
 
     const handleAddConnection = () => {
@@ -49,6 +80,10 @@ function CreateDocument() {
             alert("Please complete all fields to add a connection.");
         }
     };
+    const handleSelectDocument = (docTitle) => {
+        setSelectedDocument(docTitle);
+        setFilteredDocuments([]); // Clear suggestions after selection
+      };
 
     return (
         <Container className="my-5 p-4 bg-light rounded">
@@ -124,15 +159,31 @@ function CreateDocument() {
                     <Modal.Title>Add Connection</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form.Group controlId="connectionDocument" className="mb-3">
-                        <Form.Label>Select Document</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter document name"
-                            value={selectedDocument}
-                            onChange={(e) => setSelectedDocument(e.target.value)}
-                        />
-                    </Form.Group>
+                <Form.Group controlId="formDocument" style={{ position: 'relative' }}>
+                    <Form.Label>Document</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Enter document name"
+                        value={selectedDocument}
+                        onChange={handleSearchChange}
+                        autoComplete="off" // Prevents browser autocomplete
+                    />
+
+                    {/* Render the dropdown list of suggestions */}
+                    {filteredDocuments.length > 0 && (
+                        <ListGroup style={{ position: 'absolute', top: '100%', zIndex: 1, width: '100%' }}>
+                        {filteredDocuments.map((doc) => (
+                            <ListGroup.Item
+                            key={doc.id}
+                            action
+                            onClick={() => handleSelectDocument(doc.title)}
+                            >
+                            {doc.title}
+                            </ListGroup.Item>
+                        ))}
+                        </ListGroup>
+                    )}
+                </Form.Group>
                     <Form.Group controlId="connectionType">
                         <Form.Label>Connection Type</Form.Label>
                         <Form.Select

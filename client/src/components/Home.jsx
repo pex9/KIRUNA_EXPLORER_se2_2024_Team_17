@@ -17,7 +17,10 @@ function Home(props) {
     const [selectedDocument, setSelectedDocument] = useState(null);
     const [stakeholders, setStakeholders] = useState([]);
     const [locations, setLocations] = useState([]);
+    const [numberofconnections, setNumberofconnections] = useState(0);
+    const [documentTypes, setDocumentTypes] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState(null);
+    const [srcicon, setSrcicon] = useState("");
     const navigate = useNavigate();
     const context = useContext(AppContext);
     const isLogged = context.loginState.loggedIn;
@@ -32,7 +35,16 @@ function Home(props) {
                 console.error(err);
             }
         };
+        const fetchDocumentTypes = async () => {
+            try {
+                const res = await API.getAllTypesDocument();
+                console.log('Document Types:', res);
 
+                setDocumentTypes(res);
+            } catch (err) {
+                console.error(err);
+            }
+        };
         const fetchLocations = async () => {
             setLoading(true);
             API.getAllLocations()
@@ -61,7 +73,7 @@ function Home(props) {
             }
         };
 
-        Promise.all([fetchDocuments(), fetchLocations(), fetchStakeholders()])
+        Promise.all([fetchDocuments(), fetchLocations(), fetchStakeholders(),fetchDocumentTypes()])
             .then(() => setLoading(false))
             .catch(err => {
                 console.error(err);
@@ -74,13 +86,19 @@ function Home(props) {
         setSelectedDocument(null);
     };
 
-    const handleDocumentClick = (doc) => {
+    const handleDocumentClick = async(doc) => {
+        // Fetch the number of connections for the selected document
+        const res = await API.getDocumentConnection(doc.IdDocument);
+        console.log('Connections:', res);
+        setNumberofconnections(res.length);
         setSelectedDocument(doc);
+        setSrcicon("/public/icon/"+documentTypes[selectedDocument.IdType-1].iconsrc);
+      
     };
 
     const handleModifyClick = () => {
         if (selectedDocument) {
-            navigate(`documents/modify-document/${selectedDocument.title}`);
+            navigate(`documents/modify-document/${selectedDocument.IdDocument}`);
         }
     };
 
@@ -116,7 +134,7 @@ function Home(props) {
                                         </Button>
                                       <div className='m-3'>
                                         <h4>Selected Location:</h4>
-                                      <p contentEditable>Latitude: {selectedLocation.lat.toFixed(4)}, Longitude: {selectedLocation.lng.toFixed(4)}</p>
+                                      <p>Latitude: {selectedLocation.lat.toFixed(4)}, Longitude: {selectedLocation.lng.toFixed(4)}</p>
                                       </div>
                                     <div className='text-center'>
                                       <Button
@@ -169,24 +187,25 @@ function Home(props) {
                                     </Card>
                                 )}
                             </div>
-
                             <div style={{ flexGrow: 1 }}>
                                 <Card className="mb-3" style={{ height: '400px' }}>
                                     {selectedDocument ? (
                                         <>
                                             <Card.Header>
                                                 <strong>{selectedDocument.Title}</strong>
-                                                <FaFileAlt style={{ float: 'right', fontSize: '1.5em' }} />
+                                                <img src={srcicon} alt="Document Icon" style={{ float: 'right', width: '24px', height: '24px' }} />
                                             </Card.Header>
                                             <Card.Body>
                                                 <Card.Text>
                                                     <strong>Description:</strong> {selectedDocument.Description} <br />
                                                     <strong>Scale:</strong> {selectedDocument.Scale} <br />
                                                     <strong>Issuance Date:</strong> {selectedDocument.Issuance_Date} <br />
-                                                    <strong>Location:</strong> Lat: {locations[selectedDocument.IdLocation].Latitude} Long: {locations[selectedDocument.IdLocation].Longitude} <br />
+                                                    <strong>Location:</strong> Lat: {locations[selectedDocument.IdLocation].Latitude.toFixed(2)} Long: {locations[selectedDocument.IdLocation].Longitude.toFixed(2)} <br />
                                                     <strong>StakeHolder:</strong> {stakeholders[selectedDocument.IdStakeholder - 1].name} <br />
                                                     <strong>Language:</strong> {selectedDocument.Language} <br />
                                                     <strong>Pages:</strong> {selectedDocument.Pages} <br />
+                                                    <strong>Type:</strong> {documentTypes[selectedDocument.IdType-1].type} <br />
+                                                    <strong>Number of connections:</strong> {numberofconnections} <br />
                                                 </Card.Text>
                                                 
                                             </Card.Body>
@@ -194,7 +213,6 @@ function Home(props) {
                                             <div className="text-center my-3">
                                                     <Button variant="success" className="me-2">Add Connection</Button>
                                                     <Button variant="primary" className="me-2" onClick={handleModifyClick}>Modify</Button>
-                                                    <Button variant="danger" onClick={() => setSelectedDocument(null)}>Cancel</Button>
                                                 </div>
                                             </Card.Footer>
                                         </>
