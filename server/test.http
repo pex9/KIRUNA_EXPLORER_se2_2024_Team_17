@@ -139,7 +139,7 @@ Content-Type: application/json
 GET http://localhost:3001/api/documents
 
 ### test the get of a document by id
-GET http://localhost:3001/api/documents/1
+GET http://localhost:3001/api/documents/
 
 ### test the get of a document by id if id is not present
 GET http://localhost:3001/api/documents/100
@@ -189,13 +189,14 @@ Content-Type: application/json
     "IdConnection": 3
 }
 
+
 ### test to update a connection between two documents
 PATCH  http://localhost:3001/api/documents/1/connection
 Content-Type: application/json
 
 {
     "IdDocument1": 1,
-    "IdDocument2": 2,
+    "IdDocument2": 4,
     "IdConnection": 2
 }
 
@@ -204,6 +205,8 @@ GET http://localhost:3001/api/document-connections
 
 ### test to get all document-connections of a document id
 GET http://localhost:3001/api/document-connections/1
+
+
 
 ### TEST LOCATION API
 GET http://localhost:3001/api/locations
