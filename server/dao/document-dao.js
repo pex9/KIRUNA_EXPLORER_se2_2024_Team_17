@@ -70,14 +70,14 @@ exports.getDocumentById = (documentId) => {
  * @param {Number} documentId - ID of the document to update.
  * @returns {Promise<Boolean>} resolved with the new object update.
  */
-exports.updateDocument = (documentId, title,idStakeholder,scale,issuance_Date,language,pages,description,idtype,idlocation) => {
-  return new Promise((resolve, reject) => {
-    const sql = "UPDATE Document SET Title = ?, IdStakeholder = ?, Scale = ?, Issuance_Date = ?, Language = ?, Pages = ?, Description = ?, IdType = ?, IdLocation = ? WHERE IdDocument = ?";
-    db.run(sql, [title,idStakeholder,scale,issuance_Date,language,pages,description,idtype,idlocation,documentId], function (err) {
-      if (err) {
-        reject(new Error("Failed to update document."));
-        return;
-      }
-      resolve(true);
-    });
-  })};
+exports.updateDocument = (documentId, title,idStakeholder,scale,issuance_Date,language,pages,description,idtype) => { 
+    return new Promise((resolve, reject) => { 
+      const sql = "UPDATE Document SET Title = ?, IdStakeholder = ?, Scale = ?, Issuance_Date = ?, Language = ?, Pages = ?, Description = ?, IdType = ?  WHERE IdDocument = ?"; 
+      db.run(sql, [title,idStakeholder,scale,issuance_Date,language,pages,description,idtype,documentId], function (err) { 
+        if (err) { 
+          reject(new Error("Failed to update document.")); 
+          return; 
+        } 
+        resolve(true); 
+      }); 
+})};

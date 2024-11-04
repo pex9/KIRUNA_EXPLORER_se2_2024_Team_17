@@ -271,6 +271,32 @@ const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => 
   });
 };
 
+const updateDocument = (Id_document,title,idStakeholder, scale, issuance_Date,language,pages,description, idtype ) => { 
+  return new Promise((resolve, reject) => { 
+    fetch(URL + "/documents/"+Id_document, { 
+      method: "PATCH", 
+      headers: { 
+        "Content-Type": "application/json", 
+      }, 
+      body: JSON.stringify({ title,idStakeholder, scale, issuance_Date,language,pages,description, idtype}), 
+      credentials: "include", 
+    }) 
+      .then((response) => { 
+        if (response.ok) { 
+          resolve(response.json()); 
+        } else { 
+          response.json().then((message) => { 
+            reject(message); 
+          }); 
+        } 
+      }) 
+      .catch(() => { 
+        reject({ error: "Cannot communicate with the server." }); 
+      }); 
+  }); 
+ 
+};
+
 // PATCH to update the connections
 
 // API STAKEHOLDERS CALL
@@ -429,6 +455,6 @@ const getAllTypeConnections = () => {
   });
 };
 
-const API = { getUsers, login, logout, getUserInfo, getAllTypesDocument, getTypeDocument, getAllStakeholders, getStakeholder, addDocument, createDocumentConnection, getAllDocumentConnections, getDocumentConnection, getAllDocuments, getDocumentById, getAllLocations, updateLocationDocument, getLocationById, getAllTypeConnections };
+const API = { getUsers, login, logout, getUserInfo, getAllTypesDocument, getTypeDocument, getAllStakeholders, getStakeholder, addDocument, createDocumentConnection, getAllDocumentConnections, getDocumentConnection, getAllDocuments, getDocumentById, getAllLocations, updateLocationDocument, getLocationById, getAllTypeConnections,updateDocument };
 
 export default API;

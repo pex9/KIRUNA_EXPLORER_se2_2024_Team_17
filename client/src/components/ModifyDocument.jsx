@@ -111,7 +111,7 @@ function ModifyDocument() {
     },[]);
     const handleUpdate = async() => {
         if (document) {
-            //onUpdate(documentId, document);
+            const result= await API.updateDocument(documentId, title,stakeholder.id ? stakeholder.id: stakeholder, scale, issuanceDate, language, pages,description,  type.id ? type.id: type); 
             navigate('/');
         } else {
             if(selectedLocation.lat != null && selectedLocation.lng != null){
@@ -132,7 +132,6 @@ function ModifyDocument() {
     };
     const handleAddConnection = async() => {
         if (selectedDocument && connectionType) {
-            /*setConnections([...connections, { document: selectedDocument, type: connectionType }]);*/
             await API.createDocumentConnection(documentId, selectedDocument.IdDocument, connectionType);
             // now i have to call again the document to update the connections
             const res = await API.getDocumentConnection(documentId);
@@ -228,7 +227,7 @@ function ModifyDocument() {
                                 <ListGroup variant="flush" className="mb-2">
                                     {connections.map((conn, index) => (
                                         <ListGroup.Item key={index}>
-                                            {conn.IdDocument1 === documentId ? `${conn.IdDocument2} - ${typeConnections[conn.IdConnection].Type}` : `${conn.IdDocument1} - ${typeConnections[conn.IdConnection].Type}`}
+                                            {conn.IdDocument1 == documentId ? `${documents.find((document) => document.IdDocument == conn.IdDocument2).Title} - ${typeConnections[conn.IdConnection].Type}` : `${documents.find((document) => document.IdDocument == conn.IdDocument1).Title} - ${typeConnections[conn.IdConnection].Type}`}
                                         </ListGroup.Item>
                                     ))}
                                 </ListGroup>

@@ -62,15 +62,18 @@ function MapComponent({ locations, documents, setSelectedLocation }) {
 
   const handleDragEnd = (document, e) => {
     const { lat, lng } = e.target.getLatLng();
-    console.log(`Marker for ${document.Title} moved to ${lat}, ${lng}`);
+    console.log(`Marker for ${document} moved to ${lat}, ${lng}`);
+    console.log('Document:', document);
 
     // Update document position using the API
+    
+    
     API.updateLocationDocument(
-      document.IdDocument,
-      document.Location_Type,
+      document.IdLocation,
+      "Point",
       lat,
       lng,
-      document.Area_Coordinates
+      ""
     )
       .then(() => {
         console.log('Position updated successfully');
@@ -114,9 +117,13 @@ function MapComponent({ locations, documents, setSelectedLocation }) {
                     popupAnchor: [0, -32],
                   })
                 }
-                draggable
+                draggable={isLogged} // Only make draggable if logged in
                 eventHandlers={{
-                  dragend: (e) => handleDragEnd(document, e),
+                  dragend: (e) => {
+                    if (isLogged) {
+                      handleDragEnd(document, e); // Only call dragend if logged in
+                    }
+                  },
                   click: () => handleMarkerClick(document),
                 }}
                 key={index}

@@ -177,22 +177,22 @@ app.get('/api/documents/:documentid', (req, res) => {
 });
 
 
-
-// PUT /api/documents/:documentid to modify a document by its id
-app.put("/api/documents/:documentid", isUrbanPlanner, (req, res) => {
-  const documentId = parseInt(req.params.documentid);
-  const document = req.body;
-  if( !document.title || !document.idStakeholder){
-    res.status(400).json({ error: "The request body must contain all the fields" });
-    return;
-  }
-  try {
-    documentDao.updateDocument(documentId, document.title, document.idStakeholder, document.scale, document.issuance_Date, document.language, document.pages, document.description, document.idtype)
-      .then((document) => res.status(200).json(document))
-      .catch(() => res.status(500).end());
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  };
+// PATCH /api/documents/:documentid 
+app.patch("/api/documents/:documentid", isUrbanPlanner, (req, res) => { 
+  const documentId = parseInt(req.params.documentid); 
+  const document = req.body; 
+  console.log(document); 
+  if( !document.title || !document.idStakeholder){ 
+    res.status(400).json({ error: "The request body must contain all the fields" }); 
+    return; 
+  } 
+  try { 
+    documentDao.updateDocument(documentId, document.title, parseInt(document.idStakeholder), document.scale, document.issuance_Date, document.language, parseInt(document.pages), document.description, parseInt(document.idtype)) 
+      .then((document) => res.status(200).json(document)) 
+      .catch(() => res.status(500).end()); 
+  } catch (error) { 
+    res.status(500).json({ error: error.message }); 
+  }; 
 });
 
 // PATCH /api/documents/:documentId/connection
@@ -372,7 +372,9 @@ app.post("/api/locations",isUrbanPlanner, async (req, res) => {
 
 app.patch("/api/locations/:locationId",isUrbanPlanner, async (req, res) => {
   const idLocation = parseInt(req.params.locationId);
-  const { locationType, latitude, longitude, areaCoordinates } = req.body;
+  console.log(idLocation);
+  console.log(req.body);
+  const { location_type: locationType, latitude, longitude, area_coordinates: areaCoordinates } = req.body;
   if (!locationType) {
     return res.status(400).json({ error: "locationType is required." });
   }

@@ -7,8 +7,10 @@ import { useNavigate } from 'react-router-dom';
 import { FaFileAlt } from 'react-icons/fa'; // Import document icon
 import API from '../API'; // Import API module
 import context from 'react-bootstrap/esm/AccordionContext';
+import { Form } from 'react-bootstrap';
 import AppContext from '../AppContext';
 import '../App.css';
+import { Modal } from 'react-bootstrap';
 
 
 function Home(props) {
@@ -22,6 +24,15 @@ function Home(props) {
   const [documentTypes, setDocumentTypes] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [srcicon, setSrcicon] = useState("");
+  const [showAddConnection, setShowAddConnection] = useState(false);
+
+  const [filteredDocuments, setFilteredDocuments] = useState([]);
+  const [connectionType, setConnectionType] = useState('');
+  const [typeConnections, setTypeConnections] = useState({});
+  const [selectDocumentSearch, setSelectDocumentSearch] = useState('');
+
+  
+  
   const navigate = useNavigate();
   const context = useContext(AppContext);
   const isLogged = context.loginState.loggedIn;
@@ -64,6 +75,19 @@ function Home(props) {
           setLoading(false);
         });
     };
+    const getAllTypeConnections = async () => {
+      try {
+          const res = await API.getAllTypeConnections();
+
+          const typeConnectionId = res.reduce((acc, conn) => {
+              acc[conn.IdConnection] = conn;
+              return acc;
+          }, {});
+          setTypeConnections(typeConnectionId);
+      } catch (err) {
+          console.error(err);
+      }
+    };
 
     const fetchStakeholders = async () => {
       try {
@@ -74,7 +98,7 @@ function Home(props) {
       }
     };
 
-    Promise.all([fetchDocuments(), fetchLocations(), fetchStakeholders(), fetchDocumentTypes()])
+    Promise.all([fetchDocuments(), fetchLocations(), fetchStakeholders(), fetchDocumentTypes(),getAllTypeConnections()])
       .then(() => setLoading(false))
       .catch(err => {
         console.error(err);
@@ -102,6 +126,28 @@ function Home(props) {
       navigate(`documents/modify-document/${selectedDocument.IdDocument}`);
     }
   };
+  const handleAddConnection = () => { 
+  };
+
+  const handleSearchChange = (e) => {
+    const searchValue = e.target.value;
+    setSelectDocumentSearch(searchValue);
+
+    // Filter documents that match the input
+    if (searchValue.length > 0) {
+    const filtered = documents.filter((doc) =>
+        doc.Title.toLowerCase().includes(searchValue.toLowerCase()) && doc.IdDocument != selectedDocument.IdDocument
+    );
+    setFilteredDocuments(filtered);
+    } else {
+    setFilteredDocuments([]);
+    }
+  const handleSelectDocument = (doc) => {
+    setSelectDocumentSearch(doc);
+    setSelectDocumentSearch(doc.Title);
+    setFilteredDocuments([]);
+  }
+};
 
   return (
     <>
@@ -116,7 +162,7 @@ function Home(props) {
 
       <Container fluid className='justify-content-center mt-3' style={{ width: '95vw' }} >
         {viewMode === 'map' ? (
-          loading || locations.length == 0 || documents.length == 0 ? (
+          loading ? (
             <Spinner animation="border" variant="primary" />
           ) : (
 
@@ -212,7 +258,9 @@ function Home(props) {
                         </Card.Body>
                         <Card.Footer>
                           <div className="text-center my-3">
-                            <Button variant="success" className="me-2">Add Connection</Button>
+                            <Button variant="success " className="me-2" onClick={() => setShowAddConnection(true)}>
+                                Add Connection
+                            </Button>
                             <Button variant="primary" className="me-2" onClick={handleModifyClick}>Modify</Button>
                           </div>
                         </Card.Footer>
@@ -223,6 +271,60 @@ function Home(props) {
                   </Card>
                 </div>
               </div>
+              <Modal show={showAddConnection} centered onHide={() => setShowAddConnection(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add Connection</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Group controlId="formDocument" style={{ position: 'relative' }}>
+                        <Form.Label>Document</Form.Label>
+                        <Form.Control
+                            type="text"
+                            placeholder="Enter document name"
+                            value={selectedDocument?.Title}
+                            onChange={handleSearchChange}
+                            autoComplete="off" // Prevents browser autocomplete
+                        />
+
+                        {/* Render the dropdown list of suggestions */}
+                        {filteredDocuments.length > 0 && (
+                            <ListGroup style={{ position: 'absolute', top: '100%', zIndex: 1, width: '100%' }}>
+                            {filteredDocuments.map((doc) => (
+                                <ListGroup.Item
+                                key={doc.IdDocument}
+                                action
+                                onClick={() => handleSelectDocument(doc)}
+                                >
+                                {doc.Title}
+                                </ListGroup.Item>
+                            ))}
+                            </ListGroup>
+                        )}
+                    </Form.Group>
+                    <Form.Group controlId="connectionTypeSelect" className="mb-3">
+                        <Form.Label>Connection Type</Form.Label>
+                        <Form.Select
+                            value={connectionType}
+                            onChange={(e) => setConnectionType(e.target.value)}
+                        >
+                            <option value="">Select connection type</option>
+                            {Object.values(typeConnections).map((type) => (
+                                <option key={type.IdConnection} value={type.IdConnection}>
+                                    {type.Type}
+                                </option>
+                            ))}
+                        </Form.Select>
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="outline-secondary" onClick={() => setShowAddConnection(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleAddConnection}>
+                        Add Connection
+                    </Button>
+                </Modal.Footer>
+            </Modal>
             </Card>
             <div className='text-end mt-4 me-5'>
               <Button
