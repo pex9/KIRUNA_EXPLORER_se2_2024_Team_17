@@ -1,6 +1,6 @@
 import request from "supertest";
-const { app, server } = require("../index.mjs"); // Import the app and server
-const StakeholderDao = require("../dao/stakeholder-dao.js"); // Adjust the path as necessary
+const { app, server } = require("../index.mjs");
+const StakeholderDao = require("../dao/stakeholder-dao.js");
 jest.mock("../dao/stakeholder-dao.js");
 
 describe("Stakeholder API", () => {
@@ -18,8 +18,9 @@ describe("Stakeholder API", () => {
   describe("GET /api/stakeholders", () => {
     it("should retrieve all stakeholders", async () => {
       const mockStakeholders = [
-        { IdStakeholder: 1, Name: "Municipality", Color: "#8C6760" },
-        { IdStakeholder: 2, Name: "Architecture firms", Color: "#B6AD9D" },
+        { IdStakeholder: 1, Name: "LKAB", Color: "#000000" },
+        { IdStakeholder: 2, Name: "Municipality", Color: "#8C6760" },
+        { IdStakeholder: 3, Name: "Norrbotten Country", Color: "#702F36" },
       ];
       StakeholderDao.getStakeholders.mockResolvedValue(mockStakeholders);
 
@@ -46,8 +47,8 @@ describe("Stakeholder API", () => {
       const stakeholderId = 1;
       const mockStakeholder = {
         IdStakeholder: stakeholderId,
-        Name: "Municipality",
-        Color: "#8C6760",
+        Name: "LKAB",
+        Color: "#000000",
       };
 
       StakeholderDao.getStakeholderById.mockResolvedValue(mockStakeholder);
