@@ -1,18 +1,16 @@
-import { useContext, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents,  } from "react-leaflet";
+import { useContext, useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { Button, Modal, Card, Form, Spinner } from "react-bootstrap";
+import { Button, Card, Form, Spinner, Modal } from "react-bootstrap"; // Importing required components
 import { useNavigate } from "react-router-dom";
 import AppContext from '../AppContext';
 import L from 'leaflet';
 import API from '../API';
 import '../App.css';
 
-
-function MapComponent(locations, documents ,setSelectedLocation) {
-
+function MapComponent({ locations, documents, setSelectedLocation }) {
   const [selectedMarker, setSelectedMarker] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showCard, setShowCard] = useState(false);
   const [showAddConnection, setShowAddConnection] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState('');
   const [connectionType, setConnectionType] = useState('');
@@ -20,10 +18,25 @@ function MapComponent(locations, documents ,setSelectedLocation) {
   const navigate = useNavigate();
   const context = useContext(AppContext);
   const isLogged = context.loginState.loggedIn;
+
+  useEffect(() => {
+    const getTypeById = async (id) => {
+      try {
+        const type = await API.getTypeDocument(id);
+        setIconsVector((prev) => [...prev, type.iconsrc]);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    documents.forEach(async (document) => {
+      await getTypeById(document.IdType);
+    });
+  }, [documents]);
+
   const handleMarkerClick = (marker) => {
-    console.log("Marker clicked:", marker);
     setSelectedMarker(marker);
-    setShowModal(true);
+    setShowCard(true);
   };
 
   const handleModifyDocument = () => {
@@ -32,31 +45,12 @@ function MapComponent(locations, documents ,setSelectedLocation) {
     }
   };
 
-  useState(() => {
-
-    const getTypeById = async (id) => {
-      try {
-        const type = await API.getTypeDocument(id);
-        //console.log(type);
-        setIconsVector((prev) => [...prev, type.iconsrc]);
-      } catch (err) {
-        throw console.error(err);
-      }
-    };
-    
-    locations.documents.forEach(async (document) => {
-      await getTypeById(document.IdType);
-    });
-
-
-  },[]);
-
   const handleAddConnection = () => {
     if (selectedDocument && connectionType) {
-      console.log("Add connection:", {
+      console.log("Adding connection:", {
         document: selectedDocument,
         type: connectionType,
-        markerId: selectedMarker.id,
+        markerId: selectedMarker?.id,
       });
       setSelectedDocument('');
       setConnectionType('');
@@ -66,96 +60,98 @@ function MapComponent(locations, documents ,setSelectedLocation) {
     }
   };
 
+  const handleDragEnd = (document, e) => {
+    const { lat, lng } = e.target.getLatLng();
+    console.log(`Marker for ${document.Title} moved to ${lat}, ${lng}`);
+
+    // Update document position using the API
+    API.updateLocationDocument(
+      document.IdDocument,
+      document.Location_Type,
+      lat,
+      lng,
+      document.Area_Coordinates
+    )
+      .then(() => {
+        console.log('Position updated successfully');
+      })
+      .catch((err) => {
+        console.error('Error updating position:', err);
+      });
+  };
+
   function LocationMarker() {
     useMapEvents({
       click(e) {
         const { lat, lng } = e.latlng;
         console.log("Map clicked at:", lat, lng);
-        locations.setSelectedLocation({ lat, lng });
+        setSelectedLocation({ lat, lng });
       },
     });
     return null;
   }
 
-  console.log(locations);
-
   return (
     <>
-      {documents.length  === 0  || locations.length === 0? (
+      {documents.length === 0 || locations.length === 0 ? (
         <Spinner animation="border" variant="primary" />
       ) : (
-        <MapContainer
-          center={[67.8558, 20.2253]}
-          zoom={13}
-          scrollWheelZoom={false}
-        >
+        <MapContainer center={[67.8558, 20.2253]} zoom={13} scrollWheelZoom={false}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <LocationMarker /> {/* This component listens for map clicks */}
-          {
-          locations.documents.map((document,index) => (
-            <Marker
-              icon={new L.Icon({
-                  iconUrl: `src/icon/${iconsVector[index]}`,
-                  iconSize: [32, 32],
-                  iconAnchor: [16, 32],
-                  popupAnchor: [0, -32],
-                  html: `<span style="red" />`
-
-                })
-              }
-              className='red'
-              key={index}
-              position={[locations.locations[document.IdLocation].Latitude, locations.locations[document.IdLocation].Longitude]}
-              eventHandlers={{
-                click: () => handleMarkerClick(document),
-              }}
-            >
-              <Popup>{document.Title}</Popup>
-            </Marker>
-          ))}
+          <LocationMarker />
+          {documents.map((document, index) => {
+            const location = locations[document.IdLocation];
+            return (
+              <Marker
+                icon={
+                  new L.Icon({
+                    iconUrl: `src/icon/${iconsVector[index]}`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                    popupAnchor: [0, -32],
+                  })
+                }
+                draggable
+                eventHandlers={{
+                  dragend: (e) => handleDragEnd(document, e),
+                  click: () => handleMarkerClick(document),
+                }}
+                key={index}
+                position={[location.Latitude, location.Longitude]}
+              >
+                <Popup>{document.Title}</Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
       )}
-  {/* Modal to display selected marker details */}
-  <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{selectedMarker?.Title}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Card>
-            <Card.Body>
-              <Card.Text>
-                <strong>Description:</strong> {selectedMarker?.Description}
-              </Card.Text>
-              <Card.Text>
-                <strong>Date:</strong> {selectedMarker?.Issuance_Date}
-              </Card.Text>
-              <Card.Text>
-                <strong>Scale:</strong> {selectedMarker?.Scale}
-              </Card.Text>
-              <Card.Text>
-                <strong>Language:</strong> {selectedMarker?.Language}
-              </Card.Text>
-              <Card.Text>
-                <strong>Pages:</strong> {selectedMarker?.Pages}
-              </Card.Text>
-              <Card.Text>
-                <strong>Latitude:</strong> {locations.locations[selectedMarker?.IdLocation]?.Latitude.toFixed(2)}         
-              </Card.Text>
-              <Card.Text>
-                <strong>Longitude:</strong> {locations.locations[selectedMarker?.IdLocation]?.Longitude.toFixed(2)}           
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Modal.Body>
-        {isLogged && (
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleModifyDocument}>Modify</Button>
-        </Modal.Footer>
-        )}
-      </Modal>
+
+      {/* Marker Details Card */}
+      {showCard && (
+        <Card style={{ position: 'relative', marginTop: '20px', padding: '10px', zIndex: 1000 }}>
+          <Button variant="close" onClick={() => setShowCard(false)} style={{ position: 'absolute', top: '10px', right: '10px' }} />
+          <Card.Body>
+            <Card.Title>{selectedMarker?.Title}</Card.Title>
+            <Card.Text><strong>Description:</strong> {selectedMarker?.Description}</Card.Text>
+            <Card.Text><strong>Date:</strong> {selectedMarker?.Issuance_Date}</Card.Text>
+            <Card.Text><strong>Scale:</strong> {selectedMarker?.Scale}</Card.Text>
+            <Card.Text><strong>Language:</strong> {selectedMarker?.Language}</Card.Text>
+            <Card.Text><strong>Pages:</strong> {selectedMarker?.Pages}</Card.Text>
+            <Card.Text>
+              <strong>Latitude:</strong> {locations[selectedMarker?.IdLocation]?.Latitude.toFixed(2)}
+            </Card.Text>
+            <Card.Text>
+              <strong>Longitude:</strong> {locations[selectedMarker?.IdLocation]?.Longitude.toFixed(2)}
+            </Card.Text>
+            {isLogged && (
+              <Button variant="secondary" onClick={handleModifyDocument}>Modify</Button>
+            )}
+          </Card.Body>
+        </Card>
+      )}
 
       {/* Add Connection Modal */}
       <Modal show={showAddConnection} onHide={() => setShowAddConnection(false)} centered>

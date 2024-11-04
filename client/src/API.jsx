@@ -74,7 +74,7 @@ async function getUserInfo() {
 
 // API DOCUMENTS CALL 
 
-const addDocument = (title,idStakeholder, scale, issuance_Date,language,pages,description, idtype,locationType, latitude, longitude, area_coordinates ) => {
+const addDocument = (title, idStakeholder, scale, issuance_Date, language, pages, description, idtype, locationType, latitude, longitude, area_coordinates) => {
   console.log("ADD DOCUMENT");
   return new Promise((resolve, reject) => {
     fetch(URL + "/documents", {
@@ -82,7 +82,7 @@ const addDocument = (title,idStakeholder, scale, issuance_Date,language,pages,de
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ title,idStakeholder, scale, issuance_Date,language,pages,description, idtype,locationType, latitude, longitude, area_coordinates }),
+      body: JSON.stringify({ title, idStakeholder, scale, issuance_Date, language, pages, description, idtype, locationType, latitude, longitude, area_coordinates }),
       credentials: "include",
     })
       .then((response) => {
@@ -102,7 +102,7 @@ const addDocument = (title,idStakeholder, scale, issuance_Date,language,pages,de
 };
 
 const getAllDocuments = () => {
-  console.log("GET ALL DOCUMENTS"); 
+  console.log("GET ALL DOCUMENTS");
   return new Promise((resolve, reject) => {
     fetch(URL + "/documents", {
       credentials: "include",
@@ -187,14 +187,14 @@ const getAllTypesDocument = () => {
   });
 };
 const getTypeDocument = async (id) => {
-    const response = await fetch(URL + "/types/" + id, {
-      credentials: "include",
-    });
-        if (response.ok) {
-          return await response.json();
-        } else {
-          return await response.json().error;
-        }
+  const response = await fetch(URL + "/types/" + id, {
+    credentials: "include",
+  });
+  if (response.ok) {
+    return await response.json();
+  } else {
+    return await response.json().error;
+  }
 };
 
 
@@ -226,7 +226,7 @@ const getAllDocumentConnections = () => {
       });
   });
 };
-const getDocumentConnection =(id) => {
+const getDocumentConnection = (id) => {
   return new Promise((resolve, reject) => {
     fetch(URL + "/document-connections/" + id, {
       credentials: "include",
@@ -243,7 +243,8 @@ const getDocumentConnection =(id) => {
           });
         }
       }
-    )});
+      )
+  });
 };
 
 const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => {
@@ -253,7 +254,7 @@ const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => 
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({IdDocument1: IdDocument1, IdDocument2: IdDocument2, IdConnection: connection_type}),
+      body: JSON.stringify({ IdDocument1: IdDocument1, IdDocument2: IdDocument2, IdConnection: connection_type }),
       credentials: "include",
 
     }).then((response) => {
@@ -356,7 +357,7 @@ const getAllLocations = () => {
   });
 }
 
-const getLocationById= (id) => {
+const getLocationById = (id) => {
   return new Promise((resolve, reject) => {
     fetch(URL + "/locations/" + id, {
       credentials: "include",
@@ -428,6 +429,6 @@ const getAllTypeConnections = () => {
   });
 };
 
-const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection, getAllDocumentConnections,getDocumentConnection,getAllDocuments,getDocumentById,getAllLocations,updateLocationDocument,getLocationById,getAllTypeConnections};
+const API = { getUsers, login, logout, getUserInfo, getAllTypesDocument, getTypeDocument, getAllStakeholders, getStakeholder, addDocument, createDocumentConnection, getAllDocumentConnections, getDocumentConnection, getAllDocuments, getDocumentById, getAllLocations, updateLocationDocument, getLocationById, getAllTypeConnections };
 
 export default API;

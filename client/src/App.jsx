@@ -68,47 +68,15 @@ function App() {
         }
       }}>
         <Routes>
-          <Route path='/login' element={
-            <>
-            <Login />
-            </>
-          } />
-          <Route path='/' element={
-            <>
-              <MyNavbar />
-              <Home />
-            </>
-          } />
-          <Route path='/addDocument' element={
-            <>
-              <MyNavbar />
-              <Document />
-            </>
-          } />
-          <Route path='/documents' element={
-            <>
-              <Documents />
-            </>
-          } />
-          <Route path='/documents/modify-document/:documentId' element={
-            <>
-              <MyNavbar />
-              <ModifyDocument documents={documents} onUpdate={handleUpdate} />
-            </>
-          } />
-          <Route path='/documents/create-document' element={
-            <>
-              <MyNavbar />
-              <ModifyDocument />
-            </>
-          } />
-          <Route path='/*' element={
-            <>
-              <MyNavbar />
-              <Default />
-            </>
-          } />
+          <Route path="/login" element={<><Login /></>} />
+          <Route path="/" element={<><MyNavbar /><Home /></>} />
+          <Route path="/addDocument" element={<><MyNavbar /><Document /></>} />
+          <Route path="/documents" element={<><Documents /></>} />
+          <Route path="/documents/modify-document/:documentId" element={<><MyNavbar /><ModifyDocument documents={documents} onUpdate={handleUpdate} /></>} />
+          <Route path="/documents/create-document" element={<><MyNavbar /><ModifyDocument /></>} />
+          <Route path="/*" element={<><MyNavbar /><Default /></>} />
         </Routes>
+
       </AppContext.Provider>
     </BrowserRouter>
   );
