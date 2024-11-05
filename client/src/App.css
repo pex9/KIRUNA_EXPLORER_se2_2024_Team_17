@@ -9,7 +9,7 @@
   }
 }
 .leaflet-container {
-  height: 60vh;
+  height: 70vh;
   border-radius: 2rem;
 }
 .mapContainer{
@@ -29,6 +29,12 @@
 
 .border-color-main {
   border-color: #33B7CE;
+}
+
+.document-card {
+  border-radius: 14px;
+  border-width: 3px;
+  border-color: #bbad81;
 }
 
 .bg-color-main {
@@ -59,4 +65,11 @@
 
 .red {
   color: red;
+}
+
+.overlay {
+  position: absolute;
+  bottom: 30px;
+  z-index: 1000;
+  box-shadow: rgba(0,0,0,30) 0px 5px 10px;
 }

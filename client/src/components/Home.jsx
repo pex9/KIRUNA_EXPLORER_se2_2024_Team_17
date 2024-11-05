@@ -185,15 +185,13 @@ function Home(props) {
           ) : (
 
             <>
-              <MapComponent locations={locations} documents={documents} setSelectedLocation={setSelectedLocation} />
+              <MapComponent locations={locations} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation}/>
 
-              {isLogged &&
+              {/*isLogged &&
                 <Container fluid className='align-items-end mt-1'>
                   {selectedLocation ? (
-                    <>
-                      <div className='mt-4'>
-                        <div className=' d-flex justify-content-center'>
-                          <Card className='text-start form p-3'>
+                    <div className='d-flex justify-content-end me-5'>
+                            <Card className='text-start form p-3'>
                             <Button variant="link" style={{ color: 'black', position: 'absolute', right: '0px', top: '0px' }} onClick={() => setSelectedLocation(null)}>
                               <i className="bi bi-x h2"></i>
                             </Button>
@@ -215,15 +213,13 @@ function Home(props) {
                               </Button>
                             </div>
                           </Card>
-                        </div>
-                      </div>
-                    </>
+                    </div>
                   ) : (
                     <>
                       <h6 className="text-muted">Select a location on the map to create a new document or select a document to edit it.</h6>
                     </>
                   )}
-                </Container>
+                </Container>*/
               }
             </>
           )
@@ -253,14 +249,14 @@ function Home(props) {
                   )}
                 </div>
                 <div style={{ flexGrow: 1 }}>
-                  <Card className="mb-3" style={{ height: '400px' }}>
                     {selectedDocument ? (
-                      <>
-                        <Card.Header>
+                  <Card className="mb-3 document-card" style={{ height: '400px' }}>
+                      
+                        <Card.Header className='document'>
                           <strong>{selectedDocument.Title}</strong>
                           <img src={srcicon} alt="Document Icon" style={{ float: 'right', width: '24px', height: '24px' }} />
                         </Card.Header>
-                        <Card.Body>
+                        <Card.Body >
                           <Card.Text>
                             <strong>Description:</strong> {selectedDocument.Description} <br />
                             <strong>Scale:</strong> {selectedDocument.Scale} <br />
@@ -282,11 +278,11 @@ function Home(props) {
                             <Button variant="primary" className="me-2" onClick={handleModifyClick}>Modify</Button>
                           </div>
                         </Card.Footer>
-                      </>
+                        </Card>
+                      
                     ) : (
                       <div className="text-muted">Select a document to view its specifications.</div>
                     )}
-                  </Card>
                 </div>
               </div>
               <Modal show={showAddConnection} centered onHide={() => setShowAddConnection(false)}>
