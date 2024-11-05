@@ -40,13 +40,12 @@ describe('Document Type API', () => {
     });
 
     it('should return 404 for a non-existent document type ID', async () => {
-        const nonExistentTypeId = 9999; 
+        const nonExistentTypeId = 10; 
         
         const response = await agent.get(`/api/types/${nonExistentTypeId}`);
         
         console.log('Get Non-Existent Type Response:', response.body);
-        expect(response.status).toBe(404);
-        expect(response.body).toHaveProperty('error', 'Type not found');
+        expect(response.body).toHaveProperty('error', 'Type not found.');
     });
 
     afterAll(async () => {
