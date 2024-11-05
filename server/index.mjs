@@ -143,63 +143,89 @@ app.post("/api/documents", isUrbanPlanner, async (req, res) => {
       .json({ error: "The request body must contain all the fields" });
     return;
   }
-  const idLocation= await locationDao.addLocation(document.locationType, document.latitude, document.longitude, document.area_coordinates);
+  const idLocation = await locationDao.addLocation(
+    document.locationType,
+    document.latitude,
+    document.longitude,
+    document.area_coordinates
+  );
   console.log(idLocation);
   if (!idLocation) {
     res.status(500).json({ error: "Failed to add location." });
     return;
   }
   documentDao
-    .addDocument(document.title,document.idStakeholder,document.scale,document.issuance_Date,document.language,document.pages,document.description,document.idtype,idLocation)
+    .addDocument(
+      document.title,
+      document.idStakeholder,
+      document.scale,
+      document.issuance_Date,
+      document.language,
+      document.pages,
+      document.description,
+      document.idtype,
+      idLocation
+    )
     .then((document) => res.status(201).json(document))
     .catch(() => res.status(500).end());
 });
 
 // GET /api/documents
 
-app.get('/api/documents', (req, res) => {
-  documentDao.getDocuments()
-    .then(documents => res.json(documents))
+app.get("/api/documents", (req, res) => {
+  documentDao
+    .getDocuments()
+    .then((documents) => res.json(documents))
     .catch(() => res.status(500).end());
 });
 
 // GET /api/documents/:documentid
 
-app.get('/api/documents/:documentid', (req, res) => {
-  documentDao.getDocumentById(req.params.documentid)
-    .then(document => {
-      if (document)
-        res.json(document);
-      else
-        res.status(404).json({ error: 'Document not found' });
+app.get("/api/documents/:documentid", (req, res) => {
+  documentDao
+    .getDocumentById(req.params.documentid)
+    .then((document) => {
+      if (document) res.json(document);
+      else res.status(404).json({ error: "Document not found" });
     })
     .catch(() => res.status(500).end());
 });
-
-
 
 // PUT /api/documents/:documentid to modify a document by its id
 app.put("/api/documents/:documentid", isUrbanPlanner, (req, res) => {
   const documentId = parseInt(req.params.documentid);
   const document = req.body;
-  if( !document.title || !document.idStakeholder){
-    res.status(400).json({ error: "The request body must contain all the fields" });
+  if (!document.title || !document.idStakeholder) {
+    res
+      .status(400)
+      .json({ error: "The request body must contain all the fields" });
     return;
   }
   try {
-    documentDao.updateDocument(documentId, document.title, document.idStakeholder, document.scale, document.issuance_Date, document.language, document.pages, document.description, document.idtype)
+    documentDao
+      .updateDocument(
+        documentId,
+        document.title,
+        document.idStakeholder,
+        document.scale,
+        document.issuance_Date,
+        document.language,
+        document.pages,
+        document.description,
+        document.idtype
+      )
       .then((document) => res.status(200).json(document))
       .catch(() => res.status(500).end());
   } catch (error) {
     res.status(500).json({ error: error.message });
-  };
+  }
 });
 
 // PATCH /api/documents/:documentId/connection
 app.patch("/api/documents/:documentId/connection", async (req, res) => {
   const documentId = parseInt(req.params.documentId);
   const newDocumentId2 = parseInt(req.body.IdDocument2);
-  const newConnectionId= parseInt(req.body.IdConnection);
+  const newConnectionId = parseInt(req.body.IdConnection);
 
   if (!newDocumentId2 || !newConnectionId) {
     return res
@@ -222,8 +248,6 @@ app.patch("/api/documents/:documentId/connection", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
 
 // API TYPES
 app.get("/api/types", (req, res) => {
@@ -251,7 +275,6 @@ app.get("/api/stakeholders", (req, res) => {
     .catch(() => res.status(500).end());
 });
 
-
 app.get("/api/stakeholders/:stakeholderid", (req, res) => {
   stakeholderDao
     .getStakeholderById(req.params.stakeholderid)
@@ -262,7 +285,7 @@ app.get("/api/stakeholders/:stakeholderid", (req, res) => {
     .catch(() => res.status(500).end());
 });
 
-// API DOCUMENTCONNECTION  
+////// API DOCUMENTCONNECTION  ///////
 
 // GET /api/document-connections
 // Retrievs all list of connection documents
@@ -272,6 +295,8 @@ app.get("/api/document-connections", (req, res) => {
     .catch((err) => res.status(500).json({ error: "Internal server error" }));
 });
 
+// GET /api/document-connections/:documentId
+// Retrievs list of all connections for a specific document
 app.get("/api/document-connections/:documentId", (req, res) => {
   DocumentConnectionDao.getConnections(req.params.documentId)
     .then((connections) => res.status(200).json(connections))
@@ -308,7 +333,7 @@ app.post("/api/document-connections", isUrbanPlanner, (req, res) => {
     .catch(() => res.status(500).end());
 });
 
-// API LOCATION
+////// API LOCATION  //////
 app.get("/api/locations", (req, res) => {
   locationDao
     .getLocations()
@@ -326,31 +351,37 @@ app.get("/api/locations/:locationId", (req, res) => {
     .catch(() => res.status(500).end());
 });
 
-app.post("/api/locations",isUrbanPlanner, async (req, res) => {
+app.post("/api/locations", isUrbanPlanner, async (req, res) => {
   const { locationType, latitude, longitude, areaCoordinates } = req.body;
   console.log(req.body);
   if (!locationType) {
     return res.status(400).json({ error: "locationType is required." });
   }
-  if (locationType == 'Point') {
+  if (locationType == "Point") {
     // Check if both latitude and longitude are provided
     if (latitude == null || longitude == null) {
-      return res
-        .status(400)
-        .json({ error: "For 'Point' locationType, both latitude and longitude are required." });
+      return res.status(400).json({
+        error:
+          "For 'Point' locationType, both latitude and longitude are required.",
+      });
     }
   }
-  
-  if (locationType == 'Area') {
+
+  if (locationType == "Area") {
     // Check if areaCoordinates is provided
-    if (areaCoordinates==null) {
-      return res
-        .status(400)
-        .json({ error: "For 'Area' locationType, areaCoordinates are required." });
+    if (areaCoordinates == null) {
+      return res.status(400).json({
+        error: "For 'Area' locationType, areaCoordinates are required.",
+      });
     }
   }
   try {
-    const result = await locationDao.addLocation(locationType, latitude, longitude, areaCoordinates);
+    const result = await locationDao.addLocation(
+      locationType,
+      latitude,
+      longitude,
+      areaCoordinates
+    );
     if (result) {
       res.status(201).json({ message: "Location added successfully." });
     } else {
@@ -361,26 +392,27 @@ app.post("/api/locations",isUrbanPlanner, async (req, res) => {
   }
 });
 
-app.patch("/api/locations/:locationId",isUrbanPlanner, async (req, res) => {
+app.patch("/api/locations/:locationId", isUrbanPlanner, async (req, res) => {
   const idLocation = parseInt(req.params.locationId);
   const { locationType, latitude, longitude, areaCoordinates } = req.body;
   if (!locationType) {
     return res.status(400).json({ error: "locationType is required." });
   }
-  if (locationType == 'Point') {
+  if (locationType == "Point") {
     // Check if both latitude and longitude are provided
     if (latitude == null || longitude == null) {
-      return res
-        .status(400)
-        .json({ error: "For 'Point' locationType, both latitude and longitude are required." });
+      return res.status(400).json({
+        error:
+          "For 'Point' locationType, both latitude and longitude are required.",
+      });
     }
   }
-  if (locationType == 'Area') {
+  if (locationType == "Area") {
     // Check if areaCoordinates is provided
     if (!areaCoordinates) {
-      return res
-        .status(400)
-        .json({ error: "For 'Area' locationType, areaCoordinates are required." });
+      return res.status(400).json({
+        error: "For 'Area' locationType, areaCoordinates are required.",
+      });
     }
   }
   try {
@@ -388,7 +420,13 @@ app.patch("/api/locations/:locationId",isUrbanPlanner, async (req, res) => {
     if (!location) {
       return res.status(404).json({ error: "Location not found." });
     }
-    const result = await locationDao.updateLocation(idLocation,locationType, latitude, longitude, areaCoordinates);
+    const result = await locationDao.updateLocation(
+      idLocation,
+      locationType,
+      latitude,
+      longitude,
+      areaCoordinates
+    );
     if (result) {
       res.status(200).json({ message: "Location updated successfully." });
     } else {
@@ -398,10 +436,6 @@ app.patch("/api/locations/:locationId",isUrbanPlanner, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
-
-
 
 // activate the server
 const server = app.listen(port, () => {

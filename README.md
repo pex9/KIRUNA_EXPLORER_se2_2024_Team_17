@@ -80,8 +80,10 @@ To run the web app refer to the following step:
 ## DOCUMENT API
 
 - POST `/api/documents`
+
   - Description: Allows the authenticated user to upload a new document to the system. This endpoint validates the user’s authorization level to ensure they have permission to add documents.
   - Request: The request body should contain a JSON object with the document's metadata.
+
     ```json
     {
       "title": "Sample Title",
@@ -92,13 +94,13 @@ To run the web app refer to the following step:
       "pages": 50,
       "description": "A description for the document",
       "idType": 2,
-      "locationType" : "Point",
-      "latitude": 19, 
+      "locationType": "Point",
+      "latitude": 19,
       "longitude": 23,
-      "area_coordinates" :""
-
+      "area_coordinates": ""
     }
     ```
+
   - Response: returns `201 Created OK` (created) or `400 Bad Request` (invalid data ) or `401 Unauthorized` (If the user is unauthenticated or lacks sufficient permissions) or `500 Internal Server Error `If an unexpected error occurs.
   - Response Body: On success (`201 Created`), the body contains an object with the details of the created document.
     ```json
@@ -112,9 +114,10 @@ To run the web app refer to the following step:
       "pages": 50,
       "description": "A description for the document",
       "idType": 2,
-      "idLocation" : 1
+      "idLocation": 1
     }
     ```
+
 - GET `/api/documents`
   - Description: Allows all user to get all documents of the system.
   - Request: No request.
@@ -122,34 +125,34 @@ To run the web app refer to the following step:
   - Response Body: On success (`200 OK`), the body contains an array of objects with the details of the documents.
     ```json
     [
-    {
-      "documentId": 123,
-      "title": "Sample Title",
-      "idStakeholder": 1,
-      "scale": "National",
-      "issuance_Date": "04/2019",
-      "language": "English",
-      "pages": 50,
-      "description": "A description for the document",
-      "idType": 2,
-      "idLocation" : 2
-    },
-    {
-      "documentId": 124,
-      "title": "Sample Title v2",
-      "idStakeholder": 1,
-      "scale": "National",
-      "issuance_Date": "04/2019",
-      "language": "English",
-      "pages": 44,
-      "description": "A description for the document v2",
-      "idType": 2,
-      "idLocation" : 1
-    }
+      {
+        "documentId": 123,
+        "title": "Sample Title",
+        "idStakeholder": 1,
+        "scale": "National",
+        "issuance_Date": "04/2019",
+        "language": "English",
+        "pages": 50,
+        "description": "A description for the document",
+        "idType": 2,
+        "idLocation": 2
+      },
+      {
+        "documentId": 124,
+        "title": "Sample Title v2",
+        "idStakeholder": 1,
+        "scale": "National",
+        "issuance_Date": "04/2019",
+        "language": "English",
+        "pages": 44,
+        "description": "A description for the document v2",
+        "idType": 2,
+        "idLocation": 1
+      }
     ]
     ```
 - GET `/api/documents/:documentId`
-  - Description: Allows all user to get the document of the system by giving id. 
+  - Description: Allows all user to get the document of the system by giving id.
   - Request: No request.
   - Response: returns `200 OK` (created) or `400 Bad Request` (invalid data ) or `500 Internal Server Error `If an unexpected error occurs or `404 Not Found`.
   - Response Body: On success (`200 OK`), the body contains the object with the details of the documents.
@@ -164,10 +167,9 @@ To run the web app refer to the following step:
       "pages": 50,
       "description": "A description for the document",
       "idType": 2,
-      "idLocation" : 1
+      "idLocation": 1
     }
     ```
-
 
 # DOCUMENT CONNECTION API
 
@@ -178,33 +180,37 @@ To run the web app refer to the following step:
   - Request: No Body.
   - Response: returns `200 OK` (success) or `500 Internal Server Error` If an unexpected error occurs.
   - Response body in case of success :
-   ```json
-   [
+
+  ```json
+  [
     {
-    "IdConnectionDocuments": 1,
-    "IdDocument1": 1,
-    "IdDocument2": 2,
-    "IdConnection": 1
+      "IdConnectionDocuments": 1,
+      "IdDocument1": 1,
+      "IdDocument2": 2,
+      "IdConnection": 1
     }
   ]
-    ```
+  ```
+
 - GET `/api/document-connections/:idDocument`
 
-  - Description:  return all the connections for specific document.
+  - Description: return all the connections for specific document.
 
   - Request: No Body.
   - Response: returns `200 OK` (success) or `500 Internal Server Error` If an unexpected error occurs.
   - Response body in case of success :
-   ```json
-   [
+
+  ```json
+  [
     {
-    "IdConnectionDocuments": 1,
-    "IdDocument1": 1,
-    "IdDocument2": 2,
-    "IdConnection": 1
+      "IdConnectionDocuments": 1,
+      "IdDocument1": 1,
+      "IdDocument2": 2,
+      "IdConnection": 1
     }
   ]
-    ```
+  ```
+
 - POST `/api/document-connections`
 
   - Description: Creates a connection between two documents in the system. This endpoint validates that the user has urban planner permissions and ensures documents can be properly linked.
@@ -230,7 +236,9 @@ To run the web app refer to the following step:
       "IdConnection": 1
     }
     ```
+
 # LOCATION API
+
 - GET `/api/locations`
 
   - **Description**: Retrieves a list of all locations.
@@ -248,6 +256,7 @@ To run the web app refer to the following step:
       }
     ]
     ```
+
 - GET `/api/locations/:locationId`
 
   - **Description**: Retrieves a specific location by its ID.
@@ -264,6 +273,7 @@ To run the web app refer to the following step:
       "AreaCoordinates": null
     }
     ```
+
 - POST `/api/locations`
 
   - **Description**: Creates a new location entry.
@@ -280,6 +290,7 @@ To run the web app refer to the following step:
       "message": "Location added successfully."
     }
     ```
+
 - PATCH `/api/locations/:locationId`
 
   - **Description**: Updates an existing location by its ID.
@@ -298,6 +309,7 @@ To run the web app refer to the following step:
       "message": "Location updated successfully."
     }
     ```
+
 # Stakeholder API
 
 - GET`/api/stakeholders`
@@ -310,12 +322,12 @@ To run the web app refer to the following step:
     [
       {
         "IdStakeholder": 1,
-        "Name": "John Doe",
-        "Type": "Individual",
-        "Email": "johndoe@example.com"
+        "Name": "Municipality",
+        "Color": "#8C6760"
       }
     ]
     ```
+
 - GET `/api/stakeholders/:stakeholderid`
 
   - **Description**: Retrieves a specific stakeholder by their ID.
@@ -326,11 +338,11 @@ To run the web app refer to the following step:
     ```json
     {
       "IdStakeholder": 1,
-      "Name": "John Doe",
-      "Type": "Individual",
-      "Email": "johndoe@example.com"
+      "Name": "Municipality",
+      "Color": "#8C6760"
     }
     ```
+
 # TYPEDOCUMENT API
 
 - GET `/api/types`
@@ -348,6 +360,7 @@ To run the web app refer to the following step:
       }
     ]
     ```
+
 - GET `/api/types/:typeid`
 
   - **Description**: Retrieves a specific document type by its ID.
@@ -362,7 +375,6 @@ To run the web app refer to the following step:
       "Description": "A detailed report document type."
     }
     ```
-
 
 ## Database Tables
 
@@ -426,5 +438,6 @@ To run the web app refer to the following step:
 
 ## Screenshot
 
-## License 
-This project is licensed under the CC BY-NC-SA 4.0  License.
+## License
+
+This project is licensed under the CC BY-NC-SA 4.0 License.
