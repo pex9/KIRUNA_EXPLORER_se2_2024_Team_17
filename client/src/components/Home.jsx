@@ -117,7 +117,8 @@ function Home(props) {
     console.log('Connections:', res);
     setNumberofconnections(res.length);
     setSelectedDocument(doc);
-    setSrcicon("/public/icon/" + documentTypes[selectedDocument.IdType - 1].iconsrc);
+    setSrcicon("src/icon/" + documentTypes[doc.IdType].iconsrc);
+    console.log("src/icon/" + documentTypes[doc.IdType].iconsrc);
 
   };
 
@@ -126,7 +127,19 @@ function Home(props) {
       navigate(`documents/modify-document/${selectedDocument.IdDocument}`);
     }
   };
-  const handleAddConnection = () => { 
+  const handleAddConnection = async() => {
+    console.log(selectDocumentSearch);
+    if (selectedDocument && connectionType) {
+        console.log(connectionType);
+        await API.createDocumentConnection(selectedDocument.IdDocument,selectDocumentSearch.IdDocument , connectionType);
+        // now i have to call again the document to update the connections
+        const res = await API.getDocumentConnection(selectedDocument.IdDocument);
+        setSelectedDocument('');
+        setConnectionType('');
+        setShowAddConnection(false);
+    } else {
+        alert("Please complete all fields to add a connection.");
+    }
   };
 
   const handleSearchChange = (e) => {
@@ -142,12 +155,17 @@ function Home(props) {
     } else {
     setFilteredDocuments([]);
     }
-  const handleSelectDocument = (doc) => {
+  };
+  const handleSelectionDocument = (doc) => {
+    console.log("ho modificato");
+    console.log(doc);
     setSelectDocumentSearch(doc);
-    setSelectDocumentSearch(doc.Title);
     setFilteredDocuments([]);
   }
-};
+  const closeModal = () => {
+    setShowAddConnection(false);
+    selectDocumentSearch('');
+  }
 
   return (
     <>
@@ -281,7 +299,7 @@ function Home(props) {
                         <Form.Control
                             type="text"
                             placeholder="Enter document name"
-                            value={selectedDocument?.Title}
+                            value={selectDocumentSearch?.Title || ""}
                             onChange={handleSearchChange}
                             autoComplete="off" // Prevents browser autocomplete
                         />
@@ -293,7 +311,7 @@ function Home(props) {
                                 <ListGroup.Item
                                 key={doc.IdDocument}
                                 action
-                                onClick={() => handleSelectDocument(doc)}
+                                onClick={() => handleSelectionDocument(doc)}
                                 >
                                 {doc.Title}
                                 </ListGroup.Item>
@@ -317,7 +335,7 @@ function Home(props) {
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="outline-secondary" onClick={() => setShowAddConnection(false)}>
+                    <Button variant="outline-secondary" onClick={() => closeModal()}>
                         Cancel
                     </Button>
                     <Button variant="primary" onClick={handleAddConnection}>
