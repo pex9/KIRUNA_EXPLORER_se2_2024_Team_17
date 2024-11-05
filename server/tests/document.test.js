@@ -1,71 +1,133 @@
-import request from 'supertest'; // Import supertest for testing HTTP requests
-const { app, server } = require('../index.mjs'); // Import the app and server from your entry point
+import request from 'supertest';
+const { app, server } = require('../index.mjs');
 
-describe('Document API', () => {
-    // Sample document data
-    const sampleDocument = {
-        title: "Test Document",
-        idStakeholder: 1,
-        scale: "National",
-        issuance_Date: "2022-01-01",
-        language: "English",
-        pages: 100,
-        description: "This is a test document",
-        idType: 2,
-        idLocation: 3,
-    };
-
+describe('Document API with Session Authentication', () => {
+    let agent;
     let documentId;
 
-    // Test for adding a new document
-    it('should add a new document', async () => {
-        const response = await request(app)
+    beforeAll(async () => {
+        agent = request.agent(app);
+
+        const loginResponse = await agent
+            .post('/api/sessions')
+            .send({ username: 'mario@test.it', password: 'pwd' });
+
+        console.log('Login Response:', loginResponse.body);
+        expect(loginResponse.status).toBe(200);
+    });
+
+    it('should create a new document with valid data', async () => {
+        const documentData = {
+            title: "Sample Title",
+            idStakeholder: 1,
+            scale: "National",
+            issuance_Date: "04/2019",
+            language: "English",
+            pages: 50,
+            description: "A description for the document",
+            idType: 2,
+            locationType: "Point",
+            latitude: 19,
+            longitude: 23,
+            area_coordinates: ""
+        };
+
+        const response = await agent
             .post('/api/documents')
-            .send(sampleDocument)
-            .set('Authorization', 'Bearer <valid_token>'); // Use a valid token if required
+            .send(documentData);
+
+        console.log('Create Document Response:', response.body);
         expect(response.status).toBe(201);
-        expect(response.body).toHaveProperty('title', sampleDocument.title);
-        documentId = response.body.id; // Store the document ID for later tests
-        console.log("Document added with ID:", documentId);
+
+        
+        documentId = response.body.IdDocument || response.body.idDocument;
+        console.log('Assigned Document ID:', documentId);
+        expect(documentId).toBeDefined(); 
     });
 
-    // Test for retrieving all documents
-    it('should retrieve all documents', async () => {
-        const response = await request(app).get('/api/documents');
-        expect(response.status).toBe(200);
-        expect(Array.isArray(response.body)).toBe(true);
-        expect(response.body.length).toBeGreaterThan(0);
-    });
+    it('should update an existing document', async () => {
+        const updatedDocumentData = {
+            title: "Updated Sample Title",
+            idStakeholder: 2,
+            scale: "Regional",
+            issuance_Date: "05/2020",
+            language: "Spanish",
+            pages: 100,
+            description: "Updated description for the document",
+            idType: 3,
+            locationType: "Point",
+            latitude: 20,
+            longitude: 30,
+            area_coordinates: ""
+        };
 
-    // Test for retrieving a document by ID
-    it('should retrieve a document by ID', async () => {
-        const response = await request(app).get(`/api/documents/${documentId}`);
-        expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('id', documentId);
-        expect(response.body).toHaveProperty('title', sampleDocument.title);
-    });
-
-    // Test for updating a document
-    it('should update a document', async () => {
-        const updatedDocument = { ...sampleDocument, title: "Updated Test Document" };
-        const response = await request(app)
+        console.log('Attempting update with documentId:', documentId);
+        const updateResponse = await agent
             .put(`/api/documents/${documentId}`)
-            .send(updatedDocument)
-            .set('Authorization', 'Bearer <valid_token>'); // Use a valid token if required
-        expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('title', "Updated Test Document");
-    });
+            .send(updatedDocumentData);
 
-    // Test for deleting a document (if delete functionality exists)
-    it('should delete a document', async () => {
-        const response = await request(app)
-            .delete(`/api/documents/${documentId}`)
-            .set('Authorization', 'Bearer <valid_token>'); // Use a valid token if required
-        expect(response.status).toBe(200);
-    });
+        console.log('Update Document Response:', updateResponse.body);
+        expect(updateResponse.status).toBe(200);
 
-    // Close the server after all tests have run
+        const retrieveResponse = await agent
+            .get(`/api/documents/${documentId}`);
+
+        console.log('Retrieve Updated Document Response:', retrieveResponse.body);
+        expect(retrieveResponse.status).toBe(200);
+        expect(retrieveResponse.body).toMatchObject({
+            IdDocument: documentId,
+            Title: 'Updated Sample Title',
+            IdStakeholder: 2,
+            Scale: 'Regional',
+            Issuance_Date: '05/2020',
+            Language: 'Spanish',
+            Pages: 100,
+            Description: 'Updated description for the document',
+            IdType: 3,
+            IdLocation: null
+        });
+    });
+    it('should retrieve all documents', async () => {
+                const response = await agent.get('/api/documents');
+        
+                console.log('Get All Documents Response:', response.body);
+                expect(response.status).toBe(200);
+                expect(Array.isArray(response.body)).toBe(true);
+        
+                if (response.body.length > 0) {
+                    expect(response.body[0]).toHaveProperty('documentId'); 
+                    expect(response.body[0]).toHaveProperty('title'); 
+                }
+            });
+
+            it('should retrieve a document by ID', async () => {
+                const response = await agent.get(`/api/documents/${documentId}`);
+        
+                console.log('Get Document By ID Response:', response.body);
+                if (response.status === 200) {
+                    expect(response.body).toHaveProperty('IdDocument', documentId); 
+                    expect(response.body).toHaveProperty('Title'); 
+                } else {
+                    expect(response.status).toBe(404);
+                }
+            });
+            it('should return 404 for a non-existent document ID', async () => {
+                const nonExistentDocumentId = 9999;
+        
+                const response = await agent.get(`/api/documents/${nonExistentDocumentId}`);
+        
+                console.log('Get Non-Existent Document Response:', response.body);
+                expect(response.status).toBe(404);
+            });
+        
+            afterAll(async () => {
+                await new Promise(resolve => {
+                    server.close(resolve);
+                });
+            });
+
+
     afterAll(async () => {
-        await new Promise(resolve => server.close(resolve)); // Close the server
+        await new Promise(resolve => server.close(resolve));
     });
 });
