@@ -29,13 +29,13 @@ exports.addLocation = (location_type,latitude,longitude,area_coordinates) => {
   });
 };
 /**
- * Get location to the database giving id.
+ * Get locatios point to the database.
  * @function getLocations
- * @returns {Promise<Number>} Resolves with all locations.
+ * @returns {Promise<Number>} Resolves with all locations point.
  */
-exports.getLocations = () => {
+exports.getLocationsPoint = () => {
     return new Promise((resolve, reject) => {
-        const sql = 'SELECT * FROM Location';
+        const sql = 'SELECT * FROM Location WHERE Location_Type = "Point"';
 
         db.all(sql, (err, row) => {
             if (err) {
@@ -45,6 +45,24 @@ exports.getLocations = () => {
                 };
             })
     });
+};
+/**
+ * Get locations area to the database .
+ * @function getLocations
+ * @returns {Promise<Number>} Resolves with all locations area.
+ */
+exports.getLocationsArea = () => {
+  return new Promise((resolve, reject) => {
+      const sql = 'SELECT * FROM Location WHERE Location_Type = "Area"';
+
+      db.all(sql, (err, row) => {
+          if (err) {
+              reject(err);
+          } else {
+              resolve(row)
+              };
+          })
+  });
 };
 /**
  * get all locationa to the database.

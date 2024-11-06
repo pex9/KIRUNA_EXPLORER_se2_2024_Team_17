@@ -195,3 +195,20 @@ exports.updateConnection = (
     );
   });
 };
+
+/**
+ * getting all the connections possible for a document
+ * @returns {Promise<Array>} Resolves to an array of connection objects
+ */
+exports.getAllConnectionsType = () => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM Connection";
+    db.all(sql, (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+};

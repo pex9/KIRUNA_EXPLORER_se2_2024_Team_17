@@ -1,60 +1,60 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { useState } from "react";
+import { useContext, useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents,Polygon  } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { Button, Modal, Card, Form } from "react-bootstrap"; // Import Form for input fields
-import L from "leaflet";
-import { useNavigate } from "react-router-dom";
+import { Button, Card, Form, Spinner, Modal, CardFooter, Col, Overlay } from "react-bootstrap"; // Importing required components
+import { redirect, useNavigate } from "react-router-dom";
+import AppContext from '../AppContext';
+import L from 'leaflet';
+import API from '../API';
+import '../App.css';
 
-// Sample data for markers within the initial view
-const markers = [
-  {
-    id: 1,
-    title: "Document Location 1",
-    description: "Description for Document 1",
-    additionalInfo: "More details about Document 1",
-    position: [67.8558, 20.2253],
-  },
-  {
-    id: 2,
-    title: "Document Location 2",
-    description: "Description for Document 2",
-    additionalInfo: "More details about Document 2",
-    position: [67.8600, 20.2300],
-  },
-  {
-    id: 3,
-    title: "Document Location 3",
-    description: "Description for Document 3",
-    additionalInfo: "More details about Document 3",
-    position: [67.8585, 20.2350],
-  },
-];
+function MapComponent({ locations, locationsArea,documents, setSelectedLocation, propsDocument, selectedLocation }) {
+  const [selectedMarker, setSelectedMarker] = useState(null);
+  const [showCard, setShowCard] = useState(false);
+  const [showAddConnection, setShowAddConnection] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState('');
+  const [connectionType, setConnectionType] = useState('');
+  const navigate = useNavigate();
+  const context = useContext(AppContext);
+  const isLogged = context.loginState.loggedIn;
+  const [documentTypes, setDocumentTypes] = useState([]);
+  const [modifyMode, setModifyMode] = useState(false);
 
-function MapComponent() {
-  const [selectedMarker, setSelectedMarker] = useState(null); // Track selected marker
-  const [showModal, setShowModal] = useState(false); // Modal visibility for marker details
-  const [showAddConnection, setShowAddConnection] = useState(false); // Modal visibility for adding connection
-  const [selectedDocument, setSelectedDocument] = useState(''); // State for document input
-  const [connectionType, setConnectionType] = useState(''); // State for connection type
-  const navigate = useNavigate(); // Navigation hook
+  const offsetDistance = 0.0030; //offset distance between markers
+
+  useEffect(() => {
+    console.log(locationsArea);
+    const fetchDocumentTypes = async () => { 
+      try { 
+        const res = await API.getAllTypesDocument(); 
+ 
+        setDocumentTypes(res); 
+      } catch (err) { 
+        console.error(err); 
+      } 
+    }; 
+    fetchDocumentTypes();
+  }, [documents]);
 
   const handleMarkerClick = (marker) => {
     setSelectedMarker(marker);
-    setShowModal(true);
+    setShowCard(true);
+    setSelectedLocation(null);
   };
 
   const handleModifyDocument = () => {
-    navigate(`/documents/modify-document/${selectedMarker.id}`);
+    if (selectedMarker) {
+      navigate(`/documents/modify-document/${selectedMarker.IdDocument}`, { state: { document: selectedMarker } });
+    }
   };
 
   const handleAddConnection = () => {
     if (selectedDocument && connectionType) {
-      console.log("Add connection:", {
+      /*console.log("Adding connection:", {
         document: selectedDocument,
         type: connectionType,
-        markerId: selectedMarker.id,
-      });
-      // Reset fields after adding connection
+        markerId: selectedMarker?.id,
+      });*/
       setSelectedDocument('');
       setConnectionType('');
       setShowAddConnection(false);
@@ -63,56 +63,226 @@ function MapComponent() {
     }
   };
 
+  const handleDragEnd = (document, e) => {
+    const { lat, lng } = e.target.getLatLng();
+    //console.log(`Marker for ${document} moved to ${lat}, ${lng}`);
+    //console.log('Document:', document);
+
+    // Update document position using the API
+    
+    
+    API.updateLocationDocument(
+      document.IdLocation,
+      "Point",
+      lat,
+      lng,
+      ""
+    )
+      .then(() => {
+        console.log('Position updated successfully');
+      })
+      .catch((err) => {
+        console.error('Error updating position:', err);
+      });
+  };
+
+  function LocationMarker() {
+
+    useMapEvents({
+      click(e) {
+        setShowCard(false);
+        if(modifyMode) {
+          const { lat, lng } = e.latlng;
+          setSelectedLocation({ lat, lng });
+        }
+      },
+    });
+    return null;
+  }
+
+
+
   return (
     <>
-      <MapContainer
-        center={[67.8558, 20.2253]}
-        zoom={13}
-        scrollWheelZoom={false}
-        style={{ height: "80vh", width: "100%" }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+      {documents.length === 0 || locations.length === 0 ? documentTypes.length=== 0 (
+        <Spinner animation="border" variant="primary" />
+      ) : (
+        <div>
+        <MapContainer center={[67.8558, 20.2253]} zoom={12.4} scrollWheelZoom={false}>
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {locationsArea && Object.values(locationsArea).map((area, index) => {
+            // Parse the coordinates string into a proper array
+            const coordinates = Array.isArray(area.Area_Coordinates)
+                ? area.Area_Coordinates
+                : JSON.parse(area.Area_Coordinates);  // If Area_Coordinates is a string, parse it
+            return (
+              <Polygon
+                key={index}
+                positions={coordinates} // Use the parsed array as positions
+                pathOptions={{
+                  color: 'blue', 
+                  fillColor: 'blue', 
+                  fillOpacity: 0.2
+                }}
+              />
+            );
+          })}
+          <LocationMarker />
+          {documents.map((document, index) => {
 
-        {markers.map((marker) => (
-          <Marker
-            key={marker.id}
-            position={marker.position}
-            eventHandlers={{
-              click: () => handleMarkerClick(marker),
-            }}
-          >
-            <Popup>{marker.title}</Popup>
-          </Marker>
-        ))}
-      </MapContainer>
-
-      {/* Modal to display selected marker details */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{selectedMarker?.title}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Card>
-            <Card.Body>
-              <Card.Text>
-                <strong>Description:</strong> {selectedMarker?.description}
+            //used to not overleap the documents
+            const offsetIndex = index * offsetDistance;
+            const location = locationsArea[document.IdLocation] ? locationsArea[document.IdLocation]: locations[document.IdLocation];
+            if(location){
+            const position = [
+              location.Latitude + (index % 2 === 0 ? offsetIndex : -offsetIndex),
+              location.Longitude + (index % 2 === 0 ? -offsetIndex : offsetIndex),
+            ];
+            return (
+              <Marker
+                icon={
+                  new L.Icon({
+                    iconUrl: `src/icon/${documentTypes[document.IdType - 1]?.iconsrc}`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                    popupAnchor: [0, -32],
+                  })
+                }
+                draggable={
+                  modifyMode
+                } // Only make draggable if logged in
+                eventHandlers={{
+                  dragend: (e) => {
+                    if (isLogged) {
+                      handleDragEnd(document, e); // Only call dragend if logged in
+                    }
+                  },
+                  click: () => handleMarkerClick(document),
+                }}
+                key={index}
+                position={position}
+              >
+                <Popup>{document.Title}</Popup>
+              </Marker>
+            );
+          }
+          })}
+        {showCard && (
+          <Card className='d-flex document-card overlay' style={{marginLeft:'1%', width:'30%'}}>
+            <Button variant="close" onClick={() => setShowCard(false)} style={{ position: 'absolute', top: '2%', right: '2%' }} />
+              <Card.Header className='document'>
+              <Card.Title><strong>{selectedMarker?.Title}</strong></Card.Title>
+              </Card.Header>
+            <Card.Body className='document-card text-start p-4'>
+              <div className='d-flex'>
+                
+              <div className='col-6'>
+              
+              <Card.Text style={{fontSize:'16px'}}><strong>Date:</strong> {selectedMarker?.Issuance_Date}</Card.Text>
+              <Card.Text style={{fontSize:'16px'}}><strong>Scale:</strong> {selectedMarker?.Scale}</Card.Text>
+              <Card.Text style={{fontSize:'16px'}}><strong>Language:</strong> {selectedMarker?.Language}</Card.Text>
+              <Card.Text style={{fontSize:'16px'}}><strong>Pages:</strong> {selectedMarker?.Pages}</Card.Text>
+              <Card.Text style={{fontSize:'16px'}}>
+              <strong>Latitude:</strong> {locationsArea[selectedMarker?.IdLocation] ? locationsArea[selectedMarker?.IdLocation]?.Latitude.toFixed(2) : locations[selectedMarker?.IdLocation]?.Latitude.toFixed(2)}
               </Card.Text>
-              <Card.Text>
-                <strong>Additional Info:</strong> {selectedMarker?.additionalInfo}
+              <Card.Text style={{fontSize:'16px'}}>
+              <strong>Longitude:</strong> {locationsArea[selectedMarker?.IdLocation] ? locationsArea[selectedMarker?.IdLocation]?.Longitude.toFixed(2) : locations[selectedMarker?.IdLocation]?.Longitude.toFixed(2)}
               </Card.Text>
+              <Card.Text style={{fontSize:'16px'}}><strong>Type </strong> {locationsArea[selectedMarker?.IdLocation] ? "Area": "Point"}</Card.Text>
+              </div>
+              <div>
+              <Card.Text style={{fontSize:'16px'}}><strong>Description:</strong> {selectedMarker?.Description}</Card.Text>
+              </div>
+              </div>
             </Card.Body>
+              {isLogged && (
+            <Card.Footer className=' text-end' >
+                <Button variant="secondary" className='btn-document rounded-pill px-3' onClick={handleModifyDocument}>Modify</Button>
+            </Card.Footer>
+              )}
           </Card>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={() => setShowAddConnection(true)}>Add Connection</Button>
-          <Button variant="secondary" onClick={handleModifyDocument}>Modify</Button>
-          <Button variant="outline-secondary" onClick={() => setShowModal(false)}>Close</Button>
-        </Modal.Footer>
-      </Modal>
+        )}
+            { modifyMode && 
+            <div className='d-flex justify-content-end me-5'>
+                    <Card className='text-start form overlay'>
+                      <Card.Header>
+                        <Card.Title className='me-5 mt-1'><strong>
+                          Add New Document
+                          </strong>
+                          </Card.Title>
+                        <Button 
+                          hidden={!selectedLocation}
+                          variant="link" 
+                          style={{ color: 'black', position: 'absolute', right: '0px', top: '0px' }} 
+                          onClick={() => setSelectedLocation(null)}>
+                          <i className="bi bi-x h2"></i>
+                        </Button>
+                      </Card.Header>
+                      <Card.Body>
+                      
 
+                        <div className='mx-3'>
+                          <h5>Selected Location:</h5>
+                          {selectedLocation ? (
+                            <>
+                              <h6><strong>Latitude:</strong> {selectedLocation?.lat.toFixed(4)}<br></br>
+                              <strong>Longitude:</strong> {selectedLocation?.lng.toFixed(4)}</h6>
+                            </>
+                          ) : (
+                            <h6 className='mb-4'>Whole Municipal area</h6>
+                          )
+                        }
+                        </div>
+                      </Card.Body>
+                    </Card>
+            </div> 
+          }
+        </MapContainer>
+        </div>
+      )}
+      {isLogged &&
+      <>
+        <div className='d-flex mt-2 align-items-center justify-content-between mx-5'>
+          <div className='d-flex align-items-center'>
+          <Button variant='dark' className='rounded-pill mt-2 px-4 mx-2 btn-document' onClick={() => setModifyMode((mode) => !mode)}>
+            Enable drag / add new location for a document
+          </Button>
+
+          <div className=''>
+          {modifyMode && <strong className='col text-end mx-5 mt-1'>Drag / Add new document enabled</strong>}
+          </div>
+          </div>
+          {modifyMode &&
+          <div className='me-4'>
+            <Button
+              variant="dark"
+              className='px-3 me-5 rounded-pill btn-document'
+              size="sm"
+              onClick={() => {
+                if(!selectedLocation)
+                {
+                  const firstArea = locationsArea ? Object.values(locationsArea)[0] : null;
+                  setSelectedLocation(firstArea);
+                  navigate('documents/create-document', { state: { location: firstArea} })
+                }
+                else
+                {
+                  navigate('documents/create-document', { state: { location: selectedLocation} })
+                }
+              }}
+              >
+                  Add document
+              
+            </Button>
+            </div>
+          }
+        </div>
+      
+      </>
+    }
       {/* Add Connection Modal */}
       <Modal show={showAddConnection} onHide={() => setShowAddConnection(false)} centered>
         <Modal.Header closeButton>
@@ -150,4 +320,3 @@ function MapComponent() {
 }
 
 export default MapComponent;
-

@@ -137,35 +137,20 @@ app.get("/api/sessions/current", (req, res) => {
 // POST /api/documents, only possible for authenticated users and if he/she is a urban planner
 app.post("/api/documents", isUrbanPlanner, async (req, res) => {
   const document = req.body;
-  if (!document.title || !document.idStakeholder) {
+  console.log(document);
+  if (!document.title || !document.idStakeholder || !document.idtype) {
     res
       .status(400)
       .json({ error: "The request body must contain all the fields" });
     return;
   }
-  const idLocation = await locationDao.addLocation(
-    document.locationType,
-    document.latitude,
-    document.longitude,
-    document.area_coordinates
-  );
-  console.log(idLocation);
+  const idLocation= document.idLocation ? document.idLocation : await locationDao.addLocation(document.locationType, document.latitude, document.longitude, document.area_coordinates);
   if (!idLocation) {
     res.status(500).json({ error: "Failed to add location." });
     return;
   }
   documentDao
-    .addDocument(
-      document.title,
-      document.idStakeholder,
-      document.scale,
-      document.issuance_Date,
-      document.language,
-      document.pages,
-      document.description,
-      document.idtype,
-      idLocation
-    )
+    .addDocument(document.title,parseInt(document.idStakeholder),document.scale,document.issuance_Date,document.language,parseInt(document.pages),document.description,parseInt(document.idtype),idLocation)
     .then((document) => res.status(201).json(document))
     .catch(() => res.status(500).end());
 });
@@ -191,34 +176,23 @@ app.get("/api/documents/:documentid", (req, res) => {
     .catch(() => res.status(500).end());
 });
 
-// PUT /api/documents/:documentid to modify a document by its id
-app.put("/api/documents/:documentid", isUrbanPlanner, (req, res) => {
-  const documentId = parseInt(req.params.documentid);
-  const document = req.body;
-  if (!document.title || !document.idStakeholder) {
-    res
-      .status(400)
-      .json({ error: "The request body must contain all the fields" });
-    return;
-  }
-  try {
-    documentDao
-      .updateDocument(
-        documentId,
-        document.title,
-        document.idStakeholder,
-        document.scale,
-        document.issuance_Date,
-        document.language,
-        document.pages,
-        document.description,
-        document.idtype
-      )
-      .then((document) => res.status(200).json(document))
-      .catch(() => res.status(500).end());
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+
+// PATCH /api/documents/:documentid 
+app.patch("/api/documents/:documentid", isUrbanPlanner, (req, res) => { 
+  const documentId = parseInt(req.params.documentid); 
+  const document = req.body; 
+  console.log(document); 
+  if( !document.title || !document.idStakeholder){ 
+    res.status(400).json({ error: "The request body must contain all the fields" }); 
+    return; 
+  } 
+  try { 
+    documentDao.updateDocument(documentId, document.title, parseInt(document.idStakeholder), document.scale, document.issuance_Date, document.language, parseInt(document.pages), document.description, parseInt(document.idtype)) 
+      .then((document) => res.status(200).json(document)) 
+      .catch(() => res.status(500).end()); 
+  } catch (error) { 
+    res.status(500).json({ error: error.message }); 
+  }; 
 });
 
 // PATCH /api/documents/:documentId/connection
@@ -285,7 +259,17 @@ app.get("/api/stakeholders/:stakeholderid", (req, res) => {
     .catch(() => res.status(500).end());
 });
 
-////// API DOCUMENTCONNECTION  ///////
+// API CONNECTIONS
+
+app.get("/api/connections", (req, res) => {
+  DocumentConnectionDao.getAllConnectionsType()
+    .then((connections) => res.status(200).json(connections))
+    .catch((err) => res.status(500).json({ error: "Internal server error" }));
+});
+
+
+
+// API DOCUMENTCONNECTION  
 
 // GET /api/document-connections
 // Retrievs all list of connection documents
@@ -336,7 +320,15 @@ app.post("/api/document-connections", isUrbanPlanner, (req, res) => {
 ////// API LOCATION  //////
 app.get("/api/locations", (req, res) => {
   locationDao
-    .getLocations()
+    .getLocationsPoint()
+    .then((locations) => res.json(locations))
+    .catch(() => res.status(500).end());
+});
+
+
+app.get("/api/locations/area", (req, res) => {
+  locationDao
+    .getLocationsArea()
     .then((locations) => res.json(locations))
     .catch(() => res.status(500).end());
 });
@@ -353,7 +345,6 @@ app.get("/api/locations/:locationId", (req, res) => {
 
 app.post("/api/locations", isUrbanPlanner, async (req, res) => {
   const { locationType, latitude, longitude, areaCoordinates } = req.body;
-  console.log(req.body);
   if (!locationType) {
     return res.status(400).json({ error: "locationType is required." });
   }
@@ -394,7 +385,9 @@ app.post("/api/locations", isUrbanPlanner, async (req, res) => {
 
 app.patch("/api/locations/:locationId", isUrbanPlanner, async (req, res) => {
   const idLocation = parseInt(req.params.locationId);
-  const { locationType, latitude, longitude, areaCoordinates } = req.body;
+  console.log(idLocation);
+  console.log(req.body);
+  const { location_type: locationType, latitude, longitude, area_coordinates: areaCoordinates } = req.body;
   if (!locationType) {
     return res.status(400).json({ error: "locationType is required." });
   }

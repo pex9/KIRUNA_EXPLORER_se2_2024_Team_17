@@ -1,6 +1,6 @@
 import { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Navbar, Container, Button } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { Navbar, Container, Button, Col } from 'react-bootstrap';
 import AppContext from '../AppContext';
 
 export function MyNavbar() {
@@ -9,40 +9,46 @@ export function MyNavbar() {
   const loginState = context.loginState;
 
   return (
-    <Navbar bg="primary" variant="dark">
+    <Navbar sticky='top' bg="light" variant="dark">
       <Container fluid>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-between">
           <div className="d-flex align-items-center">
-            <div className="mx-auto text-center"><h1 className='site-title'> Kiruna eXplorer </h1></div>
+            <Link onClick={() => navigate('/')} className="ms-3 mx-auto text-center main-color"><h1 className='site-title'> Kiruna eXplorer </h1></Link>
           </div>
-          <div>
+          <div className='d-flex'>
             {loginState.loggedIn ? (
               <>
-                <Navbar.Text>
-                  {'Signed in as: ' + loginState.user.name}
-
-                  {' Role: ' + loginState.user.role}
+                <div className='me-4'>
+                <Navbar.Text style={{color:'black'}}>
+                <span>Signed in as: <strong>{loginState.user.name}</strong></span>
+                <br></br>
+                <span>Role: <strong>{loginState.user.role}</strong></span>
                 </Navbar.Text>
-                <Button className='mx-2 rounded-pill' variant='info' onClick={() => navigate('/')}>
+                </div>
+                {/*<div>
+                <Button className='mx-2 rounded-pill btn-main' variant='' onClick={() => navigate('/')}>
                   {'Home '}
-                  <i className="bi bi-house" />
+                  <i className="bi bi-house-fill" />
                 </Button>
-                <Button className='mx-2 rounded-pill' variant='danger' onClick={() => {
+                </div>*/}
+                <div>
+                <Button className='mx-2 rounded-pill btn-logout' variant='' onClick={() => {
                   loginState.doLogout();
                   navigate('/');
                 }}>
                   {'Logout '}
                   <i className="bi bi-person-fill" />
                 </Button>
+                  </div>
               </>
             ) : (
               <>
-                <Button className='mx-2 rounded-pill' variant='info' onClick={() => navigate('/')}>
+                {/*<Button className='mx-2 rounded-pill btn-main' variant='' onClick={() => navigate('/')}>
                   {'Home '}
-                  <i className="bi bi-house" />
-                </Button>
-                <Button className='mx-2 rounded-pill' variant='info' onClick={() => navigate('/login')}>
+                  <i className="bi bi-house-fill" />
+                </Button>*/}
+                <Button className='mx-2 rounded-pill btn-main' variant='' onClick={() => navigate('/login')}>
                   {'Login '}
                   <i className="bi bi-person-fill" />
                 </Button>

@@ -73,8 +73,8 @@ Content-Type: application/json
     "description": "Description of the document.",
     "idtype": 2,
     "locationType": "Point",
-    "latitude": 45.0,
-    "longitude": 9.0,
+    "latitude": 67.85,
+    "longitude": 20.22,
     "areaCoordinates": ""
 }
 
@@ -165,7 +165,8 @@ GET http://localhost:3001/api/stakeholders
 ### Test to get a stakeholder by id
 GET http://localhost:3001/api/stakeholders/1
 
-
+### Test to get all connection type
+GET http://localhost:3001/api/connections
 
 ### TEST DOCUMENT CONNECTION API
 
@@ -218,8 +219,8 @@ Content-Type: application/json
 
 {
     "locationType": "Point",
-    "latitude": 45.0,
-    "longitude": 9.0,
+    "latitude": 67.85,
+    "longitude": 20.22,
     "areaCoordinates": ""
 }
 

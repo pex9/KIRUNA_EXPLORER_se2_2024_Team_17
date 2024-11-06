@@ -9,15 +9,13 @@
   }
 }
 .leaflet-container {
-  height: 90vh;
-  width: 90%;
+  height: 70vh;
   border-radius: 2rem;
 }
 .mapContainer{
-  display: flex;
+  
   justify-content: center;
   align-items: center;
-  height: 100vh;
 }
 
 .form {
@@ -29,8 +27,18 @@
   color: #33B7CE;
 }
 
+.main-color:active {
+  color: #33B7CE;
+}
+
 .border-color-main {
   border-color: #33B7CE;
+}
+
+.document-card {
+  border-radius: 14px;
+  border-width: 3px;
+  border-color: #bbad81;
 }
 
 .bg-color-main {
@@ -40,4 +48,32 @@
 .bg-color-main-light {
   background-color: rgba(194, 232, 239, 0.41);
   color:black;
+}
+
+
+.btn-main {
+  background-color: #33B7CE;
+  color:white;
+  border-color: #33B7CE;
+}
+.btn-logout {
+  background-color: #B52C92;
+  color:white;
+  border-color: #B52C92;
+}
+.btn-document {
+  background-color: #A89559;
+  color:white;
+  border-color: #A89559;
+}
+
+.red {
+  color: red;
+}
+
+.overlay {
+  position: absolute;
+  bottom: 30px;
+  z-index: 1000;
+  box-shadow: #000000 0px 10px 20px 0px;
 }

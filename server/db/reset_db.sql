@@ -6,5 +6,6 @@ DROP TABLE IF EXISTS TypeDocument;
 DROP TABLE IF EXISTS Connection;
 DROP TABLE IF EXISTS Document;
 
-
+DELETE FROM DocumentConnection
+SELECT * FROM Location
 

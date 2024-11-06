@@ -74,14 +74,15 @@ async function getUserInfo() {
 
 // API DOCUMENTS CALL 
 
-const addDocument = (title,idStakeholder, scale, issuance_Date,language,pages,description, idtype,locationType, latitude, longitude, area_coordinates ) => {
+const addDocument = (title, idStakeholder, scale, issuance_Date, language, pages, description, idtype, locationType, latitude, longitude, area_coordinates) => {
+  console.log("ADD DOCUMENT");
   return new Promise((resolve, reject) => {
     fetch(URL + "/documents", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ title,idStakeholder, scale, issuance_Date,language,pages,description, idtype,locationType, latitude, longitude, area_coordinates }),
+      body: JSON.stringify({ title, idStakeholder, scale, issuance_Date, language, pages, description, idtype, locationType, latitude, longitude, area_coordinates }),
       credentials: "include",
     })
       .then((response) => {
@@ -99,8 +100,32 @@ const addDocument = (title,idStakeholder, scale, issuance_Date,language,pages,de
   });
 
 };
-
+const addDocumentArea = (title, idStakeholder, scale, issuance_Date, language, pages, description, idtype, idLocation) => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/documents", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title, idStakeholder, scale, issuance_Date, language, pages, description, idtype, idLocation }),
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          resolve(response.json());
+        } else {
+          response.json().then((message) => {
+            reject(message);
+          });
+        }
+      })
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });
+      });
+  });
+};
 const getAllDocuments = () => {
+  console.log("GET ALL DOCUMENTS");
   return new Promise((resolve, reject) => {
     fetch(URL + "/documents", {
       credentials: "include",
@@ -184,31 +209,15 @@ const getAllTypesDocument = () => {
       });
   });
 };
-const getTypeDocument = (id) => {
-  return new Promise((resolve, reject) => {
-    fetch(URL + "/types/" + id, {
-      credentials: "include",
-    })
-      .then((response) => {
-        if (response.ok) {
-          response.json().then((type) => {
-            resolve(type);
-          });
-        } else {
-          response
-            .json()
-            .then((message) => {
-              reject(message);
-            })
-            .catch(() => {
-              reject({ error: "Cannot parse server response." });
-            });
-        }
-      })
-      .catch(() => {
-        reject({ error: "Cannot communicate with the server." });
-      });
+const getTypeDocument = async (id) => {
+  const response = await fetch(URL + "/types/" + id, {
+    credentials: "include",
   });
+  if (response.ok) {
+    return await response.json();
+  } else {
+    return await response.json().error;
+  }
 };
 
 
@@ -240,7 +249,7 @@ const getAllDocumentConnections = () => {
       });
   });
 };
-const getDocumentConnection =(id) => {
+const getDocumentConnection = (id) => {
   return new Promise((resolve, reject) => {
     fetch(URL + "/document-connections/" + id, {
       credentials: "include",
@@ -257,7 +266,8 @@ const getDocumentConnection =(id) => {
           });
         }
       }
-    )});
+      )
+  });
 };
 
 const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => {
@@ -267,7 +277,7 @@ const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => 
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ IdDocument1, IdDocument2, connection_type }),
+      body: JSON.stringify({ IdDocument1: IdDocument1, IdDocument2: IdDocument2, IdConnection: connection_type }),
       credentials: "include",
 
     }).then((response) => {
@@ -282,6 +292,32 @@ const createDocumentConnection = (IdDocument1, IdDocument2, connection_type) => 
       reject({ error: "Cannot communicate with the server!" });
     });
   });
+};
+
+const updateDocument = (Id_document,title,idStakeholder, scale, issuance_Date,language,pages,description, idtype ) => { 
+  return new Promise((resolve, reject) => { 
+    fetch(URL + "/documents/"+Id_document, { 
+      method: "PATCH", 
+      headers: { 
+        "Content-Type": "application/json", 
+      }, 
+      body: JSON.stringify({ title,idStakeholder, scale, issuance_Date,language,pages,description, idtype}), 
+      credentials: "include", 
+    }) 
+      .then((response) => { 
+        if (response.ok) { 
+          resolve(response.json()); 
+        } else { 
+          response.json().then((message) => { 
+            reject(message); 
+          }); 
+        } 
+      }) 
+      .catch(() => { 
+        reject({ error: "Cannot communicate with the server." }); 
+      }); 
+  }); 
+ 
 };
 
 // PATCH to update the connections
@@ -369,8 +405,29 @@ const getAllLocations = () => {
       });
   });
 }
+const getAllLocationsArea = () => {
+  
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/locations/area", {
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((locations) => {
+            resolve(locations);
+          }
+          );
+        } else {
+          response.json().then((message) => {
+            reject(message);
+          });
+        }
+      }
+      );
+  });
+};
 
-const getLocationById= (id) => {
+const getLocationById = (id) => {
   return new Promise((resolve, reject) => {
     fetch(URL + "/locations/" + id, {
       credentials: "include",
@@ -414,6 +471,34 @@ const updateLocationDocument = (id, location_type, latitude, longitude, area_coo
   });
 };
 
-const API = { getUsers, login, logout, getUserInfo,getAllTypesDocument,getTypeDocument,getAllStakeholders,getStakeholder,addDocument, createDocumentConnection, getAllDocumentConnections,getDocumentConnection,getAllDocuments,getDocumentById,getAllLocations,updateLocationDocument,getLocationById};
+const getAllTypeConnections = () => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/connections", {
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((typeConnections) => {
+            resolve(typeConnections);
+          });
+        } else {
+          response
+            .json()
+            .then((message) => {
+              reject(message);
+            })
+            .catch(() => {
+              reject({ error: "Cannot parse server response." });
+            });
+        }
+      })
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });
+      }
+      );
+  });
+};
+
+const API = { getUsers, login, logout, getUserInfo, getAllTypesDocument, getTypeDocument, getAllStakeholders, getStakeholder, addDocument, createDocumentConnection, getAllDocumentConnections, getDocumentConnection, getAllDocuments, getDocumentById, getAllLocations, updateLocationDocument, getLocationById, getAllTypeConnections,updateDocument,getAllLocationsArea,addDocumentArea};
 
 export default API;
