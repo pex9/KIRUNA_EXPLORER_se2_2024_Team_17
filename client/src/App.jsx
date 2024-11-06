@@ -16,14 +16,6 @@ import MyNavbar from './components/MyNavbar';
 function App() {
   const [user, setUser] = useState(undefined);
   const [loggedIn, setLoggedIn] = useState(false);
-
-  // Document state to manage and pass down to ModifyDocument
-  const [documents, setDocuments] = useState([
-    { id: '1', title: 'Document 1', scale: '1:100', issuanceDate: '2024-10-31', description: 'Description 1' },
-    { id: '2', title: 'Document 2', scale: '1:200', issuanceDate: '2024-10-31', description: 'Description 2' },
-    // Add more documents as needed
-  ]);
-
   // Authentication check
   useEffect(() => {
     async function checkAuth() {
@@ -50,12 +42,6 @@ function App() {
     setUser(undefined);
   }
 
-  // Update function to modify a document and update state
-  const handleUpdate = (documentId, updatedDocument) => {
-    setDocuments(prevDocs =>
-      prevDocs.map(doc => (doc.id === documentId ? updatedDocument : doc))
-    );
-  };
 
   return (
     <BrowserRouter>
@@ -72,7 +58,7 @@ function App() {
           <Route path="/" element={<><MyNavbar /><Home /></>} />
           <Route path="/addDocument" element={<><MyNavbar /><Document /></>} />
           <Route path="/documents" element={<><Documents /></>} />
-          <Route path="/documents/modify-document/:documentId" element={<><MyNavbar /><ModifyDocument documents={documents} onUpdate={handleUpdate} /></>} />
+          <Route path="/documents/modify-document/:documentId" element={<><MyNavbar /><ModifyDocument/></>} />
           <Route path="/documents/create-document" element={<><MyNavbar /><ModifyDocument /></>} />
           <Route path="/*" element={<><MyNavbar /><Default /></>} />
         </Routes>

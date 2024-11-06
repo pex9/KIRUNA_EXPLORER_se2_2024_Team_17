@@ -8,7 +8,7 @@ import L from 'leaflet';
 import API from '../API';
 import '../App.css';
 
-function MapComponent({ locations, locationsArea,documents, setSelectedLocation, propsDocument, selectedLocation }) {
+function MapComponent({ locations,setLocations, locationsArea,documents, setSelectedLocation, propsDocument, selectedLocation }) {
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [showCard, setShowCard] = useState(false);
   const [showAddConnection, setShowAddConnection] = useState(false);
@@ -19,11 +19,12 @@ function MapComponent({ locations, locationsArea,documents, setSelectedLocation,
   const isLogged = context.loginState.loggedIn;
   const [documentTypes, setDocumentTypes] = useState([]);
   const [modifyMode, setModifyMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const offsetDistance = 0.0030; //offset distance between markers
+  const offsetDistance = 0.0010; //offset distance between markers
 
   useEffect(() => {
-    console.log(locationsArea);
+    setLoading(true);
     const fetchDocumentTypes = async () => { 
       try { 
         const res = await API.getAllTypesDocument(); 
@@ -34,6 +35,7 @@ function MapComponent({ locations, locationsArea,documents, setSelectedLocation,
       } 
     }; 
     fetchDocumentTypes();
+    setLoading(false);
   }, [documents]);
 
   const handleMarkerClick = (marker) => {
@@ -50,11 +52,6 @@ function MapComponent({ locations, locationsArea,documents, setSelectedLocation,
 
   const handleAddConnection = () => {
     if (selectedDocument && connectionType) {
-      /*console.log("Adding connection:", {
-        document: selectedDocument,
-        type: connectionType,
-        markerId: selectedMarker?.id,
-      });*/
       setSelectedDocument('');
       setConnectionType('');
       setShowAddConnection(false);
@@ -65,32 +62,52 @@ function MapComponent({ locations, locationsArea,documents, setSelectedLocation,
 
   const handleDragEnd = (document, e) => {
     const { lat, lng } = e.target.getLatLng();
-    //console.log(`Marker for ${document} moved to ${lat}, ${lng}`);
-    //console.log('Document:', document);
+    if (locationsArea[document.IdLocation] && locationsArea[document.IdLocation].Location_Type === "Area") {
+      alert("You can't move a document that belong in an area");
+      // Update local state to reflect the new position
+      const updatedLocations = { ...locations };
+      if (updatedLocations[document.IdLocation]) {
+        updatedLocations[document.IdLocation] = {
+          ...updatedLocations[document.IdLocation],
+          Latitude: lat,
+          Longitude: lng
+        };
+      }
+      setLocations(updatedLocations); // Update the state for immediate UI reflection
 
-    // Update document position using the API
-    
-    
-    API.updateLocationDocument(
-      document.IdLocation,
-      "Point",
-      lat,
-      lng,
-      ""
-    )
+    }
+    else{
+      API.updateLocationDocument(
+        document.IdLocation,
+        "Point",
+        lat,
+        lng,
+        ""
+      )
       .then(() => {
         console.log('Position updated successfully');
+        
+        // Update local state to reflect the new position
+        const updatedLocations = { ...locations };
+        if (updatedLocations[document.IdLocation]) {
+          updatedLocations[document.IdLocation] = {
+            ...updatedLocations[document.IdLocation],
+            Latitude: lat,
+            Longitude: lng
+          };
+        }
+        setLocations(updatedLocations); // Update the state for immediate UI reflection
       })
       .catch((err) => {
         console.error('Error updating position:', err);
       });
+    }
+    
   };
 
   function LocationMarker() {
-
     useMapEvents({
       click(e) {
-        setShowCard(false);
         if(modifyMode) {
           const { lat, lng } = e.latlng;
           setSelectedLocation({ lat, lng });
@@ -104,7 +121,7 @@ function MapComponent({ locations, locationsArea,documents, setSelectedLocation,
 
   return (
     <>
-      {documents.length === 0 || locations.length === 0 ? documentTypes.length=== 0 (
+      {loading ==true ? (
         <Spinner animation="border" variant="primary" />
       ) : (
         <div>
@@ -125,7 +142,7 @@ function MapComponent({ locations, locationsArea,documents, setSelectedLocation,
                 pathOptions={{
                   color: 'blue', 
                   fillColor: 'blue', 
-                  fillOpacity: 0.2
+                  fillOpacity: 0.1
                 }}
               />
             );

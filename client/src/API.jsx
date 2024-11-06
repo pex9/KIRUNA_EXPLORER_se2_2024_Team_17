@@ -125,7 +125,6 @@ const addDocumentArea = (title, idStakeholder, scale, issuance_Date, language, p
   });
 };
 const getAllDocuments = () => {
-  console.log("GET ALL DOCUMENTS");
   return new Promise((resolve, reject) => {
     fetch(URL + "/documents", {
       credentials: "include",

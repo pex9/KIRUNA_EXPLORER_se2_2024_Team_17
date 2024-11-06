@@ -85,8 +85,6 @@ function Home(props) {
             return acc;
           }, {});
           // Set the transformed object to state
-          console.log("SONO FOGLIA"); 
-          console.log(locationsById);
           setLocationsArea(locationsById);
         })
         .catch((err) => {
@@ -145,9 +143,7 @@ function Home(props) {
     }
   };
   const handleAddConnection = async() => {
-    console.log(selectDocumentSearch);
     if (selectedDocument && connectionType) {
-        console.log(connectionType);
         await API.createDocumentConnection(selectedDocument.IdDocument,selectDocumentSearch.IdDocument , connectionType);
         // now i have to call again the document to update the connections
         const res = await API.getDocumentConnection(selectedDocument.IdDocument);
@@ -174,8 +170,6 @@ function Home(props) {
     }
   };
   const handleSelectionDocument = (doc) => {
-    console.log("ho modificato");
-    console.log(doc);
     setSelectDocumentSearch(doc);
     setFilteredDocuments([]);
   }
@@ -202,7 +196,7 @@ function Home(props) {
           ) : (
 
             <>
-              <MapComponent locations={locations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation}/>
+              <MapComponent locations={locations} setLocations={setLocations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation}/>
             </>
           )
 
