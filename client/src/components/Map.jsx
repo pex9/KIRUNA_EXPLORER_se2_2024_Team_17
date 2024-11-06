@@ -2,7 +2,7 @@ import { useContext, useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button, Card, Form, Spinner, Modal, CardFooter, Col, Overlay } from "react-bootstrap"; // Importing required components
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
 import AppContext from '../AppContext';
 import L from 'leaflet';
 import API from '../API';
@@ -38,11 +38,12 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
   const handleMarkerClick = (marker) => {
     setSelectedMarker(marker);
     setShowCard(true);
+    setSelectedLocation(null);
   };
 
   const handleModifyDocument = () => {
     if (selectedMarker) {
-      navigate(`/documents/modify-document/${selectedMarker.IdDocument}`);
+      navigate(`/documents/modify-document/${selectedMarker.IdDocument}`, { state: { document: selectedMarker } });
     }
   };
 
@@ -87,9 +88,12 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
   function LocationMarker() {
     useMapEvents({
       click(e) {
-        const { lat, lng } = e.latlng;
-        console.log("Map clicked at:", lat, lng);
-        setSelectedLocation({ lat, lng });
+        setShowCard(false);
+        if(modifyMode) {
+          const { lat, lng } = e.latlng;
+          console.log("Map clicked at:", lat, lng);
+          setSelectedLocation({ lat, lng });
+        }
       },
     });
     return null;
@@ -106,7 +110,7 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          {modifyMode && <LocationMarker />}
+          <LocationMarker />
           {documents.map((document, index) => {
             const location = locations[document.IdLocation];
             return (
@@ -136,76 +140,111 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
             );
           })}
         {showCard && (
-          <Card className='d-flex col-3 overlay' style={{marginLeft:'1%'}}>
-            <Button variant="close" onClick={() => setShowCard(false)} style={{ position: 'absolute', top: '10px', right: '10px' }} />
-              <Card.Header>
-              <Card.Title>{selectedMarker?.Title}</Card.Title>
+          <Card className='d-flex document-card overlay' style={{marginLeft:'1%', width:'30%'}}>
+            <Button variant="close" onClick={() => setShowCard(false)} style={{ position: 'absolute', top: '2%', right: '2%' }} />
+              <Card.Header className='document'>
+              <Card.Title><strong>{selectedMarker?.Title}</strong></Card.Title>
               </Card.Header>
             <Card.Body className='document-card text-start p-4'>
               <div className='d-flex'>
                 
               <div className='col-6'>
               
-              <Card.Text><strong>Date:</strong> {selectedMarker?.Issuance_Date}</Card.Text>
-              <Card.Text><strong>Scale:</strong> {selectedMarker?.Scale}</Card.Text>
-              <Card.Text><strong>Language:</strong> {selectedMarker?.Language}</Card.Text>
-              <Card.Text><strong>Pages:</strong> {selectedMarker?.Pages}</Card.Text>
-              <Card.Text>
+              <Card.Text style={{fontSize:'16px'}}><strong>Date:</strong> {selectedMarker?.Issuance_Date}</Card.Text>
+              <Card.Text style={{fontSize:'16px'}}><strong>Scale:</strong> {selectedMarker?.Scale}</Card.Text>
+              <Card.Text style={{fontSize:'16px'}}><strong>Language:</strong> {selectedMarker?.Language}</Card.Text>
+              <Card.Text style={{fontSize:'16px'}}><strong>Pages:</strong> {selectedMarker?.Pages}</Card.Text>
+              <Card.Text style={{fontSize:'16px'}}>
                 <strong>Latitude:</strong> {locations[selectedMarker?.IdLocation]?.Latitude.toFixed(2)}
               </Card.Text>
-              <Card.Text>
+              <Card.Text style={{fontSize:'16px'}}>
                 <strong>Longitude:</strong> {locations[selectedMarker?.IdLocation]?.Longitude.toFixed(2)}
               </Card.Text>
               </div>
               <div>
-              <Card.Text><strong>Description:</strong> {selectedMarker?.Description}</Card.Text>
+              <Card.Text style={{fontSize:'16px'}}><strong>Description:</strong> {selectedMarker?.Description}</Card.Text>
               </div>
               </div>
             </Card.Body>
               {isLogged && (
             <Card.Footer className=' text-end' >
-                <Button variant="secondary" onClick={handleModifyDocument}>Modify</Button>
+                <Button variant="secondary" className='btn-document rounded-pill px-3' onClick={handleModifyDocument}>Modify</Button>
             </Card.Footer>
               )}
           </Card>
         )}
-        {selectedLocation && (
-                    <div className='d-flex justify-content-end me-5'>
-                            <Card className='text-start form p-3 overlay'>
-                            <Button variant="link" style={{ color: 'black', position: 'absolute', right: '0px', top: '0px' }} onClick={() => setSelectedLocation(null)}>
-                              <i className="bi bi-x h2"></i>
-                            </Button>
-                            <div className='m-3'>
-                              <h4>Selected Location:</h4>
-                              <p>Latitude: {selectedLocation.lat.toFixed(4)}, Longitude: {selectedLocation.lng.toFixed(4)}</p>
-                            </div>
-                            <div className='text-center'>
-                              <Button
-                                variant="dark"
-                                className='py-1 rounded-pill btn-document'
-                                size="sm"
-                                onClick={() => navigate('documents/create-document', { state: { location: selectedLocation } })}
-                                disabled={!selectedLocation} // Disable button if no location is selected
-                              >
-                                <h6>
-                                  Add document
-                                </h6>
-                              </Button>
-                            </div>
-                          </Card>
-                    </div>
-                    )}
+            { modifyMode && 
+            <div className='d-flex justify-content-end me-5'>
+                    <Card className='text-start form overlay'>
+                      <Card.Header>
+                        <Card.Title className='me-5 mt-1'><strong>
+                          Add New Document
+                          </strong>
+                          </Card.Title>
+                        <Button 
+                          hidden={!selectedLocation}
+                          variant="link" 
+                          style={{ color: 'black', position: 'absolute', right: '0px', top: '0px' }} 
+                          onClick={() => setSelectedLocation(null)}>
+                          <i className="bi bi-x h2"></i>
+                        </Button>
+                      </Card.Header>
+                      <Card.Body>
+                      
+
+                        <div className='mx-3'>
+                          <h5>Selected Location:</h5>
+                          {selectedLocation ? (
+                            <>
+                              <h6><strong>Latitude:</strong> {selectedLocation.lat.toFixed(4)}<br></br>
+                              <strong>Longitude:</strong> {selectedLocation.lng.toFixed(4)}</h6>
+                            </>
+                          ) : (
+                            <h6 className='mb-4'>Whole Municipal area</h6>
+                          )
+                        }
+                        </div>
+                      </Card.Body>
+                    </Card>
+            </div> 
+          }
         </MapContainer>
         </div>
       )}
-      <div className='d-flex mt-2 justify-content-end me-5'>
-        {modifyMode && <strong className='col text-end mx-5 mt-1'>Drag / Add new location enabled</strong>}
-        <Button variant='dark' className='rounded-pill px-4 mx-3 btn-document' onClick={() => setModifyMode((mode) => !mode)}>
-          Enable drag / add new location for a document
-        </Button>
-      </div>
-      {/* Marker Details Card */}
+      {isLogged &&
+      <>
+        <div className='d-flex mt-2 align-items-center justify-content-between mx-5'>
+          <div className='d-flex align-items-center'>
+          <Button variant='dark' className='rounded-pill mt-2 px-4 mx-2 btn-document' onClick={() => setModifyMode((mode) => !mode)}>
+            Enable drag / add new location for a document
+          </Button>
 
+          <div className=''>
+          {modifyMode && <strong className='col text-end mx-5 mt-1'>Drag / Add new document enabled</strong>}
+          </div>
+          </div>
+          {modifyMode &&
+          <div className='me-4'>
+            <Button
+              variant="dark"
+              className='px-3 me-5 rounded-pill btn-document'
+              size="sm"
+              onClick={() => {
+                if(!selectedLocation)
+                  setSelectedLocation({lat: 67.8558, lng: 20.2253 }) //if the selected location is "whole area"
+                console.log('Selected location:', selectedLocation);
+                navigate('documents/create-document', { state: { location: selectedLocation} })
+              }}
+              >
+                  Add document
+              
+            </Button>
+            </div>
+          }
+        </div>
+      
+      </>
+    }
       {/* Add Connection Modal */}
       <Modal show={showAddConnection} onHide={() => setShowAddConnection(false)} centered>
         <Modal.Header closeButton>

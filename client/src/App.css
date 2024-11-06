@@ -27,6 +27,10 @@
   color: #33B7CE;
 }
 
+.main-color:active {
+  color: #33B7CE;
+}
+
 .border-color-main {
   border-color: #33B7CE;
 }
@@ -71,5 +75,5 @@
   position: absolute;
   bottom: 30px;
   z-index: 1000;
-  box-shadow: rgba(0,0,0,30) 0px 5px 10px;
+  box-shadow: #000000 0px 10px 20px 0px;
 }

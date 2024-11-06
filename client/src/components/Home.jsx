@@ -219,12 +219,14 @@ function Home(props) {
                       <h6 className="text-muted">Select a location on the map to create a new document or select a document to edit it.</h6>
                     </>
                   )}
-                </Container>*/
-              }
+                </Container>*/ }
             </>
           )
 
         ) : (
+          loading ? (
+            <Spinner animation="border" variant="primary" />
+          ) : (
           <>
             <Card className="mt-3">
               <div className='d-flex p-3'>
@@ -234,7 +236,7 @@ function Home(props) {
                   ) : (
                     <Card>
                       <Card.Header>Document List</Card.Header>
-                      <ListGroup>
+                      <ListGroup style={{maxHeight:'355px', overflowY:'auto'}}>
                         {documents.map((doc, index) => (
                           <ListGroup.Item
                             key={index}
@@ -249,98 +251,46 @@ function Home(props) {
                   )}
                 </div>
                 <div style={{ flexGrow: 1 }}>
-                    {selectedDocument ? (
-                  <Card className="mb-3 document-card" style={{ height: '400px' }}>
-                      
-                        <Card.Header className='document'>
-                          <strong>{selectedDocument.Title}</strong>
-                          <img src={srcicon} alt="Document Icon" style={{ float: 'right', width: '24px', height: '24px' }} />
-                        </Card.Header>
-                        <Card.Body >
-                          <Card.Text>
-                            <strong>Description:</strong> {selectedDocument.Description} <br />
-                            <strong>Scale:</strong> {selectedDocument.Scale} <br />
-                            <strong>Issuance Date:</strong> {selectedDocument.Issuance_Date} <br />
-                            <strong>Location:</strong> Lat: {locations[selectedDocument.IdLocation].Latitude.toFixed(2)} Long: {locations[selectedDocument.IdLocation].Longitude.toFixed(2)} <br />
-                            <strong>StakeHolder:</strong> {stakeholders[selectedDocument.IdStakeholder - 1].name} <br />
-                            <strong>Language:</strong> {selectedDocument.Language} <br />
-                            <strong>Pages:</strong> {selectedDocument.Pages} <br />
-                            <strong>Type:</strong> {documentTypes[selectedDocument.IdType - 1].type} <br />
-                            <strong>Number of connections:</strong> {numberofconnections} <br />
-                          </Card.Text>
-
-                        </Card.Body>
-                        <Card.Footer>
-                          <div className="text-center my-3">
-                            <Button variant="success " className="me-2" onClick={() => setShowAddConnection(true)}>
-                                Add Connection
-                            </Button>
-                            <Button variant="primary" className="me-2" onClick={handleModifyClick}>Modify</Button>
-                          </div>
-                        </Card.Footer>
-                        </Card>
-                      
+                  {selectedDocument ? (
+                    <Card className="mb-3 document-card" style={{ height: '400px' }}>
+                      <Card.Header className='document'>
+                        <strong>{selectedDocument.Title}</strong>
+                        <img src={srcicon} alt="Document Icon" style={{ float: 'right', width: '24px', height: '24px' }} />
+                      </Card.Header>
+                      <Card.Body className='document-card text-start p-4'>
+                        <div className='d-flex'>
+              
+                        <div className='col-6 px-5'>
+                        
+                        <Card.Text style={{fontSize:'16px'}}><strong>Date:</strong> {selectedDocument?.Issuance_Date}</Card.Text>
+                        <Card.Text style={{fontSize:'16px'}}><strong>Scale:</strong> {selectedDocument?.Scale}</Card.Text>
+                        <Card.Text style={{fontSize:'16px'}}><strong>Language:</strong> {selectedDocument?.Language}</Card.Text>
+                        <Card.Text style={{fontSize:'16px'}}><strong>Pages:</strong> {selectedDocument?.Pages}</Card.Text>
+                        <Card.Text style={{fontSize:'16px'}}>
+                          <strong>Latitude:</strong> {locations[selectedDocument?.IdLocation]?.Latitude.toFixed(2)}
+                        </Card.Text>
+                        <Card.Text style={{fontSize:'16px'}}>
+                          <strong>Longitude:</strong> {locations[selectedDocument?.IdLocation]?.Longitude.toFixed(2)}
+                        </Card.Text>
+                        </div>
+                        <div>
+                        <Card.Text style={{fontSize:'16px'}}><strong>Description:</strong> {selectedDocument?.Description}</Card.Text>
+                        </div>
+                        </div>
+                      </Card.Body>
+                      <Card.Footer>
+                        <div className="text-center my-3">
+                          <Button variant="secondary" className="me-2 btn-document rounded-pill" onClick={handleModifyClick}>Modify</Button>
+                        </div>
+                      </Card.Footer>
+                    </Card>
                     ) : (
                       <div className="text-muted">Select a document to view its specifications.</div>
                     )}
                 </div>
               </div>
-              <Modal show={showAddConnection} centered onHide={() => setShowAddConnection(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Add Connection</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group controlId="formDocument" style={{ position: 'relative' }}>
-                        <Form.Label>Document</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter document name"
-                            value={selectDocumentSearch?.Title || ""}
-                            onChange={handleSearchChange}
-                            autoComplete="off" // Prevents browser autocomplete
-                        />
-
-                        {/* Render the dropdown list of suggestions */}
-                        {filteredDocuments.length > 0 && (
-                            <ListGroup style={{ position: 'absolute', top: '100%', zIndex: 1, width: '100%' }}>
-                            {filteredDocuments.map((doc) => (
-                                <ListGroup.Item
-                                key={doc.IdDocument}
-                                action
-                                onClick={() => handleSelectionDocument(doc)}
-                                >
-                                {doc.Title}
-                                </ListGroup.Item>
-                            ))}
-                            </ListGroup>
-                        )}
-                    </Form.Group>
-                    <Form.Group controlId="connectionTypeSelect" className="mb-3">
-                        <Form.Label>Connection Type</Form.Label>
-                        <Form.Select
-                            value={connectionType}
-                            onChange={(e) => setConnectionType(e.target.value)}
-                        >
-                            <option value="">Select connection type</option>
-                            {Object.values(typeConnections).map((type) => (
-                                <option key={type.IdConnection} value={type.IdConnection}>
-                                    {type.Type}
-                                </option>
-                            ))}
-                        </Form.Select>
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="outline-secondary" onClick={() => closeModal()}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" onClick={handleAddConnection}>
-                        Add Connection
-                    </Button>
-                </Modal.Footer>
-            </Modal>
             </Card>
-            <div className='text-end mt-4 me-5'>
+            {/*<div className='text-end mt-4 me-5'>
               <Button
                 variant="dark"
                 className='rounded-pill btn-document py-1'
@@ -351,10 +301,67 @@ function Home(props) {
                   Add new document
                 </h6>
               </Button>
-            </div>
+            </div>*/}
           </>
-        )}
-      </Container>
+          )
+        )
+      }
+    </Container>
+
+      <Modal show={showAddConnection} centered onHide={() => setShowAddConnection(false)}>
+        <Modal.Header closeButton>
+            <Modal.Title>Add Connection</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+            <Form.Group controlId="formDocument" style={{ position: 'relative' }}>
+                <Form.Label>Document</Form.Label>
+                <Form.Control
+                    type="text"
+                    placeholder="Enter document name"
+                    value={selectDocumentSearch?.Title || ""}
+                    onChange={handleSearchChange}
+                    autoComplete="off" // Prevents browser autocomplete
+                />
+
+                {/* Render the dropdown list of suggestions */}
+                {filteredDocuments.length > 0 && (
+                    <ListGroup style={{ position: 'absolute', top: '100%', zIndex: 1, width: '100%' }}>
+                    {filteredDocuments.map((doc) => (
+                        <ListGroup.Item
+                        key={doc.IdDocument}
+                        action
+                        onClick={() => handleSelectionDocument(doc)}
+                        >
+                        {doc.Title}
+                        </ListGroup.Item>
+                    ))}
+                    </ListGroup>
+                )}
+            </Form.Group>
+            <Form.Group controlId="connectionTypeSelect" className="mb-3">
+                <Form.Label>Connection Type</Form.Label>
+                <Form.Select
+                    value={connectionType}
+                    onChange={(e) => setConnectionType(e.target.value)}
+                >
+                    <option value="">Select connection type</option>
+                    {Object.values(typeConnections).map((type) => (
+                        <option key={type.IdConnection} value={type.IdConnection}>
+                            {type.Type}
+                        </option>
+                    ))}
+                </Form.Select>
+            </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+            <Button variant="outline-secondary" onClick={() => closeModal()}>
+                Cancel
+            </Button>
+            <Button variant="primary" onClick={handleAddConnection}>
+                Add Connection
+            </Button>
+        </Modal.Footer>
+    </Modal>
 
     </>
   );
