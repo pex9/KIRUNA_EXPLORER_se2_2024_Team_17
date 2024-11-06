@@ -130,8 +130,10 @@ function MapComponent({ locations,setLocations, locationsArea,documents, setSele
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          {locationsArea && Object.values(locationsArea).map((area, index) => {
+          {(locationsArea[selectedMarker?.IdLocation] && locationsArea) && 
+            Object.values(locationsArea).map((area, index) => {
             // Parse the coordinates string into a proper array
+            
             const coordinates = Array.isArray(area.Area_Coordinates)
                 ? area.Area_Coordinates
                 : JSON.parse(area.Area_Coordinates);  // If Area_Coordinates is a string, parse it
