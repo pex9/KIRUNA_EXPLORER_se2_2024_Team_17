@@ -7,11 +7,15 @@ describe('Document Type API', () => {
     beforeAll(async () => {
         agent = request.agent(app);
     });
+    afterAll(async () => {
+        await new Promise((resolve) => {
+          server.close(resolve);
+        });
+      });
 
     it('should retrieve all document types', async () => {
         const response = await agent.get('/api/types');
         
-        console.log('Get All Types Response:', response.body);
         expect(response.status).toBe(200);
         expect(Array.isArray(response.body)).toBe(true); 
 
@@ -44,7 +48,6 @@ describe('Document Type API', () => {
         
         const response = await agent.get(`/api/types/${nonExistentTypeId}`);
         
-        console.log('Get Non-Existent Type Response:', response.body);
         expect(response.body).toHaveProperty('error', 'Type not found.');
     });
 

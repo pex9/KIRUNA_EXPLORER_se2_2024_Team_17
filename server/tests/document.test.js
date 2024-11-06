@@ -1,5 +1,6 @@
 import request from "supertest";
 const { app, server } = require("../index.mjs");
+const locationDao = require("../dao/location-dao.js");
 
 describe("Document API with Session Authentication", () => {
   let agent;
@@ -11,9 +12,19 @@ describe("Document API with Session Authentication", () => {
     const loginResponse = await agent
       .post("/api/sessions")
       .send({ username: "mario@test.it", password: "pwd" });
-
-    //console.log("Login Response:", loginResponse.body);
     expect(loginResponse.status).toBe(200);
+  });
+
+  afterAll(async () => {
+    await new Promise((resolve) => {
+      server.close(resolve);  // Ensure server is closed only once
+    });
+  });
+
+  it("should retrieve all documents", async () => {
+    const response = await agent.get("/api/documents");
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
   });
 
   it("should create a new document with valid data", async () => {
@@ -25,7 +36,7 @@ describe("Document API with Session Authentication", () => {
       language: "English",
       pages: 50,
       description: "A description for the document",
-      idType: 2,
+      idtype: 2,
       locationType: "Point",
       latitude: 19,
       longitude: 23,
@@ -33,13 +44,41 @@ describe("Document API with Session Authentication", () => {
     };
 
     const response = await agent.post("/api/documents").send(documentData);
-
-    //console.log("Create Document Response:", response.body);
     expect(response.status).toBe(201);
 
     documentId = response.body.IdDocument || response.body.idDocument;
-    //console.log("Assigned Document ID:", documentId);
     expect(documentId).toBeDefined();
+  });
+
+  it("should return 400 for a document with invalid data", async () => {
+    const invalidDocumentData = {
+      title: "Sample Title",
+      idStakeholder: 1,
+      scale: "National",
+      issuance_Date: "04/2019",
+    };
+    const response = await agent.post("/api/documents").send(invalidDocumentData);
+    expect(response.status).toBe(400);
+  });
+
+  it("should return 500 if error to insert location", async () => {
+    const invalidDocumentData = {
+      title: "Sample Title",
+      idStakeholder: 1,
+      scale: "National",
+      issuance_Date: "04/2019",
+      language: "English",
+      pages: 50,
+      description: "A description for the document",
+      idtype: 2,
+    };
+
+    // Mocking locationDao to simulate failure in location insertion
+    locationDao.addLocation = jest.fn().mockResolvedValue(null);
+
+    const response = await agent.post("/api/documents").send(invalidDocumentData);
+    expect(response.status).toBe(500);
+    expect(response.body.error).toBe("Failed to add location.");
   });
 
   it("should update an existing document", async () => {
@@ -51,25 +90,15 @@ describe("Document API with Session Authentication", () => {
       language: "Spanish",
       pages: 100,
       description: "Updated description for the document",
-      idType: 3,
-      locationType: "Point",
-      latitude: 20,
-      longitude: 30,
-      area_coordinates: "",
+      idtype: 3
     };
 
-    //console.log("Attempting update with documentId:", documentId);
     const updateResponse = await agent
-      .put(`/api/documents/${documentId}`)
+      .patch(`/api/documents/${documentId}`)
       .send(updatedDocumentData);
-
-    //console.log("Update Document Response:", updateResponse.body);
     expect(updateResponse.status).toBe(200);
 
     const retrieveResponse = await agent.get(`/api/documents/${documentId}`);
-
-    console.log("Retrieve Updated Document Response:", retrieveResponse.body);
-    console.log(retrieveResponse.body);
     expect(retrieveResponse.status).toBe(200);
     expect(retrieveResponse.body).toMatchObject({
       IdDocument: documentId,
@@ -80,23 +109,20 @@ describe("Document API with Session Authentication", () => {
       Language: "Spanish",
       Pages: 100,
       Description: "Updated description for the document",
-      IdType: 3,
-      IdLocation: null,
+      IdType: 3
     });
   });
-  it("should retrieve all documents", async () => {
-    const response = await agent.get("/api/documents");
 
-    //console.log("Get All Documents Response:", response.body);
-    //console.log(response.body);
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.body)).toBe(true);
+  it("should return 404 for a non-existent document ID", async () => {
+    const nonExistentDocumentId = 9999;
+    const response = await agent.get(`/api/documents/${nonExistentDocumentId}`);
+    expect(response.status).toBe(404);
   });
+
+  
 
   it("should retrieve a document by ID", async () => {
     const response = await agent.get(`/api/documents/${documentId}`);
-
-    //console.log("Get Document By ID Response:", response.body);
     if (response.status === 200) {
       expect(response.body).toHaveProperty("IdDocument", documentId);
       expect(response.body).toHaveProperty("Title");
@@ -104,22 +130,19 @@ describe("Document API with Session Authentication", () => {
       expect(response.status).toBe(404);
     }
   });
-  it("should return 404 for a non-existent document ID", async () => {
-    const nonExistentDocumentId = 9999;
 
-    const response = await agent.get(`/api/documents/${nonExistentDocumentId}`);
-
-    //console.log("Get Non-Existent Document Response:", response.body);
-    expect(response.status).toBe(404);
-  });
-
-  afterAll(async () => {
-    await new Promise((resolve) => {
-      server.close(resolve);
-    });
-  });
-
-  afterAll(async () => {
-    await new Promise((resolve) => server.close(resolve));
+  it("should return 400 for not insert all data", async () => {
+    const updatedDocumentData = {
+      scale: "Regional",
+      issuance_Date: "05/2020",
+      language: "Spanish",
+      pages: 100,
+      description: "Updated description for the document",
+      idtype: 3
+    };
+    const updateResponse = await agent
+      .patch(`/api/documents/${documentId}`)
+      .send(updatedDocumentData);
+    expect(updateResponse.status).toBe(400);
   });
 });

@@ -14,6 +14,11 @@ describe("Stakeholder API", () => {
       .post("/api/sessions")
       .send({ username: "mario@test.it", password: "pwd" });
   });
+  afterAll(async () => {
+    await new Promise((resolve) => {
+      server.close(resolve);
+    });
+   });
 
   describe("GET /api/stakeholders", () => {
     it("should retrieve all stakeholders", async () => {

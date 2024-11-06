@@ -8,6 +8,22 @@ jest.mock("../dao/document-connection-dao.js");
 // jest.mock("../dao/user-dao");
 
 describe("Document Connections API", () => {
+
+  let agent;
+
+  beforeAll(async () => {
+    agent = request.agent(app);
+
+    // Simulate login to maintain session state for future requests
+    await agent
+      .post("/api/sessions")
+      .send({ username: "mario@test.it", password: "pwd" });
+  });
+  afterAll(async () => {
+    await new Promise((resolve) => {
+      server.close(resolve);
+    });
+  });
   describe("GET /api/document-connections", () => {
     it("should retrieve all document connections", async () => {
       const mockConnections = [
@@ -70,16 +86,7 @@ describe("Document Connections API", () => {
     });
   });
 
-  let agent;
-
-  beforeAll(async () => {
-    agent = request.agent(app);
-
-    // Simulate login to maintain session state for future requests
-    await agent
-      .post("/api/sessions")
-      .send({ username: "mario@test.it", password: "pwd" });
-  });
+  
 
   describe("POST /api/document-connections", () => {
     it("should create a new document connection when authenticated", async () => {

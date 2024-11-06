@@ -87,6 +87,7 @@ function ModifyDocument() {
                     acc[conn.IdConnection] = conn;
                     return acc;
                 }, {});
+                console.log(res);
                 setTypeConnections(typeConnectionId);
             } catch (err) {
                 console.error(err);
