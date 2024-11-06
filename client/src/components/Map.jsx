@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents,Polygon  } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button, Card, Form, Spinner, Modal, CardFooter, Col, Overlay } from "react-bootstrap"; // Importing required components
 import { redirect, useNavigate } from "react-router-dom";
@@ -8,31 +8,32 @@ import L from 'leaflet';
 import API from '../API';
 import '../App.css';
 
-function MapComponent({ locations, documents, setSelectedLocation, propsDocument, selectedLocation }) {
+function MapComponent({ locations, locationsArea,documents, setSelectedLocation, propsDocument, selectedLocation }) {
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [showCard, setShowCard] = useState(false);
   const [showAddConnection, setShowAddConnection] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState('');
   const [connectionType, setConnectionType] = useState('');
-  const [iconsVector, setIconsVector] = useState([]);
   const navigate = useNavigate();
   const context = useContext(AppContext);
   const isLogged = context.loginState.loggedIn;
+  const [documentTypes, setDocumentTypes] = useState([]);
   const [modifyMode, setModifyMode] = useState(false);
 
-  useEffect(() => {
-    const getTypeById = async (id) => {
-      try {
-        const type = await API.getTypeDocument(id);
-        setIconsVector((prev) => [...prev, type.iconsrc]);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+  const offsetDistance = 0.0030; //offset distance between markers
 
-    documents.forEach(async (document) => {
-      await getTypeById(document.IdType);
-    });
+  useEffect(() => {
+    console.log(locationsArea);
+    const fetchDocumentTypes = async () => { 
+      try { 
+        const res = await API.getAllTypesDocument(); 
+ 
+        setDocumentTypes(res); 
+      } catch (err) { 
+        console.error(err); 
+      } 
+    }; 
+    fetchDocumentTypes();
   }, [documents]);
 
   const handleMarkerClick = (marker) => {
@@ -49,11 +50,11 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
 
   const handleAddConnection = () => {
     if (selectedDocument && connectionType) {
-      console.log("Adding connection:", {
+      /*console.log("Adding connection:", {
         document: selectedDocument,
         type: connectionType,
         markerId: selectedMarker?.id,
-      });
+      });*/
       setSelectedDocument('');
       setConnectionType('');
       setShowAddConnection(false);
@@ -64,8 +65,8 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
 
   const handleDragEnd = (document, e) => {
     const { lat, lng } = e.target.getLatLng();
-    console.log(`Marker for ${document} moved to ${lat}, ${lng}`);
-    console.log('Document:', document);
+    //console.log(`Marker for ${document} moved to ${lat}, ${lng}`);
+    //console.log('Document:', document);
 
     // Update document position using the API
     
@@ -86,12 +87,12 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
   };
 
   function LocationMarker() {
+
     useMapEvents({
       click(e) {
         setShowCard(false);
         if(modifyMode) {
           const { lat, lng } = e.latlng;
-          console.log("Map clicked at:", lat, lng);
           setSelectedLocation({ lat, lng });
         }
       },
@@ -99,31 +100,60 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
     return null;
   }
 
+
+
   return (
     <>
-      {documents.length === 0 || locations.length === 0 ? (
+      {documents.length === 0 || locations.length === 0 ? documentTypes.length=== 0 (
         <Spinner animation="border" variant="primary" />
       ) : (
         <div>
-        <MapContainer center={[67.8558, 20.2253]} zoom={13} scrollWheelZoom={false}>
+        <MapContainer center={[67.8558, 20.2253]} zoom={12.4} scrollWheelZoom={false}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          {locationsArea && Object.values(locationsArea).map((area, index) => {
+            // Parse the coordinates string into a proper array
+            const coordinates = Array.isArray(area.Area_Coordinates)
+                ? area.Area_Coordinates
+                : JSON.parse(area.Area_Coordinates);  // If Area_Coordinates is a string, parse it
+            return (
+              <Polygon
+                key={index}
+                positions={coordinates} // Use the parsed array as positions
+                pathOptions={{
+                  color: 'blue', 
+                  fillColor: 'blue', 
+                  fillOpacity: 0.2
+                }}
+              />
+            );
+          })}
           <LocationMarker />
           {documents.map((document, index) => {
-            const location = locations[document.IdLocation];
+
+            //used to not overleap the documents
+            const offsetIndex = index * offsetDistance;
+            const location = locationsArea[document.IdLocation] ? locationsArea[document.IdLocation]: locations[document.IdLocation];
+            if(location){
+            const position = [
+              location.Latitude + (index % 2 === 0 ? offsetIndex : -offsetIndex),
+              location.Longitude + (index % 2 === 0 ? -offsetIndex : offsetIndex),
+            ];
             return (
               <Marker
                 icon={
                   new L.Icon({
-                    iconUrl: `src/icon/${iconsVector[index]}`,
+                    iconUrl: `src/icon/${documentTypes[document.IdType - 1]?.iconsrc}`,
                     iconSize: [32, 32],
                     iconAnchor: [16, 32],
                     popupAnchor: [0, -32],
                   })
                 }
-                draggable={modifyMode} // Only make draggable if logged in
+                draggable={
+                  modifyMode
+                } // Only make draggable if logged in
                 eventHandlers={{
                   dragend: (e) => {
                     if (isLogged) {
@@ -133,11 +163,12 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
                   click: () => handleMarkerClick(document),
                 }}
                 key={index}
-                position={[location.Latitude, location.Longitude]}
+                position={position}
               >
                 <Popup>{document.Title}</Popup>
               </Marker>
             );
+          }
           })}
         {showCard && (
           <Card className='d-flex document-card overlay' style={{marginLeft:'1%', width:'30%'}}>
@@ -155,11 +186,12 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
               <Card.Text style={{fontSize:'16px'}}><strong>Language:</strong> {selectedMarker?.Language}</Card.Text>
               <Card.Text style={{fontSize:'16px'}}><strong>Pages:</strong> {selectedMarker?.Pages}</Card.Text>
               <Card.Text style={{fontSize:'16px'}}>
-                <strong>Latitude:</strong> {locations[selectedMarker?.IdLocation]?.Latitude.toFixed(2)}
+              <strong>Latitude:</strong> {locationsArea[selectedMarker?.IdLocation] ? locationsArea[selectedMarker?.IdLocation]?.Latitude.toFixed(2) : locations[selectedMarker?.IdLocation]?.Latitude.toFixed(2)}
               </Card.Text>
               <Card.Text style={{fontSize:'16px'}}>
-                <strong>Longitude:</strong> {locations[selectedMarker?.IdLocation]?.Longitude.toFixed(2)}
+              <strong>Longitude:</strong> {locationsArea[selectedMarker?.IdLocation] ? locationsArea[selectedMarker?.IdLocation]?.Longitude.toFixed(2) : locations[selectedMarker?.IdLocation]?.Longitude.toFixed(2)}
               </Card.Text>
+              <Card.Text style={{fontSize:'16px'}}><strong>Type </strong> {locationsArea[selectedMarker?.IdLocation] ? "Area": "Point"}</Card.Text>
               </div>
               <div>
               <Card.Text style={{fontSize:'16px'}}><strong>Description:</strong> {selectedMarker?.Description}</Card.Text>
@@ -196,8 +228,8 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
                           <h5>Selected Location:</h5>
                           {selectedLocation ? (
                             <>
-                              <h6><strong>Latitude:</strong> {selectedLocation.lat.toFixed(4)}<br></br>
-                              <strong>Longitude:</strong> {selectedLocation.lng.toFixed(4)}</h6>
+                              <h6><strong>Latitude:</strong> {selectedLocation?.lat.toFixed(4)}<br></br>
+                              <strong>Longitude:</strong> {selectedLocation?.lng.toFixed(4)}</h6>
                             </>
                           ) : (
                             <h6 className='mb-4'>Whole Municipal area</h6>
@@ -231,9 +263,15 @@ function MapComponent({ locations, documents, setSelectedLocation, propsDocument
               size="sm"
               onClick={() => {
                 if(!selectedLocation)
-                  setSelectedLocation({lat: 67.8558, lng: 20.2253 }) //if the selected location is "whole area"
-                console.log('Selected location:', selectedLocation);
-                navigate('documents/create-document', { state: { location: selectedLocation} })
+                {
+                  const firstArea = locationsArea ? Object.values(locationsArea)[0] : null;
+                  setSelectedLocation(firstArea);
+                  navigate('documents/create-document', { state: { location: firstArea} })
+                }
+                else
+                {
+                  navigate('documents/create-document', { state: { location: selectedLocation} })
+                }
               }}
               >
                   Add document

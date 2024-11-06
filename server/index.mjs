@@ -144,7 +144,7 @@ app.post("/api/documents", isUrbanPlanner, async (req, res) => {
       .json({ error: "The request body must contain all the fields" });
     return;
   }
-  const idLocation= await locationDao.addLocation(document.locationType, document.latitude, document.longitude, document.area_coordinates);
+  const idLocation= document.idLocation ? document.idLocation : await locationDao.addLocation(document.locationType, document.latitude, document.longitude, document.area_coordinates);
   if (!idLocation) {
     res.status(500).json({ error: "Failed to add location." });
     return;
@@ -321,7 +321,15 @@ app.post("/api/document-connections", isUrbanPlanner, (req, res) => {
 // API LOCATION
 app.get("/api/locations", (req, res) => {
   locationDao
-    .getLocations()
+    .getLocationsPoint()
+    .then((locations) => res.json(locations))
+    .catch(() => res.status(500).end());
+});
+
+
+app.get("/api/locations/area", (req, res) => {
+  locationDao
+    .getLocationsArea()
     .then((locations) => res.json(locations))
     .catch(() => res.status(500).end());
 });

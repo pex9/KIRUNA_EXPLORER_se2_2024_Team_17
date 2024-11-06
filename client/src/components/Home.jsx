@@ -20,6 +20,7 @@ function Home(props) {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [stakeholders, setStakeholders] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [locationsArea, setLocationsArea] = useState([]);
   const [numberofconnections, setNumberofconnections] = useState(0);
   const [documentTypes, setDocumentTypes] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -50,7 +51,7 @@ function Home(props) {
     const fetchDocumentTypes = async () => {
       try {
         const res = await API.getAllTypesDocument();
-        console.log('Document Types:', res);
+        //console.log('Document Types:', res);
 
         setDocumentTypes(res);
       } catch (err) {
@@ -69,6 +70,24 @@ function Home(props) {
           // Set the transformed object to state
           setLocations(locationsById);
           setLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setLoading(false);
+        });
+    };
+    const fetchLocationsArea = async () => {
+      setLoading(true);
+      API.getAllLocationsArea()
+        .then((res) => {
+          const locationsById = res.reduce((acc, location) => {
+            acc[location.IdLocation] = location;
+            return acc;
+          }, {});
+          // Set the transformed object to state
+          console.log("SONO FOGLIA"); 
+          console.log(locationsById);
+          setLocationsArea(locationsById);
         })
         .catch((err) => {
           console.error(err);
@@ -98,7 +117,7 @@ function Home(props) {
       }
     };
 
-    Promise.all([fetchDocuments(), fetchLocations(), fetchStakeholders(), fetchDocumentTypes(),getAllTypeConnections()])
+    Promise.all([fetchDocuments(), fetchLocations(), fetchStakeholders(), fetchDocumentTypes(),getAllTypeConnections(),fetchLocationsArea()])
       .then(() => setLoading(false))
       .catch(err => {
         console.error(err);
@@ -114,11 +133,9 @@ function Home(props) {
   const handleDocumentClick = async (doc) => {
     // Fetch the number of connections for the selected document
     const res = await API.getDocumentConnection(doc.IdDocument);
-    console.log('Connections:', res);
     setNumberofconnections(res.length);
     setSelectedDocument(doc);
     setSrcicon("src/icon/" + documentTypes[doc.IdType].iconsrc);
-    console.log("src/icon/" + documentTypes[doc.IdType].iconsrc);
 
   };
 
@@ -185,41 +202,7 @@ function Home(props) {
           ) : (
 
             <>
-              <MapComponent locations={locations} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation}/>
-
-              {/*isLogged &&
-                <Container fluid className='align-items-end mt-1'>
-                  {selectedLocation ? (
-                    <div className='d-flex justify-content-end me-5'>
-                            <Card className='text-start form p-3'>
-                            <Button variant="link" style={{ color: 'black', position: 'absolute', right: '0px', top: '0px' }} onClick={() => setSelectedLocation(null)}>
-                              <i className="bi bi-x h2"></i>
-                            </Button>
-                            <div className='m-3'>
-                              <h4>Selected Location:</h4>
-                              <p>Latitude: {selectedLocation.lat.toFixed(4)}, Longitude: {selectedLocation.lng.toFixed(4)}</p>
-                            </div>
-                            <div className='text-center'>
-                              <Button
-                                variant="dark"
-                                className='py-1 rounded-pill btn-document'
-                                size="sm"
-                                onClick={() => navigate('documents/create-document', { state: { location: selectedLocation } })}
-                                disabled={!selectedLocation} // Disable button if no location is selected
-                              >
-                                <h6>
-                                  Add document
-                                </h6>
-                              </Button>
-                            </div>
-                          </Card>
-                    </div>
-                  ) : (
-                    <>
-                      <h6 className="text-muted">Select a location on the map to create a new document or select a document to edit it.</h6>
-                    </>
-                  )}
-                </Container>*/ }
+              <MapComponent locations={locations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation}/>
             </>
           )
 
@@ -267,11 +250,13 @@ function Home(props) {
                         <Card.Text style={{fontSize:'16px'}}><strong>Language:</strong> {selectedDocument?.Language}</Card.Text>
                         <Card.Text style={{fontSize:'16px'}}><strong>Pages:</strong> {selectedDocument?.Pages}</Card.Text>
                         <Card.Text style={{fontSize:'16px'}}>
-                          <strong>Latitude:</strong> {locations[selectedDocument?.IdLocation]?.Latitude.toFixed(2)}
+                        <strong>Latitude:</strong> {locationsArea[selectedDocument?.IdLocation] ? locationsArea[selectedDocument?.IdLocation]?.Latitude.toFixed(2) : locations[selectedDocument?.IdLocation]?.Latitude.toFixed(2)}
                         </Card.Text>
                         <Card.Text style={{fontSize:'16px'}}>
-                          <strong>Longitude:</strong> {locations[selectedDocument?.IdLocation]?.Longitude.toFixed(2)}
+                          <strong>Longitude:</strong> {locationsArea[selectedDocument?.IdLocation] ? locationsArea[selectedDocument?.IdLocation]?.Longitude.toFixed(2) : locations[selectedDocument?.IdLocation]?.Longitude.toFixed(2)}
                         </Card.Text>
+                        <Card.Text style={{fontSize:'16px'}}><strong>Type </strong> {locationsArea[selectedDocument?.IdLocation] ? "Area": "Point"}</Card.Text>
+
                         </div>
                         <div>
                         <Card.Text style={{fontSize:'16px'}}><strong>Description:</strong> {selectedDocument?.Description}</Card.Text>

@@ -100,7 +100,30 @@ const addDocument = (title, idStakeholder, scale, issuance_Date, language, pages
   });
 
 };
-
+const addDocumentArea = (title, idStakeholder, scale, issuance_Date, language, pages, description, idtype, idLocation) => {
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/documents", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title, idStakeholder, scale, issuance_Date, language, pages, description, idtype, idLocation }),
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          resolve(response.json());
+        } else {
+          response.json().then((message) => {
+            reject(message);
+          });
+        }
+      })
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });
+      });
+  });
+};
 const getAllDocuments = () => {
   console.log("GET ALL DOCUMENTS");
   return new Promise((resolve, reject) => {
@@ -382,6 +405,27 @@ const getAllLocations = () => {
       });
   });
 }
+const getAllLocationsArea = () => {
+  
+  return new Promise((resolve, reject) => {
+    fetch(URL + "/locations/area", {
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((locations) => {
+            resolve(locations);
+          }
+          );
+        } else {
+          response.json().then((message) => {
+            reject(message);
+          });
+        }
+      }
+      );
+  });
+};
 
 const getLocationById = (id) => {
   return new Promise((resolve, reject) => {
@@ -455,6 +499,6 @@ const getAllTypeConnections = () => {
   });
 };
 
-const API = { getUsers, login, logout, getUserInfo, getAllTypesDocument, getTypeDocument, getAllStakeholders, getStakeholder, addDocument, createDocumentConnection, getAllDocumentConnections, getDocumentConnection, getAllDocuments, getDocumentById, getAllLocations, updateLocationDocument, getLocationById, getAllTypeConnections,updateDocument };
+const API = { getUsers, login, logout, getUserInfo, getAllTypesDocument, getTypeDocument, getAllStakeholders, getStakeholder, addDocument, createDocumentConnection, getAllDocumentConnections, getDocumentConnection, getAllDocuments, getDocumentById, getAllLocations, updateLocationDocument, getLocationById, getAllTypeConnections,updateDocument,getAllLocationsArea,addDocumentArea};
 
 export default API;

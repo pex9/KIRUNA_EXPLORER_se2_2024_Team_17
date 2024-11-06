@@ -113,20 +113,21 @@ function ModifyDocument() {
       if(!title || !scale || !issuanceDate || !description || !language || !pages || !stakeholder || !type){
         alert("Please complete all fields to add a document.");
       } else {
-
-        if (document) {
+        if (documentId) {
           const result= await API.updateDocument(documentId, title,stakeholder.id ? stakeholder.id: stakeholder, scale, issuanceDate, language, pages,description,  type.id ? type.id: type); 
           navigate('/');
         } else {
-            if(selectedLocation.lat != null && selectedLocation.lng != null){
+              if( selectedLocation!= null && selectedLocation.lat != null && selectedLocation.lng != null){
                 // insert the document which is a point 
                 //console.log(selectedLocation);
                 //console.log({ title, scale, issuanceDate, description, connections, language, pages, stakeholder: stakeholder, type: type, locationType : "Point", latitude : selectedLocation.lat , longitude: selectedLocation.lng, area_coordinates :"" });
                 const result= await API.addDocument( title,stakeholder, scale, issuanceDate, language, pages,description,  type,  "Point",  selectedLocation.lat , selectedLocation.lng, "" );
                 navigate('/');
               }
-              else if (selectedLocation.coordinates != null){
-                // insert the document which is a polygon
+              else if (selectedLocation!= null && selectedLocation.Location_Type =="Area"){
+                //insert the document inside an area
+                const result = await API.addDocumentArea( title,stakeholder, scale, issuanceDate, language, pages,description,  type, selectedLocation.IdLocation );
+                navigate('/');
             }
             // insert the document
             /*const result= await API.addDocument({ title, scale, issuanceDate, description, connections, language, pages, stakeholder: stakeholder.id, type: type.id });
@@ -285,30 +286,27 @@ function ModifyDocument() {
                       </FloatingLabel>
                     </Form.Group>
                     {!documentId ? ( 
-                      <>
-                        {( selectedLocation.lat != null && selectedLocation.lng != null) ?
-                          (
+                        <>
+                          {(selectedLocation && selectedLocation.lat != null && selectedLocation.lng != null) ? (
                             <div className='mb-4 d-flex'>
-                            <p className='mx-4'>
-                            <strong>Latitude:</strong> {selectedLocation.lat.toFixed(4)}
-                            </p>
-                            <p className='mx-4'>
-                            <strong>Longitude:</strong> {selectedLocation.lng.toFixed(4)} 
-                            </p>
-                          </div>
-                        ) : (
-                          <p>
+                              <p className='mx-4'>
+                                <strong>Latitude:</strong> {selectedLocation.lat.toFixed(4)}
+                              </p>
+                              <p className='mx-4'>
+                                <strong>Longitude:</strong> {selectedLocation.lng.toFixed(4)} 
+                              </p>
+                            </div>
+                          ) : (
+                            <p>
                               <strong>Location: </strong> Whole Municipal Area
                             </p>
-                          )
-                        }
-                      </>
-                    ) : (
-                      <>
-
-                      </>
-                    )
-                  }
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {/* Existing document details here */}
+                        </>
+                      )}
                   
                     <div className="d-flex justify-content-center my-2 mx-5">
                         <Button variant="outline-secondary" className='mx-2 rounded-pill px-4' onClick={() => navigate('/')}>
