@@ -2,12 +2,17 @@ import request from 'supertest'; // Import supertest for testing HTTP requests
 const { app,server } = require('../index.mjs'); // Use require for your app and server
 describe('User API', () => {
     // Test for login
+    afterAll(async () => {
+        await new Promise((resolve) => {
+          server.close(resolve);
+        });
+    });
+
     it('should login successfully with valid credentials', async () => {
         const response = await request(app)
             .post('/api/sessions')
             .send({ username: 'mario@test.it', password: 'pwd' });
         expect(response.status).toBe(200);
-        console.log(response.body);
         expect(response.body).toHaveProperty('email', 'mario@test.it');
         expect(response.body).toHaveProperty('name', 'Mario');
         expect(response.body).toHaveProperty('surname', 'Test');
