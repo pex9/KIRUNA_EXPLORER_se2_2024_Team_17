@@ -1,5 +1,5 @@
-import { useContext, useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents,Polygon  } from "react-leaflet";
+import { useContext, useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polygon, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button, Card, Form, Spinner, Modal, CardFooter, Col, Overlay } from "react-bootstrap"; // Importing required components
 import { redirect, useNavigate } from "react-router-dom";
@@ -8,7 +8,7 @@ import L from 'leaflet';
 import API from '../API';
 import '../App.css';
 
-function MapComponent({ locations,setLocations, locationsArea,documents, setSelectedLocation, propsDocument, selectedLocation }) {
+function MapComponent({ locations, setLocations, locationsArea, documents, setSelectedLocation, propsDocument, selectedLocation }) {
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [showCard, setShowCard] = useState(false);
   const [showAddConnection, setShowAddConnection] = useState(false);
@@ -20,20 +20,54 @@ function MapComponent({ locations,setLocations, locationsArea,documents, setSele
   const [documentTypes, setDocumentTypes] = useState([]);
   const [modifyMode, setModifyMode] = useState(false);
   const [loading, setLoading] = useState(true);
-
   const offsetDistance = 0.0010; //offset distance between markers
+  const mapRef = useRef(null); // To get a reference to the map instance
+
+  // Custom hook to handle zooming behavior
+  function CustomZoomHandler() {
+    const map = useMap(); // Get the map instance
+
+    useEffect(() => {
+      // Disable default scroll zoom
+      map.scrollWheelZoom.disable();
+
+      // Custom zoom behavior with Ctrl + scroll
+      const handleWheel = (event) => {
+        if (event.ctrlKey) {
+          event.preventDefault(); // Prevent default page scrolling
+
+          if (event.deltaY < 0) {
+            map.zoomIn(); // Zoom in when scroll is up (negative deltaY)
+          } else {
+            map.zoomOut(); // Zoom out when scroll is down (positive deltaY)
+          }
+        }
+      };
+
+      // Attach the event listener to the map container
+      const mapContainer = map.getContainer();
+      mapContainer.addEventListener('wheel', handleWheel);
+
+      // Cleanup the event listener when component unmounts
+      return () => {
+        mapContainer.removeEventListener('wheel', handleWheel);
+      };
+    }, [map]);
+
+    return null; // This component does not render any UI
+  }
 
   useEffect(() => {
     setLoading(true);
-    const fetchDocumentTypes = async () => { 
-      try { 
-        const res = await API.getAllTypesDocument(); 
- 
-        setDocumentTypes(res); 
-      } catch (err) { 
-        console.error(err); 
-      } 
-    }; 
+    const fetchDocumentTypes = async () => {
+      try {
+        const res = await API.getAllTypesDocument();
+
+        setDocumentTypes(res);
+      } catch (err) {
+        console.error(err);
+      }
+    };
     fetchDocumentTypes();
     setLoading(false);
   }, [documents]);
@@ -76,7 +110,7 @@ function MapComponent({ locations,setLocations, locationsArea,documents, setSele
       setLocations(updatedLocations); // Update the state for immediate UI reflection
 
     }
-    else{
+    else {
       API.updateLocationDocument(
         document.IdLocation,
         "Point",
@@ -84,31 +118,31 @@ function MapComponent({ locations,setLocations, locationsArea,documents, setSele
         lng,
         ""
       )
-      .then(() => {
-        console.log('Position updated successfully');
-        
-        // Update local state to reflect the new position
-        const updatedLocations = { ...locations };
-        if (updatedLocations[document.IdLocation]) {
-          updatedLocations[document.IdLocation] = {
-            ...updatedLocations[document.IdLocation],
-            Latitude: lat,
-            Longitude: lng
-          };
-        }
-        setLocations(updatedLocations); // Update the state for immediate UI reflection
-      })
-      .catch((err) => {
-        console.error('Error updating position:', err);
-      });
+        .then(() => {
+          console.log('Position updated successfully');
+
+          // Update local state to reflect the new position
+          const updatedLocations = { ...locations };
+          if (updatedLocations[document.IdLocation]) {
+            updatedLocations[document.IdLocation] = {
+              ...updatedLocations[document.IdLocation],
+              Latitude: lat,
+              Longitude: lng
+            };
+          }
+          setLocations(updatedLocations); // Update the state for immediate UI reflection
+        })
+        .catch((err) => {
+          console.error('Error updating position:', err);
+        });
     }
-    
+
   };
 
   function LocationMarker() {
     useMapEvents({
       click(e) {
-        if(modifyMode) {
+        if (modifyMode) {
           const { lat, lng } = e.latlng;
           setSelectedLocation({ lat, lng });
         }
@@ -118,190 +152,188 @@ function MapComponent({ locations,setLocations, locationsArea,documents, setSele
   }
 
 
-
   return (
     <>
-      {loading ==true ? (
+      {loading == true ? (
         <Spinner animation="border" variant="primary" />
       ) : (
         <div>
-        <MapContainer center={[67.8558, 20.2253]} zoom={12.4} scrollWheelZoom={false}>
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {(locationsArea[selectedMarker?.IdLocation] && locationsArea) && 
-            Object.values(locationsArea).map((area, index) => {
-            // Parse the coordinates string into a proper array
-            
-            const coordinates = Array.isArray(area.Area_Coordinates)
-                ? area.Area_Coordinates
-                : JSON.parse(area.Area_Coordinates);  // If Area_Coordinates is a string, parse it
-            return (
-              <Polygon
-                key={index}
-                positions={coordinates} // Use the parsed array as positions
-                pathOptions={{
-                  color: 'blue', 
-                  fillColor: 'blue', 
-                  fillOpacity: 0.1
-                }}
-              />
-            );
-          })}
-          <LocationMarker />
-          {documents.map((document, index) => {
+          <MapContainer ref={mapRef} center={[67.8558, 20.2253]} zoom={12.4}>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {(locationsArea[selectedMarker?.IdLocation] && locationsArea) &&
+              Object.values(locationsArea).map((area, index) => {
+                // Parse the coordinates string into a proper array
 
-            //used to not overleap the documents
-            const offsetIndex = index * offsetDistance;
-            const location = locationsArea[document.IdLocation] ? locationsArea[document.IdLocation]: locations[document.IdLocation];
-            if(location){
-            const position = [
-              location.Latitude + (index % 2 === 0 ? offsetIndex : -offsetIndex),
-              location.Longitude + (index % 2 === 0 ? -offsetIndex : offsetIndex),
-            ];
-            return (
-              <Marker
-                icon={
-                  new L.Icon({
-                    iconUrl: `src/icon/${documentTypes[document.IdType - 1]?.iconsrc}`,
-                    iconSize: [32, 32],
-                    iconAnchor: [16, 32],
-                    popupAnchor: [0, -32],
-                  })
-                }
-                draggable={
-                  modifyMode
-                } // Only make draggable if logged in
-                eventHandlers={{
-                  dragend: (e) => {
-                    if (isLogged) {
-                      handleDragEnd(document, e); // Only call dragend if logged in
+                const coordinates = Array.isArray(area.Area_Coordinates)
+                  ? area.Area_Coordinates
+                  : JSON.parse(area.Area_Coordinates);  // If Area_Coordinates is a string, parse it
+                return (
+                  <Polygon
+                    key={index}
+                    positions={coordinates} // Use the parsed array as positions
+                    pathOptions={{
+                      color: 'blue',
+                      fillColor: 'blue',
+                      fillOpacity: 0.1
+                    }}
+                  />
+                );
+              })}
+            <LocationMarker />
+            {documents.map((document, index) => {
+
+              //used to not overleap the documents
+              const offsetIndex = index * offsetDistance;
+              const location = locationsArea[document.IdLocation] ? locationsArea[document.IdLocation] : locations[document.IdLocation];
+              if (location) {
+                const position = [
+                  location.Latitude + (index % 2 === 0 ? offsetIndex : -offsetIndex),
+                  location.Longitude + (index % 2 === 0 ? -offsetIndex : offsetIndex),
+                ];
+                return (
+                  <Marker
+                    icon={
+                      new L.Icon({
+                        iconUrl: `src/icon/${documentTypes[document.IdType - 1]?.iconsrc}`,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32],
+                        popupAnchor: [0, -32],
+                      })
                     }
-                  },
-                  click: () => handleMarkerClick(document),
-                }}
-                key={index}
-                position={position}
-              >
-                <Popup>{document.Title}</Popup>
-              </Marker>
-            );
-          }
-          })}
-        {showCard && (
-          <Card className='d-flex document-card overlay' style={{marginLeft:'1%', width:'30%'}}>
-            <Button variant="close" onClick={() => setShowCard(false)} style={{ position: 'absolute', top: '2%', right: '2%' }} />
-              <Card.Header className='document'>
-              <Card.Title><strong>{selectedMarker?.Title}</strong></Card.Title>
-              </Card.Header>
-            <Card.Body className='document-card text-start p-4'>
-              <div className='d-flex'>
-                
-              <div className='col-6'>
-              
-              <Card.Text style={{fontSize:'16px'}}><strong>Date:</strong> {selectedMarker?.Issuance_Date}</Card.Text>
-              <Card.Text style={{fontSize:'16px'}}><strong>Scale:</strong> {selectedMarker?.Scale}</Card.Text>
-              <Card.Text style={{fontSize:'16px'}}><strong>Language:</strong> {selectedMarker?.Language}</Card.Text>
-              <Card.Text style={{fontSize:'16px'}}><strong>Pages:</strong> {selectedMarker?.Pages}</Card.Text>
-              <Card.Text style={{fontSize:'16px'}}>
-              <strong>Latitude:</strong> {locationsArea[selectedMarker?.IdLocation] ? locationsArea[selectedMarker?.IdLocation]?.Latitude.toFixed(2) : locations[selectedMarker?.IdLocation]?.Latitude.toFixed(2)}
-              </Card.Text>
-              <Card.Text style={{fontSize:'16px'}}>
-              <strong>Longitude:</strong> {locationsArea[selectedMarker?.IdLocation] ? locationsArea[selectedMarker?.IdLocation]?.Longitude.toFixed(2) : locations[selectedMarker?.IdLocation]?.Longitude.toFixed(2)}
-              </Card.Text>
-              <Card.Text style={{fontSize:'16px'}}><strong>Type </strong> {locationsArea[selectedMarker?.IdLocation] ? "Area": "Point"}</Card.Text>
-              </div>
-              <div>
-              <Card.Text style={{fontSize:'16px'}}><strong>Description:</strong> {selectedMarker?.Description}</Card.Text>
-              </div>
-              </div>
-            </Card.Body>
-              {isLogged && (
-            <Card.Footer className=' text-end' >
-                <Button variant="secondary" className='btn-document rounded-pill px-3' onClick={handleModifyDocument}>Modify</Button>
-            </Card.Footer>
-              )}
-          </Card>
-        )}
-            { modifyMode && 
-            <div className='d-flex justify-content-end me-5'>
-                    <Card className='text-start form overlay'>
-                      <Card.Header>
-                        <Card.Title className='me-5 mt-1'><strong>
-                          Add New Document
-                          </strong>
-                          </Card.Title>
-                        <Button 
-                          hidden={!selectedLocation}
-                          variant="link" 
-                          style={{ color: 'black', position: 'absolute', right: '0px', top: '0px' }} 
-                          onClick={() => setSelectedLocation(null)}>
-                          <i className="bi bi-x h2"></i>
-                        </Button>
-                      </Card.Header>
-                      <Card.Body>
-                      
-
-                        <div className='mx-3'>
-                          <h5>Selected Location:</h5>
-                          {selectedLocation ? (
-                            <>
-                              <h6><strong>Latitude:</strong> {selectedLocation?.lat.toFixed(4)}<br></br>
-                              <strong>Longitude:</strong> {selectedLocation?.lng.toFixed(4)}</h6>
-                            </>
-                          ) : (
-                            <h6 className='mb-4'>Whole Municipal area</h6>
-                          )
+                    draggable={
+                      modifyMode
+                    } // Only make draggable if logged in
+                    eventHandlers={{
+                      dragend: (e) => {
+                        if (isLogged) {
+                          handleDragEnd(document, e); // Only call dragend if logged in
                         }
-                        </div>
-                      </Card.Body>
-                    </Card>
-            </div> 
-          }
-        </MapContainer>
+                      },
+                      click: () => handleMarkerClick(document),
+                    }}
+                    key={index}
+                    position={position}
+                  >
+                    <Popup>{document.Title}</Popup>
+                  </Marker>
+                );
+              }
+            })}
+            {showCard && (
+              <Card className='d-flex document-card overlay' style={{ marginLeft: '1%', width: '30%' }}>
+                <Button variant="close" onClick={() => setShowCard(false)} style={{ position: 'absolute', top: '2%', right: '2%' }} />
+                <Card.Header className='document'>
+                  <Card.Title><strong>{selectedMarker?.Title}</strong></Card.Title>
+                </Card.Header>
+                <Card.Body className='document-card text-start p-4'>
+                  <div className='d-flex'>
+
+                    <div className='col-6'>
+
+                      <Card.Text style={{ fontSize: '16px' }}><strong>Date:</strong> {selectedMarker?.Issuance_Date}</Card.Text>
+                      <Card.Text style={{ fontSize: '16px' }}><strong>Scale:</strong> {selectedMarker?.Scale}</Card.Text>
+                      <Card.Text style={{ fontSize: '16px' }}><strong>Language:</strong> {selectedMarker?.Language}</Card.Text>
+                      <Card.Text style={{ fontSize: '16px' }}><strong>Pages:</strong> {selectedMarker?.Pages}</Card.Text>
+                      <Card.Text style={{ fontSize: '16px' }}>
+                        <strong>Latitude:</strong> {locationsArea[selectedMarker?.IdLocation] ? locationsArea[selectedMarker?.IdLocation]?.Latitude.toFixed(2) : locations[selectedMarker?.IdLocation]?.Latitude.toFixed(2)}
+                      </Card.Text>
+                      <Card.Text style={{ fontSize: '16px' }}>
+                        <strong>Longitude:</strong> {locationsArea[selectedMarker?.IdLocation] ? locationsArea[selectedMarker?.IdLocation]?.Longitude.toFixed(2) : locations[selectedMarker?.IdLocation]?.Longitude.toFixed(2)}
+                      </Card.Text>
+                      <Card.Text style={{ fontSize: '16px' }}><strong>Type </strong> {locationsArea[selectedMarker?.IdLocation] ? "Area" : "Point"}</Card.Text>
+                    </div>
+                    <div>
+                      <Card.Text style={{ fontSize: '16px' }}><strong>Description:</strong> {selectedMarker?.Description}</Card.Text>
+                    </div>
+                  </div>
+                </Card.Body>
+                {isLogged && (
+                  <Card.Footer className=' text-end' >
+                    <Button variant="secondary" className='btn-document rounded-pill px-3' onClick={handleModifyDocument}>Modify</Button>
+                  </Card.Footer>
+                )}
+              </Card>
+            )}
+            {modifyMode &&
+              <div className='d-flex justify-content-end me-5'>
+                <Card className='text-start form overlay'>
+                  <Card.Header>
+                    <Card.Title className='me-5 mt-1'><strong>
+                      Add New Document
+                    </strong>
+                    </Card.Title>
+                    <Button
+                      hidden={!selectedLocation}
+                      variant="link"
+                      style={{ color: 'black', position: 'absolute', right: '0px', top: '0px' }}
+                      onClick={() => setSelectedLocation(null)}>
+                      <i className="bi bi-x h2"></i>
+                    </Button>
+                  </Card.Header>
+                  <Card.Body>
+
+
+                    <div className='mx-3'>
+                      <h5>Selected Location:</h5>
+                      {selectedLocation ? (
+                        <>
+                          <h6><strong>Latitude:</strong> {selectedLocation?.lat.toFixed(4)}<br></br>
+                            <strong>Longitude:</strong> {selectedLocation?.lng.toFixed(4)}</h6>
+                        </>
+                      ) : (
+                        <h6 className='mb-4'>Whole Municipal area</h6>
+                      )
+                      }
+                    </div>
+                  </Card.Body>
+                </Card>
+              </div>
+            }
+            <CustomZoomHandler />
+          </MapContainer>
         </div>
       )}
       {isLogged &&
-      <>
-        <div className='d-flex mt-2 align-items-center justify-content-between mx-5'>
-          <div className='d-flex align-items-center'>
-          <Button variant='dark' className='rounded-pill mt-2 px-4 mx-2 btn-document' onClick={() => setModifyMode((mode) => !mode)}>
-            Enable drag / add new location for a document
-          </Button>
+        <>
+          <div className='d-flex mt-2 align-items-center justify-content-between mx-5'>
+            <div className='d-flex align-items-center'>
+              <Button variant='dark' className='rounded-pill mt-2 px-4 mx-2 btn-document' onClick={() => setModifyMode((mode) => !mode)}>
+                Enable drag / add new location for a document
+              </Button>
 
-          <div className=''>
-          {modifyMode && <strong className='col text-end mx-5 mt-1'>Drag / Add new document enabled</strong>}
-          </div>
-          </div>
-          {modifyMode &&
-          <div className='me-4'>
-            <Button
-              variant="dark"
-              className='px-3 me-5 rounded-pill btn-document'
-              size="sm"
-              onClick={() => {
-                if(!selectedLocation)
-                {
-                  const firstArea = locationsArea ? Object.values(locationsArea)[0] : null;
-                  setSelectedLocation(firstArea);
-                  navigate('documents/create-document', { state: { location: firstArea} })
-                }
-                else
-                {
-                  navigate('documents/create-document', { state: { location: selectedLocation} })
-                }
-              }}
-              >
-                  Add document
-              
-            </Button>
+              <div className=''>
+                {modifyMode && <strong className='col text-end mx-5 mt-1'>Drag / Add new document enabled</strong>}
+              </div>
             </div>
-          }
-        </div>
-      
-      </>
-    }
+            {modifyMode &&
+              <div className='me-4'>
+                <Button
+                  variant="dark"
+                  className='px-3 me-5 rounded-pill btn-document'
+                  size="sm"
+                  onClick={() => {
+                    if (!selectedLocation) {
+                      const firstArea = locationsArea ? Object.values(locationsArea)[0] : null;
+                      setSelectedLocation(firstArea);
+                      navigate('documents/create-document', { state: { location: firstArea } })
+                    }
+                    else {
+                      navigate('documents/create-document', { state: { location: selectedLocation } })
+                    }
+                  }}
+                >
+                  Add document
+
+                </Button>
+              </div>
+            }
+          </div>
+
+        </>
+      }
       {/* Add Connection Modal */}
       <Modal show={showAddConnection} onHide={() => setShowAddConnection(false)} centered>
         <Modal.Header closeButton>

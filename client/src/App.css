@@ -1,6 +1,7 @@
 #root {
   margin: 0 auto;
   text-align: center;
+  --custom-color: #A89559;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -8,12 +9,14 @@
     animation: logo-spin infinite 20s linear;
   }
 }
+
 .leaflet-container {
   height: 70vh;
   border-radius: 2rem;
 }
-.mapContainer{
-  
+
+.mapContainer {
+
   justify-content: center;
   align-items: center;
 }
@@ -43,27 +46,30 @@
 
 .bg-color-main {
   background-color: #33B7CE;
-  color:white;
+  color: white;
 }
+
 .bg-color-main-light {
   background-color: rgba(194, 232, 239, 0.41);
-  color:black;
+  color: black;
 }
 
 
 .btn-main {
   background-color: #33B7CE;
-  color:white;
+  color: white;
   border-color: #33B7CE;
 }
+
 .btn-logout {
   background-color: #B52C92;
-  color:white;
+  color: white;
   border-color: #B52C92;
 }
+
 .btn-document {
   background-color: #A89559;
-  color:white;
+  color: white;
   border-color: #A89559;
 }
 
@@ -76,4 +82,14 @@
   bottom: 30px;
   z-index: 1000;
   box-shadow: #000000 0px 10px 20px 0px;
+}
+
+.custom-toggle .btn-outline-primary {
+  color: var(--custom-color);
+  border-color: var(--custom-color);
+}
+
+.custom-toggle .btn-outline-primary.active {
+  background-color: var(--custom-color);
+  border-color: var(--custom-color);
 }

@@ -26,14 +26,13 @@ function Home(props) {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [srcicon, setSrcicon] = useState("");
   const [showAddConnection, setShowAddConnection] = useState(false);
-
   const [filteredDocuments, setFilteredDocuments] = useState([]);
   const [connectionType, setConnectionType] = useState('');
   const [typeConnections, setTypeConnections] = useState({});
   const [selectDocumentSearch, setSelectDocumentSearch] = useState('');
 
-  
-  
+
+
   const navigate = useNavigate();
   const context = useContext(AppContext);
   const isLogged = context.loginState.loggedIn;
@@ -94,15 +93,15 @@ function Home(props) {
     };
     const getAllTypeConnections = async () => {
       try {
-          const res = await API.getAllTypeConnections();
+        const res = await API.getAllTypeConnections();
 
-          const typeConnectionId = res.reduce((acc, conn) => {
-              acc[conn.IdConnection] = conn;
-              return acc;
-          }, {});
-          setTypeConnections(typeConnectionId);
+        const typeConnectionId = res.reduce((acc, conn) => {
+          acc[conn.IdConnection] = conn;
+          return acc;
+        }, {});
+        setTypeConnections(typeConnectionId);
       } catch (err) {
-          console.error(err);
+        console.error(err);
       }
     };
 
@@ -115,7 +114,7 @@ function Home(props) {
       }
     };
 
-    Promise.all([fetchDocuments(), fetchLocations(), fetchStakeholders(), fetchDocumentTypes(),getAllTypeConnections(),fetchLocationsArea()])
+    Promise.all([fetchDocuments(), fetchLocations(), fetchStakeholders(), fetchDocumentTypes(), getAllTypeConnections(), fetchLocationsArea()])
       .then(() => setLoading(false))
       .catch(err => {
         console.error(err);
@@ -142,16 +141,16 @@ function Home(props) {
       navigate(`documents/modify-document/${selectedDocument.IdDocument}`);
     }
   };
-  const handleAddConnection = async() => {
+  const handleAddConnection = async () => {
     if (selectedDocument && connectionType) {
-        await API.createDocumentConnection(selectedDocument.IdDocument,selectDocumentSearch.IdDocument , connectionType);
-        // now i have to call again the document to update the connections
-        const res = await API.getDocumentConnection(selectedDocument.IdDocument);
-        setSelectedDocument('');
-        setConnectionType('');
-        setShowAddConnection(false);
+      await API.createDocumentConnection(selectedDocument.IdDocument, selectDocumentSearch.IdDocument, connectionType);
+      // now i have to call again the document to update the connections
+      const res = await API.getDocumentConnection(selectedDocument.IdDocument);
+      setSelectedDocument('');
+      setConnectionType('');
+      setShowAddConnection(false);
     } else {
-        alert("Please complete all fields to add a connection.");
+      alert("Please complete all fields to add a connection.");
     }
   };
 
@@ -161,12 +160,12 @@ function Home(props) {
 
     // Filter documents that match the input
     if (searchValue.length > 0) {
-    const filtered = documents.filter((doc) =>
+      const filtered = documents.filter((doc) =>
         doc.Title.toLowerCase().includes(searchValue.toLowerCase()) && doc.IdDocument != selectedDocument.IdDocument
-    );
-    setFilteredDocuments(filtered);
+      );
+      setFilteredDocuments(filtered);
     } else {
-    setFilteredDocuments([]);
+      setFilteredDocuments([]);
     }
   };
   const handleSelectionDocument = (doc) => {
@@ -182,9 +181,38 @@ function Home(props) {
     <>
       {isLogged &&
         <div className=' d-flex justify-content-center mt-3'>
-          <ToggleButtonGroup type="radio" name="options" value={viewMode} onChange={handleToggle}>
-            <ToggleButton id="tbg-map" value="map" variant='' className='px-4'>Map</ToggleButton>
-            <ToggleButton id="tbg-list" value="list" variant='' className='px-4'>List</ToggleButton>
+          <ToggleButtonGroup
+            type="radio"
+            name="options"
+            value={viewMode}
+            onChange={handleToggle}
+          >
+            <ToggleButton
+              id="tbg-map"
+              value="map"
+              variant="outline-primary"
+              className="px-4"
+              style={{
+                color: viewMode === "map" ? "white" : "#A89559",
+                borderColor: "#A89559",
+                backgroundColor: viewMode === "map" ? "#A89559" : "transparent",
+              }}
+            >
+              Map
+            </ToggleButton>
+            <ToggleButton
+              id="tbg-list"
+              value="list"
+              variant="outline-primary"
+              className="px-4"
+              style={{
+                color: viewMode === "list" ? "white" : "#A89559",
+                borderColor: "#A89559",
+                backgroundColor: viewMode === "list" ? "#A89559" : "transparent",
+              }}
+            >
+              List
+            </ToggleButton>
           </ToggleButtonGroup>
         </div>
       }
@@ -196,7 +224,7 @@ function Home(props) {
           ) : (
 
             <>
-              <MapComponent locations={locations} setLocations={setLocations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation}/>
+              <MapComponent locations={locations} setLocations={setLocations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation} />
             </>
           )
 
@@ -204,72 +232,72 @@ function Home(props) {
           loading ? (
             <Spinner animation="border" variant="primary" />
           ) : (
-          <>
-            <Card className="mt-3">
-              <div className='d-flex p-3'>
-                <div className='me-3' style={{ width: '30%', overflowY: 'auto', maxHeight: '600px' }}>
-                  {loading ? (
-                    <Spinner animation="border" variant="primary" />
-                  ) : (
-                    <Card>
-                      <Card.Header>Document List</Card.Header>
-                      <ListGroup style={{maxHeight:'355px', overflowY:'auto'}}>
-                        {documents.map((doc, index) => (
-                          <ListGroup.Item
-                            key={index}
-                            onClick={() => handleDocumentClick(doc)}
-                            style={{ cursor: 'pointer', fontWeight: selectedDocument === doc ? 'bold' : 'normal' }}
-                          >
-                            {doc.Title}
-                          </ListGroup.Item>
-                        ))}
-                      </ListGroup>
-                    </Card>
-                  )}
-                </div>
-                <div style={{ flexGrow: 1 }}>
-                  {selectedDocument ? (
-                    <Card className="mb-3 document-card" style={{ height: '400px' }}>
-                      <Card.Header className='document'>
-                        <strong>{selectedDocument.Title}</strong>
-                        <img src={srcicon} alt="Document Icon" style={{ float: 'right', width: '24px', height: '24px' }} />
-                      </Card.Header>
-                      <Card.Body className='document-card text-start p-4'>
-                        <div className='d-flex'>
-              
-                        <div className='col-6 px-5'>
-                        
-                        <Card.Text style={{fontSize:'16px'}}><strong>Date:</strong> {selectedDocument?.Issuance_Date}</Card.Text>
-                        <Card.Text style={{fontSize:'16px'}}><strong>Scale:</strong> {selectedDocument?.Scale}</Card.Text>
-                        <Card.Text style={{fontSize:'16px'}}><strong>Language:</strong> {selectedDocument?.Language}</Card.Text>
-                        <Card.Text style={{fontSize:'16px'}}><strong>Pages:</strong> {selectedDocument?.Pages}</Card.Text>
-                        <Card.Text style={{fontSize:'16px'}}>
-                        <strong>Latitude:</strong> {locationsArea[selectedDocument?.IdLocation] ? locationsArea[selectedDocument?.IdLocation]?.Latitude.toFixed(2) : locations[selectedDocument?.IdLocation]?.Latitude.toFixed(2)}
-                        </Card.Text>
-                        <Card.Text style={{fontSize:'16px'}}>
-                          <strong>Longitude:</strong> {locationsArea[selectedDocument?.IdLocation] ? locationsArea[selectedDocument?.IdLocation]?.Longitude.toFixed(2) : locations[selectedDocument?.IdLocation]?.Longitude.toFixed(2)}
-                        </Card.Text>
-                        <Card.Text style={{fontSize:'16px'}}><strong>Type </strong> {locationsArea[selectedDocument?.IdLocation] ? "Area": "Point"}</Card.Text>
+            <>
+              <Card className="mt-3">
+                <div className='d-flex p-3'>
+                  <div className='me-3' style={{ width: '30%', overflowY: 'auto', maxHeight: '600px' }}>
+                    {loading ? (
+                      <Spinner animation="border" variant="primary" />
+                    ) : (
+                      <Card>
+                        <Card.Header>Document List</Card.Header>
+                        <ListGroup style={{ maxHeight: '355px', overflowY: 'auto' }}>
+                          {documents.map((doc, index) => (
+                            <ListGroup.Item
+                              key={index}
+                              onClick={() => handleDocumentClick(doc)}
+                              style={{ cursor: 'pointer', fontWeight: selectedDocument === doc ? 'bold' : 'normal' }}
+                            >
+                              {doc.Title}
+                            </ListGroup.Item>
+                          ))}
+                        </ListGroup>
+                      </Card>
+                    )}
+                  </div>
+                  <div style={{ flexGrow: 1 }}>
+                    {selectedDocument ? (
+                      <Card className="mb-3 document-card" style={{ height: '400px' }}>
+                        <Card.Header className='document'>
+                          <strong>{selectedDocument.Title}</strong>
+                          <img src={srcicon} alt="Document Icon" style={{ float: 'right', width: '24px', height: '24px' }} />
+                        </Card.Header>
+                        <Card.Body className='document-card text-start p-4'>
+                          <div className='d-flex'>
 
-                        </div>
-                        <div>
-                        <Card.Text style={{fontSize:'16px'}}><strong>Description:</strong> {selectedDocument?.Description}</Card.Text>
-                        </div>
-                        </div>
-                      </Card.Body>
-                      <Card.Footer>
-                        <div className="text-center my-3">
-                          <Button variant="secondary" className="me-2 btn-document rounded-pill" onClick={handleModifyClick}>Modify</Button>
-                        </div>
-                      </Card.Footer>
-                    </Card>
+                            <div className='col-6 px-5'>
+
+                              <Card.Text style={{ fontSize: '16px' }}><strong>Date:</strong> {selectedDocument?.Issuance_Date}</Card.Text>
+                              <Card.Text style={{ fontSize: '16px' }}><strong>Scale:</strong> {selectedDocument?.Scale}</Card.Text>
+                              <Card.Text style={{ fontSize: '16px' }}><strong>Language:</strong> {selectedDocument?.Language}</Card.Text>
+                              <Card.Text style={{ fontSize: '16px' }}><strong>Pages:</strong> {selectedDocument?.Pages}</Card.Text>
+                              <Card.Text style={{ fontSize: '16px' }}>
+                                <strong>Latitude:</strong> {locationsArea[selectedDocument?.IdLocation] ? locationsArea[selectedDocument?.IdLocation]?.Latitude.toFixed(2) : locations[selectedDocument?.IdLocation]?.Latitude.toFixed(2)}
+                              </Card.Text>
+                              <Card.Text style={{ fontSize: '16px' }}>
+                                <strong>Longitude:</strong> {locationsArea[selectedDocument?.IdLocation] ? locationsArea[selectedDocument?.IdLocation]?.Longitude.toFixed(2) : locations[selectedDocument?.IdLocation]?.Longitude.toFixed(2)}
+                              </Card.Text>
+                              <Card.Text style={{ fontSize: '16px' }}><strong>Type </strong> {locationsArea[selectedDocument?.IdLocation] ? "Area" : "Point"}</Card.Text>
+
+                            </div>
+                            <div>
+                              <Card.Text style={{ fontSize: '16px' }}><strong>Description:</strong> {selectedDocument?.Description}</Card.Text>
+                            </div>
+                          </div>
+                        </Card.Body>
+                        <Card.Footer>
+                          <div className="text-center my-3">
+                            <Button variant="secondary" className="me-2 btn-document rounded-pill" onClick={handleModifyClick}>Modify</Button>
+                          </div>
+                        </Card.Footer>
+                      </Card>
                     ) : (
                       <div className="text-muted">Select a document to view its specifications.</div>
                     )}
+                  </div>
                 </div>
-              </div>
-            </Card>
-            {/*<div className='text-end mt-4 me-5'>
+              </Card>
+              {/*<div className='text-end mt-4 me-5'>
               <Button
                 variant="dark"
                 className='rounded-pill btn-document py-1'
@@ -281,66 +309,66 @@ function Home(props) {
                 </h6>
               </Button>
             </div>*/}
-          </>
+            </>
           )
         )
-      }
-    </Container>
+        }
+      </Container>
 
       <Modal show={showAddConnection} centered onHide={() => setShowAddConnection(false)}>
         <Modal.Header closeButton>
-            <Modal.Title>Add Connection</Modal.Title>
+          <Modal.Title>Add Connection</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-            <Form.Group controlId="formDocument" style={{ position: 'relative' }}>
-                <Form.Label>Document</Form.Label>
-                <Form.Control
-                    type="text"
-                    placeholder="Enter document name"
-                    value={selectDocumentSearch?.Title || ""}
-                    onChange={handleSearchChange}
-                    autoComplete="off" // Prevents browser autocomplete
-                />
+          <Form.Group controlId="formDocument" style={{ position: 'relative' }}>
+            <Form.Label>Document</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter document name"
+              value={selectDocumentSearch?.Title || ""}
+              onChange={handleSearchChange}
+              autoComplete="off" // Prevents browser autocomplete
+            />
 
-                {/* Render the dropdown list of suggestions */}
-                {filteredDocuments.length > 0 && (
-                    <ListGroup style={{ position: 'absolute', top: '100%', zIndex: 1, width: '100%' }}>
-                    {filteredDocuments.map((doc) => (
-                        <ListGroup.Item
-                        key={doc.IdDocument}
-                        action
-                        onClick={() => handleSelectionDocument(doc)}
-                        >
-                        {doc.Title}
-                        </ListGroup.Item>
-                    ))}
-                    </ListGroup>
-                )}
-            </Form.Group>
-            <Form.Group controlId="connectionTypeSelect" className="mb-3">
-                <Form.Label>Connection Type</Form.Label>
-                <Form.Select
-                    value={connectionType}
-                    onChange={(e) => setConnectionType(e.target.value)}
-                >
-                    <option value="">Select connection type</option>
-                    {Object.values(typeConnections).map((type) => (
-                        <option key={type.IdConnection} value={type.IdConnection}>
-                            {type.Type}
-                        </option>
-                    ))}
-                </Form.Select>
-            </Form.Group>
+            {/* Render the dropdown list of suggestions */}
+            {filteredDocuments.length > 0 && (
+              <ListGroup style={{ position: 'absolute', top: '100%', zIndex: 1, width: '100%' }}>
+                {filteredDocuments.map((doc) => (
+                  <ListGroup.Item
+                    key={doc.IdDocument}
+                    action
+                    onClick={() => handleSelectionDocument(doc)}
+                  >
+                    {doc.Title}
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            )}
+          </Form.Group>
+          <Form.Group controlId="connectionTypeSelect" className="mb-3">
+            <Form.Label>Connection Type</Form.Label>
+            <Form.Select
+              value={connectionType}
+              onChange={(e) => setConnectionType(e.target.value)}
+            >
+              <option value="">Select connection type</option>
+              {Object.values(typeConnections).map((type) => (
+                <option key={type.IdConnection} value={type.IdConnection}>
+                  {type.Type}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-            <Button variant="outline-secondary" onClick={() => closeModal()}>
-                Cancel
-            </Button>
-            <Button variant="primary" onClick={handleAddConnection}>
-                Add Connection
-            </Button>
+          <Button variant="outline-secondary" onClick={() => closeModal()}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleAddConnection}>
+            Add Connection
+          </Button>
         </Modal.Footer>
-    </Modal>
+      </Modal>
 
     </>
   );
