@@ -34,7 +34,10 @@ To run the web app refer to the following step:
 
 - Route `/`: Home page of the kiruna explorer
 - Route `/login`: Login page to access as urban planner
-- Route `/*`: default route for routes that don't exist
+- Route `/addDocument`: Route for adding a document.
+- Route `/documents`: Route for showing the documents.
+- Route `/documents/modify-document/:documentId`: Route for modifying the document given the id.
+- Route `/documents/create-document`: Route for create a document with all fields.
 
 ## API Server
 
