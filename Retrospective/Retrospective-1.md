@@ -118,5 +118,5 @@ sections:
     although we are currently following this approach
 
 - One thing you are proud of as a Team!!
-- We’re proud of the teamwork and commitment everyone showed. the team was flexible and supportive, which kept us moving forward.
-  We also managed to communicating better with each other and everyone was willing to help in case of any unexpected issues
+  - We’re proud of the teamwork and commitment everyone showed. the team was flexible and supportive, which kept us moving forward.
+    We also managed to communicating better with each other and everyone was willing to help in case of any unexpected issues
