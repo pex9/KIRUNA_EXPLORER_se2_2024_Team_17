@@ -20,7 +20,7 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
   const [documentTypes, setDocumentTypes] = useState([]);
   const [modifyMode, setModifyMode] = useState(false);
   const [loading, setLoading] = useState(true);
-  const offsetDistance = 0.0010; //offset distance between markers
+  const offsetDistance = 0.0020; //offset distance between markers
   const mapRef = useRef(null); // To get a reference to the map instance
 
   // Custom hook to handle zooming behavior

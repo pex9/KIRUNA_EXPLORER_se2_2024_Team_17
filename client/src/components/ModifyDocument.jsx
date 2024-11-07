@@ -111,7 +111,7 @@ function ModifyDocument() {
           fetchDocument();
     },[]);
     const handleUpdate = async() => {
-      if(!title || !scale || !issuanceDate || !description || !language || !pages || !stakeholder || !type){
+      if(!title || !scale || !issuanceDate || !description  || !stakeholder || !type){
         alert("Please complete all fields to add a document.");
       } else {
         if (documentId) {

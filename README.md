@@ -449,6 +449,15 @@ To run the web app refer to the following step:
 
 ## Screenshots
 
+![Screenshot](.\images\login.png)
+![Screenshot](.\images\map.png)
+![Screenshot](.\images\addDocument.png)
+![Screenshot](.\images\listDocument.png)
+![Screenshot](.\images\visualizeDocument.png)
+![Screenshot](.\images\visualizeDocumentMap.png)
+![Screenshot](.\images\updateDocument.png)
+
+
 ## License
 
 This project is licensed under the CC BY-NC-SA 4.0 License.
