@@ -189,10 +189,19 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
               const offsetIndex = index * offsetDistance;
               const location = locationsArea[document.IdLocation] ? locationsArea[document.IdLocation] : locations[document.IdLocation];
               if (location) {
-                const position = [
-                  location.Latitude + (index % 2 === 0 ? offsetIndex : -offsetIndex),
-                  location.Longitude + (index % 2 === 0 ? -offsetIndex : offsetIndex),
-                ];
+                let position=[];
+                if(location.Location_Type === "Point"){
+                   position = [
+                    location.Latitude,
+                    location.Longitude,
+                  ];
+                }
+                else{
+                   position = [
+                    location.Latitude + (index % 2 === 0 ? offsetIndex : -offsetIndex),
+                    location.Longitude + (index % 2 === 0 ? -offsetIndex : offsetIndex),
+                  ];
+                }   
                 return (
                   <Marker
                     icon={
