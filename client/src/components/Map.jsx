@@ -139,6 +139,7 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
 
   };
 
+
   function LocationMarker() {
     useMapEvents({
       click(e) {
@@ -161,7 +162,7 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
           <MapContainer ref={mapRef} center={[67.8558, 20.2253]} zoom={12.4}>
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" zIndex={0}
             />
             {(locationsArea[selectedMarker?.IdLocation] && locationsArea) &&
               Object.values(locationsArea).map((area, index) => {
@@ -182,7 +183,8 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
                   />
                 );
               })}
-            <LocationMarker />
+            <LocationMarker style={{zIndex:0}}/>
+            {selectedLocation && modifyMode && <Marker position={selectedLocation} /> }
             {documents.map((document, index) => {
 
               //used to not overleap the documents
@@ -233,7 +235,18 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
             })}
             {showCard && (
               <Card className='d-flex document-card overlay' style={{ marginLeft: '1%', width: '30%' }}>
-                <Button variant="close" onClick={() => setShowCard(false)} style={{ position: 'absolute', top: '2%', right: '2%' }} />
+                <Button 
+                  variant="close"
+                  onClick={() => {
+                    setShowCard(false);
+                    setSelectedMarker(null);
+                    }} 
+                  style={{ 
+                    position: 'absolute', 
+                    top: '2%', 
+                    right: '2%' 
+                    }} 
+                />
                 <Card.Header className='document'>
                   <Card.Title><strong>{selectedMarker?.Title}</strong></Card.Title>
                 </Card.Header>
