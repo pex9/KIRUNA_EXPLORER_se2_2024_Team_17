@@ -173,6 +173,27 @@ To run the web app refer to the following step:
       "idLocation": 1
     }
     ```
+- **POST** `/api/documents/:documentId/resources`
+  - **Description**: Allows users to upload a file for a specific document, given its `documentId`.
+  - **Request**:
+    - **URL Parameter**: `documentId` (integer) - the unique ID of the document to which the resource will be associated.
+    - **Body**: `multipart/form-data` (file upload). The file will be uploaded using the field name `file`.
+      - Example Body:
+        ```bash
+        Content-Type: multipart/form-data
+        {
+            file: <file_to_upload>
+        }
+        ```
+  - **Response**: returns `200 OK`: File uploaded successfully or `400 Bad Request`: If no file is uploaded or required parameters are missing or `404 Not Found`: If the document with the given `documentId` does not exist. or `500 Internal Server Error`: If an unexpected error occurs.
+  - **Response Body**: On success (`200 OK`), the body contains a message with the details of the uploaded file.
+    ```json
+    {
+      "message": "File uploaded successfully!",
+      "documentId": 1,
+      "filename": "file1234_20241110_145302.pdf"
+    }
+    ```
 
 # DOCUMENT CONNECTION API
 

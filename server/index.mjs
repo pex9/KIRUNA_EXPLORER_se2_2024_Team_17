@@ -3,6 +3,9 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
+import fs from "fs";
+import path from "path";
+import multer from "multer";
 import passport from "passport";
 import LocalStrategy from "passport-local";
 import session from "express-session";
@@ -12,7 +15,11 @@ import stakeholderDao from "./dao/stakeholder-dao.js";
 import typeDocumentDao from "./dao/typeDocument-dao.js";
 import DocumentConnectionDao from "./dao/document-connection-dao.js";
 import locationDao from "./dao/location-dao.js";
+import { fileURLToPath } from "url";
 
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 /*** Set up Passport ***/
 // set up the "username and password" login strategy
 passport.use(
@@ -47,14 +54,67 @@ passport.deserializeUser((id, done) => {
     });
 });
 
+// middleware to check if the document provided in the request exists
+const checkDocumentExists = async (req, res, next) => {
+  const documentId = parseInt(req.params.documentId);
+  if (isNaN(documentId)) {
+      return res.status(400).json({ message: 'Invalid document ID' });
+  }
+
+  try {
+      const document = await documentDao.getDocumentById(documentId);
+      if (!document) {
+          return res.status(404).json({ message: 'Document not found' });
+      }
+      next(); // Continue to the next middleware if the document exists
+  } catch (error) {
+      return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      const documentId = req.params.documentId;
+      if (!documentId) {
+          return cb(new Error('Document ID is missing'));
+      }
+
+      // Define the directory path based on the document ID
+      const dirPath = path.join(__dirname, 'uploads/', documentId);
+
+      // Check if the directory exists, if not, create it
+      if (!fs.existsSync(dirPath)) {
+          fs.mkdirSync(dirPath, { recursive: true });
+      }
+
+      // Use the newly created directory as the destination
+      cb(null, dirPath);
+  },
+  filename: (req, file, cb) => {
+      const documentId = req.params.documentId;
+      const currentDate = new Date().toISOString().replace(/[-:]/g, '').replace('T', '_').split('.')[0];
+      const fileExtension = path.extname(file.originalname);
+
+      // Filename format: documentId_YYYYMMDD_HHMMSS.extension
+      const newFilename = `${documentId}_${currentDate}${fileExtension}`;
+      cb(null, newFilename);
+  }
+});
+
+const upload = multer({ storage });
+
 // init express
 const app = new express();
 const port = 3001;
+
+
 
 // set-up middlewares
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.static("public"));
+
+
 
 // CORS configuration
 const corsOptions = {
@@ -181,7 +241,6 @@ app.get("/api/documents/:documentid", (req, res) => {
 app.patch("/api/documents/:documentid", isUrbanPlanner, (req, res) => { 
   const documentId = parseInt(req.params.documentid); 
   const document = req.body; 
-  console.log(document); 
   if( !document.title || !document.idStakeholder){ 
     res.status(400).json({ error: "The request body must contain all the fields" }); 
     return; 
@@ -222,6 +281,26 @@ app.patch("/api/documents/:documentId/connection", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// API add file to document
+
+// Endpoint to upload a file
+app.post('/api/documents/:documentId/resources',checkDocumentExists, upload.single('file'), async (req, res) => {
+  if (req.file) {
+      const documentId = parseInt(req.params.documentId);
+      res.json({
+          message: 'File uploaded successfully!',
+          documentId: documentId,
+          filename: req.file.filename,
+      });
+  } else {
+      res.status(400).json({ message: 'File upload failed.' });
+  }
+});
+
+// APU get file from document app.get('/documents/:documentId/resources/')
+
+
 
 // API TYPES
 app.get("/api/types", (req, res) => {
