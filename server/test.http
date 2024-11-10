@@ -132,7 +132,26 @@ Content-Type: application/json
 #   "error": "The request body must contain all the fields"
 # }
 
-### test the update of a document if urban planner
+### test to add resoruces to a document
+
+### test to add a resource to a document with postman
+POST http://localhost:3001/api/documents/18/resources
+Content-Type: multipart/form-data
+# 200 OK
+#{
+#    "message": "File uploaded successfully!",
+#    "documentId": 19,
+#    "filename": "19_20241110_202310.pdf"
+#}
+
+### test to add a resource to a document with postman that don't exist
+POST http://localhost:3001/api/documents/1/resources
+Content-Type: multipart/form-data
+# 404 NOT FOUND
+#{
+#    "error": "Document not found",
+#}
+
 
 
 ### test the get of all documents

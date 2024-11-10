@@ -498,6 +498,35 @@ const getAllTypeConnections = () => {
   });
 };
 
-const API = { getUsers, login, logout, getUserInfo, getAllTypesDocument, getTypeDocument, getAllStakeholders, getStakeholder, addDocument, createDocumentConnection, getAllDocumentConnections, getDocumentConnection, getAllDocuments, getDocumentById, getAllLocations, updateLocationDocument, getLocationById, getAllTypeConnections,updateDocument,getAllLocationsArea,addDocumentArea};
+const addResourceToDocument = (idDocument, file) => {
+  return new Promise((resolve, reject) => {
+    const formData = new FormData();
+    formData.append('file', file);  // Append the file to the form data
+    formData.append('idDocument', idDocument); // Add the documentId field to the form data
+
+    fetch(URL + "/documents/" + idDocument + "/resources", {
+      method: "POST",
+      body: formData,  // Set the form data as the body of the request
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();  // Return the JSON response
+        } else {
+          return response.json().then((message) => {
+            reject(message);  // Reject with the error message from the response
+          });
+        }
+      })
+      .then((data) => {
+        resolve(data);  // Resolve with the successful response data
+      })
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });  // Reject if there’s an error in the request
+      });
+  });
+};
+
+const API = { getUsers, login, logout, getUserInfo, getAllTypesDocument, getTypeDocument, getAllStakeholders, getStakeholder, addDocument, createDocumentConnection, getAllDocumentConnections, getDocumentConnection, getAllDocuments, getDocumentById, getAllLocations, updateLocationDocument, getLocationById, getAllTypeConnections,updateDocument,getAllLocationsArea,addDocumentArea,addResourceToDocument};
 
 export default API;
