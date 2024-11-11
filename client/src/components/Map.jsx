@@ -7,12 +7,15 @@ import AppContext from '../AppContext';
 import L from 'leaflet';
 import API from '../API';
 import '../App.css';
+import 'leaflet-draw/dist/leaflet.draw.css';
+import { EditControl } from 'react-leaflet-draw';  // Import for the drawing tool
+import { FeatureGroup } from 'react-leaflet';  // Import for the drawing tool
+
 
 function MapComponent({ locations, setLocations, locationsArea, documents, setSelectedLocation, propsDocument, selectedLocation }) {
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [showCard, setShowCard] = useState(false);
-  const [showAddConnection, setShowAddConnection] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState('');
+  const [showCreateArea, setShowCreateArea] = useState(false);
   const [connectionType, setConnectionType] = useState('');
   const navigate = useNavigate();
   const context = useContext(AppContext);
@@ -22,6 +25,10 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
   const [loading, setLoading] = useState(true);
   const offsetDistance = 0.0020; //offset distance between markers
   const mapRef = useRef(null); // To get a reference to the map instance
+  const [areaCoordinates, setAreaCoordinates] = useState([]);
+
+  const [areaName, setAreaName] = useState('');
+
 
   // Custom hook to handle zooming behavior
   function CustomZoomHandler() {
@@ -84,11 +91,32 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
     }
   };
 
-  const handleAddConnection = () => {
-    if (selectedDocument && connectionType) {
-      setSelectedDocument('');
+  const handleAddArea = async() => {
+    if (areaName ) {
+      console.log('Adding area:', areaName);
+      console.log('Area coordinates:', areaCoordinates[0]);
+      const getCenter = (areaCoordinates) => {
+        let totalLat = 0;
+        let totalLng = 0;
+        const count = areaCoordinates[0].length;
+        console.log('Count:', count); 
+      
+        areaCoordinates[0].forEach(point => {
+          totalLat += point.lat;
+          totalLng += point.lng;
+        });
+      
+        // Calculate average of latitudes and longitudes
+        const centerLat = totalLat / count;
+        const centerLng = totalLng / count;
+      
+        return { lat: centerLat, lng: centerLng };
+      };
+      console.log('Center:', getCenter(areaCoordinates));
+      await API.addArea(areaName, JSON.stringify(areaCoordinates[0]), getCenter(areaCoordinates).lat, getCenter(areaCoordinates).lng);
+      //setAreaName('');
       setConnectionType('');
-      setShowAddConnection(false);
+      setShowCreateArea(false);
     } else {
       alert("Please fill in all fields.");
     }
@@ -152,6 +180,14 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
     return null;
   }
 
+  const handleDrawCreate = (e) => {
+    const layer = e.layer;
+    const coordinates = layer.getLatLngs();
+    setAreaCoordinates(coordinates);
+    setShowCreateArea(true);
+  };
+
+
 
   return (
     <>
@@ -164,6 +200,24 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" zIndex={0}
             />
+          {(isLogged) ? (
+          <FeatureGroup key={'normal'}>
+                    <EditControl
+                        position="topright"
+                        onCreated={handleDrawCreate}
+                        draw={{
+                            rectangle: false,
+                            polyline: false,
+                            circle: false,
+                            circlemarker: false,
+                            marker: false,
+                            polygon: true
+                        }}
+                        edit={{
+                            edit: false
+                        }}
+                    />
+                </FeatureGroup >) : null}
             {(locationsArea[selectedMarker?.IdLocation] && locationsArea) &&
               Object.values(locationsArea).map((area, index) => {
                 // Parse the coordinates string into a proper array
@@ -326,6 +380,7 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
                 Enable drag / add new location for a document
               </Button>
 
+
               <div className=''>
                 {modifyMode && <strong className='col text-end mx-5 mt-1'>Drag / Add new document enabled</strong>}
               </div>
@@ -357,35 +412,26 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
         </>
       }
       {/* Add Connection Modal */}
-      <Modal show={showAddConnection} onHide={() => setShowAddConnection(false)} centered>
+      <Modal show={showCreateArea} onHide={() => setShowCreateArea(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Add Connection</Modal.Title>
+          <Modal.Title>Create an Area</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group controlId="formDocument">
-              <Form.Label>Document</Form.Label>
+              <Form.Label>Area</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter document name"
-                value={selectedDocument}
-                onChange={(e) => setSelectedDocument(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group controlId="formConnectionType">
-              <Form.Label>Connection Type</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter connection type"
-                value={connectionType}
-                onChange={(e) => setConnectionType(e.target.value)}
+                placeholder="Enter Area name"
+                value={areaName}
+                onChange={(e) => setAreaName(e.target.value)}
               />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" onClick={handleAddConnection}>Add Connection</Button>
-          <Button variant="secondary" onClick={() => setShowAddConnection(false)}>Close</Button>
+          <Button variant="primary" onClick={handleAddArea}>Add Area</Button>
+          <Button variant="secondary" onClick={() => setShowCreateArea(false)}>Close</Button>
         </Modal.Footer>
       </Modal>
     </>

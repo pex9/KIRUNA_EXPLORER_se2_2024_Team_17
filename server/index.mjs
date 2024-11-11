@@ -204,7 +204,7 @@ app.post("/api/documents", isUrbanPlanner, async (req, res) => {
       .json({ error: "The request body must contain all the fields" });
     return;
   }
-  const idLocation= document.idLocation ? document.idLocation : await locationDao.addLocation(document.locationType, document.latitude, document.longitude, document.area_coordinates);
+  const idLocation= document.idLocation ? document.idLocation : await locationDao.addLocation(document.locationType, document.latitude, document.longitude, document.area_coordinates,'');
   if (!idLocation) {
     res.status(500).json({ error: "Failed to add location." });
     return;
@@ -423,7 +423,10 @@ app.get("/api/locations/:locationId", (req, res) => {
 });
 
 app.post("/api/locations", isUrbanPlanner, async (req, res) => {
-  const { locationType, latitude, longitude, areaCoordinates } = req.body;
+  console.log(req.body);
+  
+  const { location_type: locationType, center_lat: latitude, center_lng: longitude, area_coordinates: areaCoordinates,areaName: area_name } = req.body;
+
   if (!locationType) {
     return res.status(400).json({ error: "locationType is required." });
   }
@@ -446,11 +449,15 @@ app.post("/api/locations", isUrbanPlanner, async (req, res) => {
     }
   }
   try {
+    console.log("dio sabnto"+area_name);
+    const transformedCoordinates = JSON.parse(areaCoordinates).map(point => [point.lat, point.lng]);
+    console.log(transformedCoordinates);
     const result = await locationDao.addLocation(
       locationType,
       latitude,
       longitude,
-      areaCoordinates
+      transformedCoordinates,
+      area_name
     );
     if (result) {
       res.status(201).json({ message: "Location added successfully." });
