@@ -6,6 +6,10 @@ import API from '../API';
 function ModifyDocument() {
     const { documentId } = useParams();
     const [showAddConnection, setShowAddConnection] = useState(false);
+  
+    const location = useLocation(); 
+    const { location: selectedLocation } = location.state || {};
+
     // document fields
     const [title, setTitle] = useState('');
     const [scale, setScale] = useState('');
@@ -15,6 +19,8 @@ function ModifyDocument() {
     const [pages, setPages] = useState('');
     const [stakeholder, setStakeholder] = useState([]);
     const [type, setType] = useState('');
+    const [latitude, setLatitude] = useState(selectedLocation && selectedLocation.lat != null ? selectedLocation.lat.toFixed(4) : 0);
+    const [longitude, setLongitude] = useState(selectedLocation && selectedLocation.lng != null ? selectedLocation.lng.toFixed(4) : 0);
 
     const [selectedDocument, setSelectedDocument] = useState('');
     const [connectionType, setConnectionType] = useState('');
@@ -27,9 +33,6 @@ function ModifyDocument() {
 
     const [documents, setDocuments] = useState([]); // List of all documents
     const [filteredDocuments, setFilteredDocuments] = useState([]); // used to filter documents
-
-    const location = useLocation(); 
-    const { location: selectedLocation } = location.state || {};
 
     useEffect(() => {
         const getStakeholders = async () => {
@@ -275,10 +278,11 @@ function ModifyDocument() {
                             </Form.Select>
                           </FloatingLabel>  
                     </FormGroup>
-                    <Form.Group controlId="description" className="mb-4">
+                    <Form.Group controlId="description" className="mb-3">
                       <FloatingLabel  
                         controlId="description" label="Description" className="mb-3">
                         <Form.Control
+                            className='py-3'
                             as="textarea"
                             style={{height: '205px'}}
                             value={description}
@@ -288,13 +292,13 @@ function ModifyDocument() {
                     </Form.Group>
                     {!documentId ? ( 
                         <>
-                          {(selectedLocation && selectedLocation.lat != null && selectedLocation.lng != null) ? (
+                          {(latitude && longitude) ? (
                             <div className='mb-4 d-flex'>
-                              <p className='mx-4'>
-                                <strong>Latitude:</strong> {selectedLocation.lat.toFixed(4)}
+                              <p className='mx-4 d-flex align-items-center'>
+                                <strong className='me-2'>Latitude:</strong> <Form.Control value={latitude} onChange={(e) => setLatitude(e.target.value)}></Form.Control>
                               </p>
-                              <p className='mx-4'>
-                                <strong>Longitude:</strong> {selectedLocation.lng.toFixed(4)} 
+                              <p className='mx-4 d-flex align-items-center'>
+                                <strong className='me-2'>Longitude:</strong> <Form.Control value={longitude} onChange={(e) => setLongitude(e.target.value)}></Form.Control>
                               </p>
                             </div>
                           ) : (
@@ -305,7 +309,20 @@ function ModifyDocument() {
                         </>
                       ) : (
                         <>
-                          {/* Existing document details here */}
+                            {(selectedLocation && selectedLocation.lat != null && selectedLocation.lng != null) ? (
+                            <div className='mb-4 d-flex'>
+                              <p className='mx-4 d-flex align-items-center'>
+                                <strong className='me-2'>Latitude:</strong> <Form.Control value={latitude} onChange={(e) => setLatitude(e.target.value)}></Form.Control>
+                              </p>
+                              <p className='mx-4 d-flex align-items-center'>
+                                <strong className='me-2'>Longitude:</strong> <Form.Control value={longitude} onChange={(e) => setLongitude(e.target.value)}></Form.Control>
+                              </p>
+                            </div>
+                          ) : (
+                            <p>
+                              <strong>Location: </strong> Whole Municipal Area
+                            </p>
+                          )}
                         </>
                       )}
                   

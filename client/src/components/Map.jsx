@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polygon, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polygon, useMap, LayersControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button, Card, Form, Spinner, Modal, CardFooter, Col, Overlay } from "react-bootstrap"; // Importing required components
 import { redirect, useNavigate } from "react-router-dom";
@@ -7,8 +7,9 @@ import AppContext from '../AppContext';
 import L from 'leaflet';
 import API from '../API';
 import '../App.css';
+import CardDocument from './CardDocument';
 
-function MapComponent({ locations, setLocations, locationsArea, documents, setSelectedLocation, propsDocument, selectedLocation }) {
+function MapComponent({ locations, setLocations, locationsArea, documents, setSelectedLocation, propsDocument, selectedLocation, handleDocumentClick, numberofconnections}) {
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [showCard, setShowCard] = useState(false);
   const [showAddConnection, setShowAddConnection] = useState(false);
@@ -76,12 +77,7 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
     setSelectedMarker(marker);
     setShowCard(true);
     setSelectedLocation(null);
-  };
-
-  const handleModifyDocument = () => {
-    if (selectedMarker) {
-      navigate(`/documents/modify-document/${selectedMarker.IdDocument}`, { state: { document: selectedMarker } });
-    }
+    handleDocumentClick(marker);
   };
 
   const handleAddConnection = () => {
@@ -162,7 +158,7 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
           <MapContainer ref={mapRef} center={[67.8558, 20.2253]} zoom={12.4}>
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" zIndex={0}
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             {(locationsArea[selectedMarker?.IdLocation] && locationsArea) &&
               Object.values(locationsArea).map((area, index) => {
@@ -183,7 +179,7 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
                   />
                 );
               })}
-            <LocationMarker style={{zIndex:0}}/>
+            <LocationMarker />
             {selectedLocation && modifyMode && <Marker position={selectedLocation} /> }
             {documents.map((document, index) => {
 
@@ -234,19 +230,35 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
               }
             })}
             {showCard && (
-              <Card className='d-flex document-card overlay' style={{ marginLeft: '1%', width: '30%' }}>
+              <div 
+                onClick={(e)=>e.stopPropagation()} 
+                className='d-flex document-card overlay col-lg-4 col-md-7 col-sm-10' 
+                style={{ marginLeft: '1%'}}
+              >
+                <CardDocument 
+                  document={selectedMarker} 
+                  locationType={locationsArea[selectedMarker?.IdLocation] ? "Area" : "Point"} 
+                  latitude={locations[selectedMarker?.IdLocation]?.Latitude.toFixed(4)} 
+                  longitude={locations[selectedMarker?.IdLocation]?.Longitude.toFixed(4)} 
+                  setShowCard={setShowCard} 
+                  setSelectedDocument={setSelectedMarker} 
+                  isLogged={isLogged} 
+                  viewMode='map'
+                  numberofconnections={numberofconnections}
+                />
+              {/*<Card className='d-flex document-card overlay' style={{ marginLeft: '1%', width: '30%' }}>
                 <Button 
                   variant="close"
                   onClick={() => {
                     setShowCard(false);
                     setSelectedMarker(null);
-                    }} 
+                  }} 
                   style={{ 
                     position: 'absolute', 
                     top: '2%', 
                     right: '2%' 
                     }} 
-                />
+                    />
                 <Card.Header className='document'>
                   <Card.Title><strong>{selectedMarker?.Title}</strong></Card.Title>
                 </Card.Header>
@@ -277,7 +289,8 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
                     <Button variant="secondary" className='btn-document rounded-pill px-3' onClick={handleModifyDocument}>Modify</Button>
                   </Card.Footer>
                 )}
-              </Card>
+              </Card>*/}
+            </div>
             )}
             {modifyMode &&
               <div className='d-flex justify-content-end me-5'>
@@ -334,8 +347,8 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
               <div className='me-4'>
                 <Button
                   variant="dark"
-                  className='px-3 me-5 rounded-pill btn-document'
-                  size="sm"
+                  className='px-4 py-2 me-5 rounded-pill btn-document'
+                  size="md"
                   onClick={() => {
                     if (!selectedLocation) {
                       const firstArea = locationsArea ? Object.values(locationsArea)[0] : null;

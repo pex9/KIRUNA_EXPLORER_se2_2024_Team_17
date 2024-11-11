@@ -7,8 +7,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Login from './components/Authentication';
 import Default from './components/Default';
 import Home from './components/Home';
-import Document from './components/Document';
-import Documents from './components/Documents';
 import API from './API';
 import ModifyDocument from './components/ModifyDocument';
 import MyNavbar from './components/MyNavbar';
@@ -56,8 +54,6 @@ function App() {
         <Routes>
           <Route path="/login" element={<><Login /></>} />
           <Route path="/" element={<><MyNavbar /><Home /></>} />
-          <Route path="/addDocument" element={<><MyNavbar /><Document /></>} />
-          <Route path="/documents" element={<><Documents /></>} />
           <Route path="/documents/modify-document/:documentId" element={<><MyNavbar /><ModifyDocument/></>} />
           <Route path="/documents/create-document" element={<><MyNavbar /><ModifyDocument /></>} />
           <Route path="/*" element={<><MyNavbar /><Default /></>} />

@@ -11,6 +11,7 @@ import { Form } from 'react-bootstrap';
 import AppContext from '../AppContext';
 import '../App.css';
 import { Modal } from 'react-bootstrap';
+import CardDocument from './CardDocument';
 
 
 function Home(props) {
@@ -33,7 +34,6 @@ function Home(props) {
 
 
 
-  const navigate = useNavigate();
   const context = useContext(AppContext);
   const isLogged = context.loginState.loggedIn;
 
@@ -136,11 +136,6 @@ function Home(props) {
 
   };
 
-  const handleModifyClick = () => {
-    if (selectedDocument) {
-      navigate(`documents/modify-document/${selectedDocument.IdDocument}`);
-    }
-  };
   const handleAddConnection = async () => {
     if (selectedDocument && connectionType) {
       await API.createDocumentConnection(selectedDocument.IdDocument, selectDocumentSearch.IdDocument, connectionType);
@@ -222,24 +217,22 @@ function Home(props) {
           loading ? (
             <Spinner animation="border" variant="primary" />
           ) : (
-
-            <>
-              <MapComponent locations={locations} setLocations={setLocations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation} />
-            </>
+              <MapComponent locations={locations} setLocations={setLocations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation} handleDocumentClick={handleDocumentClick} numberofconnections={numberofconnections}/>
           )
 
         ) : (
+          
           loading ? (
             <Spinner animation="border" variant="primary" />
           ) : (
             <>
-              <Card className="mt-3">
+              <Card className="mt-3" style={{minHeight:'400px'}}>
                 <div className='d-flex p-3'>
-                  <div className='me-3' style={{ width: '30%', overflowY: 'auto', maxHeight: '600px' }}>
+                  <div className='me-3' style={{maxHeight: '600px' }}>
                     {loading ? (
                       <Spinner animation="border" variant="primary" />
                     ) : (
-                      <Card>
+                      <Card style={{width:'100%'}}>
                         <Card.Header>Document List</Card.Header>
                         <ListGroup style={{ maxHeight: '355px', overflowY: 'auto' }}>
                           {documents.map((doc, index) => (
@@ -255,42 +248,18 @@ function Home(props) {
                       </Card>
                     )}
                   </div>
-                  <div style={{ flexGrow: 1 }}>
+                  <div style={{ flexGrow: 1, width:'40%' }}>
                     {selectedDocument ? (
-                      <Card className="mb-3 document-card" style={{ height: '400px' }}>
-                        <Card.Header className='document'>
-                          <strong>{selectedDocument.Title}</strong>
-                          <img src={srcicon} alt="Document Icon" style={{ float: 'right', width: '24px', height: '24px' }} />
-                        </Card.Header>
-                        <Card.Body className='document-card text-start p-4'>
-                          <div className='d-flex'>
-
-                            <div className='col-6 px-5'>
-
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Date:</strong> {selectedDocument?.Issuance_Date}</Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Scale:</strong> {selectedDocument?.Scale}</Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Language:</strong> {selectedDocument?.Language}</Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Pages:</strong> {selectedDocument?.Pages}</Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}>
-                                <strong>Latitude:</strong> {locationsArea[selectedDocument?.IdLocation] ? locationsArea[selectedDocument?.IdLocation]?.Latitude.toFixed(2) : locations[selectedDocument?.IdLocation]?.Latitude.toFixed(2)}
-                              </Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}>
-                                <strong>Longitude:</strong> {locationsArea[selectedDocument?.IdLocation] ? locationsArea[selectedDocument?.IdLocation]?.Longitude.toFixed(2) : locations[selectedDocument?.IdLocation]?.Longitude.toFixed(2)}
-                              </Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Type </strong> {locationsArea[selectedDocument?.IdLocation] ? "Area" : "Point"}</Card.Text>
-
-                            </div>
-                            <div>
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Description:</strong> {selectedDocument?.Description}</Card.Text>
-                            </div>
-                          </div>
-                        </Card.Body>
-                        <Card.Footer>
-                          <div className="text-center my-3">
-                            <Button variant="secondary" className="me-2 btn-document rounded-pill" onClick={handleModifyClick}>Modify</Button>
-                          </div>
-                        </Card.Footer>
-                      </Card>
+                      <CardDocument 
+                      document={selectedDocument} 
+                      locationType={locationsArea[selectedDocument?.IdLocation] ? "Area" : "Point"} 
+                      latitude={locations[selectedDocument?.IdLocation]?.Latitude.toFixed(4)} 
+                      longitude={locations[selectedDocument?.IdLocation]?.Longitude.toFixed(4)} 
+                      setSelectedDocument={setSelectedDocument} 
+                      isLogged={isLogged} 
+                      viewMode='list'
+                      numberofconnections={numberofconnections}
+                      />
                     ) : (
                       <div className="text-muted">Select a document to view its specifications.</div>
                     )}
