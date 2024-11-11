@@ -70,7 +70,11 @@ function ModifyDocument() {
                 setScale(res.Scale);
                 setLanguage(res.Language);
                 setPages(res.Pages);
-                setIssuanceDate(res.Issuance_Date);
+                setIssuanceDate({
+                  year: res.Issuance_Date.substring(0, 4) ? res.Issuance_Date.substring(0, 4) : null,
+                  month: res.Issuance_Date.substring(5, 7) ? res.Issuance_Date.substring(5, 7) : null,
+                  day: res.Issuance_Date.substring(8, 10) ? res.Issuance_Date.substring(8, 10) : null
+                });
                 setDescription(res.Description);
 
                 const stakeholder = await API.getStakeholder(res.IdStakeholder);
@@ -223,15 +227,46 @@ function ModifyDocument() {
                         </FloatingLabel>
                       </Form.Group>
                       
-                      <Form.Group controlId="issuanceDate" className="mb-3">
-                        <FloatingLabel controlId="issuanceDate" label="Issuance Date" className="mb-3">
-                          <Form.Control
-                              type="date('mm-yyyy')"
-                              
-                              value={issuanceDate}
-                              onChange={(e) => setIssuanceDate(e.target.value)}
-                              />
-                        </FloatingLabel>
+                      <Form.Group controlId="issuanceDate" className="ms-1 mb-3 d-flex align-items-center justify-content-center">
+                        <label className='me-4'>Date:</label>
+                        <Form.Control 
+                          controlId='year' 
+                          className='mx-2' 
+                          type='number' 
+                          style={{width:'10ch'}} 
+                          placeholder='yyyy' 
+                          maxLength={4} 
+                          min={2000} 
+                          max={2024} 
+                          value={issuanceDate.year} 
+                          onChange={(e)=>setIssuanceDate({year: e.target.value, month: issuanceDate.month, day: issuanceDate.day})} required
+                        />
+                        /
+                        <Form.Control 
+                          controlId='month' 
+                          className='mx-2' 
+                          type='number' 
+                          placeholder='mm' 
+                          maxLength={2} 
+                          style={{width:'8ch'}} 
+                          min={1} 
+                          max={12} 
+                          value={issuanceDate.month} 
+                          onChange={(e)=>setIssuanceDate({year: issuanceDate.year, month: e.target.value, day: issuanceDate.day})}
+                        />
+                        /
+                        <Form.Control 
+                          controlId='day' 
+                          className='mx-2' 
+                          type='number' 
+                          placeholder='dd' 
+                          maxLength={2} 
+                          style={{width:'8ch'}} 
+                          min={1} 
+                          max={31} 
+                          value={issuanceDate.day}
+                          onChange={(e)=>setIssuanceDate({year: issuanceDate.year, month: issuanceDate.month, day: e.target.value})}
+                        />
                       </Form.Group>
 
                       {documentId &&

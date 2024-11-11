@@ -228,7 +228,7 @@ function Home(props) {
             <>
               <Card className="mt-3" style={{minHeight:'400px'}}>
                 <div className='d-flex p-3'>
-                  <div className='me-3' style={{maxHeight: '600px' }}>
+                  <div className='me-3 col-md-3 col-sm-1' style={{maxHeight: '600px' }}>
                     {loading ? (
                       <Spinner animation="border" variant="primary" />
                     ) : (
@@ -248,7 +248,7 @@ function Home(props) {
                       </Card>
                     )}
                   </div>
-                  <div style={{ flexGrow: 1, width:'40%' }}>
+                  <div style={{ flexGrow: 1 }}>
                     {selectedDocument ? (
                       <CardDocument 
                       document={selectedDocument} 

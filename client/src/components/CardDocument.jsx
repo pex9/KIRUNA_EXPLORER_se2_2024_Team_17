@@ -28,7 +28,7 @@ function CardDocument ({document, locationType, latitude, longitude, setShowCard
           right: '2%' 
           }} 
           />
-      <Card.Header className='document mx-3'>
+      <Card.Header className='document px-4'>
         <Card.Title><strong>{document?.Title}</strong></Card.Title>
       </Card.Header>
       <Card.Body className='document-card text-start p-4'>
@@ -41,31 +41,32 @@ function CardDocument ({document, locationType, latitude, longitude, setShowCard
             <Card.Text style={{ fontSize: '16px' }}><strong>Language:</strong> {document?.Language}</Card.Text>
             <Card.Text style={{ fontSize: '16px' }}><strong>Pages:</strong> {document?.Pages}</Card.Text>
             {/*<Card.Text style={{ fontSize: '16px' }}><strong>Type: </strong> {locationType}</Card.Text>*/}
+            <Card.Text style={{ fontSize: '16px'}}><strong>Connections:</strong> {numberofconnections}</Card.Text>
             {isLogged &&
-              <>
-              {locationType == 'Area' ?
+              <div style={{paddingTop:'70px'}}>
+              {locationType == 'Point' ?
 
-                <>
+                <div  >
                 <Card.Text style={{ fontSize: '16px' }}>
                 <strong>Latitude:</strong> {latitude}
                 </Card.Text>
                 <Card.Text style={{ fontSize: '16px' }}>
                     <strong>Longitude:</strong> {longitude}
                   </Card.Text>
-                </>
+                </div>
                 :
-                <>
-                <Card.Text style={{ fontSize: '16px' }}>
+                <div style={{marginTop:'40px'}}>
+                <Card.Text style={{ fontSize: '16px'}}>
                 <strong>Area:</strong> Whole Municipal Area 
                 </Card.Text>
-                </>
+                </div>
               }
-              </>
+              </div>
             }
-            <Card.Text style={{ fontSize: '16px' }}><strong>Connections:</strong> {numberofconnections}</Card.Text>
           </div>
           <div> 
-            <Card.Text style={{height: '300px', overflowY: 'auto' , fontSize: '16px' }}><strong>Description:</strong> {document?.Description}</Card.Text>
+            <strong style={{fontSize:'16px'}}>Description:</strong>
+            <Card.Text style={{marginTop:'5px',height: '300px', overflowY: 'auto' , fontSize: '16px' }}>{document?.Description}</Card.Text>
           </div>
         </div>
       </Card.Body>
