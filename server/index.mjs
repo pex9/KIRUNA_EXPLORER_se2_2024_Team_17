@@ -17,7 +17,6 @@ import DocumentConnectionDao from "./dao/document-connection-dao.js";
 import locationDao from "./dao/location-dao.js";
 import { fileURLToPath } from "url";
 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 /*** Set up Passport ***/
@@ -58,47 +57,51 @@ passport.deserializeUser((id, done) => {
 const checkDocumentExists = async (req, res, next) => {
   const documentId = parseInt(req.params.documentId);
   if (isNaN(documentId)) {
-      return res.status(400).json({ message: 'Invalid document ID' });
+    return res.status(400).json({ message: "Invalid document ID" });
   }
 
   try {
-      const document = await documentDao.getDocumentById(documentId);
-      if (!document) {
-          return res.status(404).json({ message: 'Document not found' });
-      }
-      next(); // Continue to the next middleware if the document exists
+    const document = await documentDao.getDocumentById(documentId);
+    if (!document) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+    next(); // Continue to the next middleware if the document exists
   } catch (error) {
-      return res.status(500).json({ message: 'Server error', error });
+    return res.status(500).json({ message: "Server error", error });
   }
 };
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-      const documentId = req.params.documentId;
-      if (!documentId) {
-          return cb(new Error('Document ID is missing'));
-      }
+    const documentId = req.params.documentId;
+    if (!documentId) {
+      return cb(new Error("Document ID is missing"));
+    }
 
-      // Define the directory path based on the document ID
-      const dirPath = path.join(__dirname, 'uploads/', documentId);
+    // Define the directory path based on the document ID
+    const dirPath = path.join(__dirname, "uploads/", documentId);
 
-      // Check if the directory exists, if not, create it
-      if (!fs.existsSync(dirPath)) {
-          fs.mkdirSync(dirPath, { recursive: true });
-      }
+    // Check if the directory exists, if not, create it
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
 
-      // Use the newly created directory as the destination
-      cb(null, dirPath);
+    // Use the newly created directory as the destination
+    cb(null, dirPath);
   },
   filename: (req, file, cb) => {
-      const documentId = req.params.documentId;
-      const currentDate = new Date().toISOString().replace(/[-:]/g, '').replace('T', '_').split('.')[0];
-      const fileExtension = path.extname(file.originalname);
+    const documentId = req.params.documentId;
+    const currentDate = new Date()
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace("T", "_")
+      .split(".")[0];
+    const fileExtension = path.extname(file.originalname);
 
-      // Filename format: documentId_YYYYMMDD_HHMMSS.extension
-      const newFilename = `${documentId}_${currentDate}${fileExtension}`;
-      cb(null, newFilename);
-  }
+    // Filename format: documentId_YYYYMMDD_HHMMSS.extension
+    const newFilename = `${documentId}_${currentDate}${fileExtension}`;
+    cb(null, newFilename);
+  },
 });
 
 const upload = multer({ storage });
@@ -107,14 +110,10 @@ const upload = multer({ storage });
 const app = new express();
 const port = 3001;
 
-
-
 // set-up middlewares
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.static("public"));
-
-
 
 // CORS configuration
 const corsOptions = {
@@ -204,13 +203,30 @@ app.post("/api/documents", isUrbanPlanner, async (req, res) => {
       .json({ error: "The request body must contain all the fields" });
     return;
   }
-  const idLocation= document.idLocation ? document.idLocation : await locationDao.addLocation(document.locationType, document.latitude, document.longitude, document.area_coordinates);
+  const idLocation = document.idLocation
+    ? document.idLocation
+    : await locationDao.addLocation(
+        document.locationType,
+        document.latitude,
+        document.longitude,
+        document.area_coordinates
+      );
   if (!idLocation) {
     res.status(500).json({ error: "Failed to add location." });
     return;
   }
   documentDao
-    .addDocument(document.title,parseInt(document.idStakeholder),document.scale,document.issuance_Date,document.language,parseInt(document.pages),document.description,parseInt(document.idtype),idLocation)
+    .addDocument(
+      document.title,
+      parseInt(document.idStakeholder),
+      document.scale,
+      document.issuance_Date,
+      document.language,
+      parseInt(document.pages),
+      document.description,
+      parseInt(document.idtype),
+      idLocation
+    )
     .then((document) => res.status(201).json(document))
     .catch(() => res.status(500).end());
 });
@@ -236,22 +252,34 @@ app.get("/api/documents/:documentid", (req, res) => {
     .catch(() => res.status(500).end());
 });
 
-
-// PATCH /api/documents/:documentid 
-app.patch("/api/documents/:documentid", isUrbanPlanner, (req, res) => { 
-  const documentId = parseInt(req.params.documentid); 
-  const document = req.body; 
-  if( !document.title || !document.idStakeholder){ 
-    res.status(400).json({ error: "The request body must contain all the fields" }); 
-    return; 
-  } 
-  try { 
-    documentDao.updateDocument(documentId, document.title, parseInt(document.idStakeholder), document.scale, document.issuance_Date, document.language, parseInt(document.pages), document.description, parseInt(document.idtype)) 
-      .then((document) => res.status(200).json(document)) 
-      .catch(() => res.status(500).end()); 
-  } catch (error) { 
-    res.status(500).json({ error: error.message }); 
-  }; 
+// PATCH /api/documents/:documentid
+app.patch("/api/documents/:documentid", isUrbanPlanner, (req, res) => {
+  const documentId = parseInt(req.params.documentid);
+  const document = req.body;
+  if (!document.title || !document.idStakeholder) {
+    res
+      .status(400)
+      .json({ error: "The request body must contain all the fields" });
+    return;
+  }
+  try {
+    documentDao
+      .updateDocument(
+        documentId,
+        document.title,
+        parseInt(document.idStakeholder),
+        document.scale,
+        document.issuance_Date,
+        document.language,
+        parseInt(document.pages),
+        document.description,
+        parseInt(document.idtype)
+      )
+      .then((document) => res.status(200).json(document))
+      .catch(() => res.status(500).end());
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // PATCH /api/documents/:documentId/connection
@@ -285,22 +313,52 @@ app.patch("/api/documents/:documentId/connection", async (req, res) => {
 // API add file to document
 
 // Endpoint to upload a file
-app.post('/api/documents/:documentId/resources',checkDocumentExists, upload.single('file'), async (req, res) => {
-  if (req.file) {
+app.post(
+  "/api/documents/:documentId/resources",
+  checkDocumentExists,
+  upload.single("file"),
+  async (req, res) => {
+    if (req.file) {
       const documentId = parseInt(req.params.documentId);
       res.json({
-          message: 'File uploaded successfully!',
-          documentId: documentId,
-          filename: req.file.filename,
+        message: "File uploaded successfully!",
+        documentId: documentId,
+        filename: req.file.filename,
       });
-  } else {
-      res.status(400).json({ message: 'File upload failed.' });
+    } else {
+      res.status(400).json({ message: "File upload failed." });
+    }
   }
-});
+);
 
-// APU get file from document app.get('/documents/:documentId/resources/')
+// API get file from document
+app.get(
+  "/api/documents/:documentId/resources",
+  checkDocumentExists,
+  async (req, res) => {
+    const documentId = String(req.params.documentId); // Ensure documentId is a string
+    const dirPath = path.join(__dirname, "uploads/", documentId);
 
+    try {
+      // Check if the directory for this document exists
+      if (!fs.existsSync(dirPath)) {
+        return res
+          .status(404)
+          .json({ message: "No resources found for this document" });
+      }
+      // Read files in the directory and prepare them as downloadable resources
+      const files = fs.readdirSync(dirPath);
+      const resources = files.map((file) => ({
+        filename: file,
+        url: `/uploads/${documentId}/${file}`,
+      }));
 
+      res.status(200).json(resources);
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error });
+    }
+  }
+);
 
 // API TYPES
 app.get("/api/types", (req, res) => {
@@ -346,9 +404,7 @@ app.get("/api/connections", (req, res) => {
     .catch((err) => res.status(500).json({ error: "Internal server error" }));
 });
 
-
-
-// API DOCUMENTCONNECTION  
+// API DOCUMENTCONNECTION
 
 // GET /api/document-connections
 // Retrievs all list of connection documents
@@ -403,7 +459,6 @@ app.get("/api/locations", (req, res) => {
     .then((locations) => res.json(locations))
     .catch(() => res.status(500).end());
 });
-
 
 app.get("/api/locations/area", (req, res) => {
   locationDao
@@ -466,7 +521,12 @@ app.patch("/api/locations/:locationId", isUrbanPlanner, async (req, res) => {
   const idLocation = parseInt(req.params.locationId);
   console.log(idLocation);
   console.log(req.body);
-  const { location_type: locationType, latitude, longitude, area_coordinates: areaCoordinates } = req.body;
+  const {
+    location_type: locationType,
+    latitude,
+    longitude,
+    area_coordinates: areaCoordinates,
+  } = req.body;
   if (!locationType) {
     return res.status(400).json({ error: "locationType is required." });
   }
