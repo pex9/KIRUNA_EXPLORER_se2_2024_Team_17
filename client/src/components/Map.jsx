@@ -156,9 +156,13 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
       ) : (
         <div>
           <MapContainer ref={mapRef} center={[67.8558, 20.2253]} zoom={12.4}>
-            <TileLayer
+            {/*<TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />*/}
+            <TileLayer
+              url='https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'
+              subdomains={['mt1','mt2','mt3']}
             />
             {(locationsArea[selectedMarker?.IdLocation] && locationsArea) &&
               Object.values(locationsArea).map((area, index) => {
