@@ -174,6 +174,7 @@ To run the web app refer to the following step:
     }
     ```
 - **POST** `/api/documents/:documentId/resources`
+
   - **Description**: Allows users to upload a file for a specific document, given its `documentId`.
   - **Request**:
     - **URL Parameter**: `documentId` (integer) - the unique ID of the document to which the resource will be associated.
@@ -193,6 +194,24 @@ To run the web app refer to the following step:
       "documentId": 1,
       "filename": "file1234_20241110_145302.pdf"
     }
+    ```
+
+- GET `/api/documents/:documentId/resources`
+
+  - **Description**: Allows user to get the resources of the document of the system by giving id
+  - **Request**: No request.
+  - **Response**: returns `200 OK` (created) or `400 Bad Request` (invalid
+    data ) or `500 Internal Server Error `If an unexpected error occurs or `404 Not Found` If the document with the given `documentId` does not exist.
+  - **Response Body**: On success (`200 OK`), the body contains the object with the details of the resources of the document.
+
+    ```json
+    [
+      {
+        "documentId": 18,
+        "filename": "18_20241110_201804.pdf",
+        "url": "/uploads/18/18_20241110_201804.pdf"
+      }
+    ]
     ```
 
 # DOCUMENT CONNECTION API

@@ -349,6 +349,7 @@ app.get(
       // Read files in the directory and prepare them as downloadable resources
       const files = fs.readdirSync(dirPath);
       const resources = files.map((file) => ({
+        documentId: Number(documentId),
         filename: file,
         url: `/uploads/${documentId}/${file}`,
       }));
