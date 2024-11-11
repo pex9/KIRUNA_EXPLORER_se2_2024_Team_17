@@ -336,17 +336,16 @@ app.get(
   "/api/documents/:documentId/resources",
   checkDocumentExists,
   async (req, res) => {
-    const documentId = String(req.params.documentId); // Ensure documentId is a string
+    const documentId = String(req.params.documentId);
     const dirPath = path.join(__dirname, "uploads/", documentId);
 
     try {
-      // Check if the directory for this document exists
       if (!fs.existsSync(dirPath)) {
         return res
           .status(404)
           .json({ message: "No resources found for this document" });
       }
-      // Read files in the directory and prepare them as downloadable resources
+
       const files = fs.readdirSync(dirPath);
       const resources = files.map((file) => ({
         documentId: Number(documentId),
