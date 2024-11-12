@@ -216,7 +216,6 @@ app.post("/api/documents", isUrbanPlanner, async (req, res) => {
 });
 
 // GET /api/documents
-
 app.get("/api/documents", (req, res) => {
   documentDao
     .getDocuments()
@@ -225,7 +224,6 @@ app.get("/api/documents", (req, res) => {
 });
 
 // GET /api/documents/:documentid
-
 app.get("/api/documents/:documentid", (req, res) => {
   documentDao
     .getDocumentById(req.params.documentid)
@@ -236,6 +234,16 @@ app.get("/api/documents/:documentid", (req, res) => {
     .catch(() => res.status(500).end());
 });
 
+// GET /api/documents/title/:title
+app.get("/api/documents/title/:title", (req, res) => {
+  documentDao
+      .getDocumentByTitle(req.params.title)
+      .then((document) => {
+          if (document) res.json(document);
+          else res.status(404).json({ error: "Document not found" });
+      })
+      .catch(() => res.status(500).end());
+});
 
 // PATCH /api/documents/:documentid 
 app.patch("/api/documents/:documentid", isUrbanPlanner, (req, res) => { 
