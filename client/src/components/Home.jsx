@@ -176,7 +176,7 @@ function Home(props) {
           loading ? (
             <Spinner animation="border" variant="primary" />
           ) : (
-              <MapComponent locations={locations} setLocations={setLocations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation} handleDocumentClick={handleDocumentClick} numberofconnections={numberofconnections}/>
+              <MapComponent locations={locations} setLocations={setLocations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation} handleDocumentClick={handleDocumentClick} numberofconnections={numberofconnections} fetchLocationsArea={fetchLocationsArea}/>
           )
 
         ) : (
@@ -218,6 +218,7 @@ function Home(props) {
                       isLogged={isLogged} 
                       viewMode={viewMode}
                       numberofconnections={numberofconnections}
+                      areaName={locationsArea[selectedDocument?.IdLocation]?.Area_Name}
                       />
                     ) : (
                       <div className="text-muted">Select a document to view its specifications.</div>

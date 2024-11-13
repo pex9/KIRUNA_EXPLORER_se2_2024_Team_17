@@ -8,3 +8,4 @@ DROP TABLE IF EXISTS Document;
 
 DELETE FROM DocumentConnection
 DELETE FROM Location
+DELETE FROM Document

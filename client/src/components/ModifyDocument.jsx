@@ -10,6 +10,7 @@ function ModifyDocument() {
     const location = useLocation(); 
     const { location: selectedLocation } = location.state || {};
 
+
     // document fields
     const [title, setTitle] = useState('');
     const [scale, setScale] = useState('');
@@ -33,7 +34,6 @@ function ModifyDocument() {
 
     const [documents, setDocuments] = useState([]); // List of all documents
     const [filteredDocuments, setFilteredDocuments] = useState([]); // used to filter documents
-
 
     useEffect(() => {
         const getStakeholders = async () => {
@@ -143,14 +143,18 @@ function ModifyDocument() {
                 // insert the document which is a point 
                 //console.log(selectedLocation);
                 //console.log({ title, scale, issuanceDate, description, connections, language, pages, stakeholder: stakeholder, type: type, locationType : "Point", latitude : selectedLocation.lat , longitude: selectedLocation.lng, area_coordinates :"" });
-                const result= await API.addDocument( title,stakeholder, scale, date, language, pages,description,  type,  "Point",  selectedLocation.lat , selectedLocation.lng, "" );
+                const result= await API.addDocument( title,stakeholder, scale, date, language, pages,description,  type,  "Point",  latitude , longitude, "" );
                 navigate('/');
               }
               else if (selectedLocation!= null && selectedLocation.Location_Type =="Area"){
                 //insert the document inside an area
                 const result = await API.addDocumentArea( title,stakeholder, scale, date, language, pages,description,  type, selectedLocation.IdLocation );
                 navigate('/');
-              }
+            }
+            // insert the document
+            /*const result= await API.addDocument({ title, scale, issuanceDate, description, connections, language, pages, stakeholder: stakeholder.id, type: type.id });
+            console.log(result);
+            navigate('/');*/
           }
         }
         };
@@ -359,8 +363,8 @@ function ModifyDocument() {
                       <>
                           {(latitude && longitude) ? (
                             <div className='mb-4 d-flex'>
-                              <p className='mx-4'>
-                                <strong>Latitude:</strong> {selectedLocation.lat.toFixed(4)}
+                              <p className='mx-4 d-flex align-items-center'>
+                                <strong className='me-2'>Latitude:</strong> <Form.Control value={latitude} onChange={(e) => setLatitude(e.target.value)}></Form.Control>
                               </p>
                               <p className='mx-4 d-flex align-items-center'>
                                 <strong className='me-2'>Longitude:</strong> <Form.Control value={longitude} onChange={(e) => setLongitude(e.target.value)}></Form.Control>
@@ -369,16 +373,33 @@ function ModifyDocument() {
                           ) : (
                             <p>
                               <strong>Location: </strong> {selectedLocation?.Area_Name}
-                            </p>
+                              </p>
                           )}
                         </>
                       ) : (
                         <>
-                          {/* Existing document details here */}
+                            {(selectedLocation && selectedLocation.lat != null && selectedLocation.lng != null) ? (
+                              <div className='mb-4 d-flex'>
+                              <p className='mx-4 d-flex align-items-center'>
+                                <strong className='me-2'>Latitude:</strong> <Form.Control value={latitude} onChange={(e) => setLatitude(e.target.value)}></Form.Control>
+                              </p>
+                              <p className='mx-4 d-flex align-items-center'>
+                                <strong className='me-2'>Longitude:</strong> <Form.Control value={longitude} onChange={(e) => setLongitude(e.target.value)}></Form.Control>
+                              </p>
+                            </div>
+                          ) : (
+                            <p>
+                              <strong>Location: </strong> {location.state.area}
+                            </p>
+                          )}
                         </>
                       )}
                   
-                    <div className="d-flex justify-content-center my-2 mx-5">
+                </Col>
+                      {message && <Alert variant="danger" dismissible onClick={() => setMessage('')}>{message}</Alert>}
+            </Row>
+            </Card.Body>
+                    <div className="d-flex justify-content-center mb-4 mx-5">
                         <Button variant="outline-secondary" className='mx-2 rounded-pill px-4' onClick={() => navigate('/')}>
                             Cancel
                         </Button>

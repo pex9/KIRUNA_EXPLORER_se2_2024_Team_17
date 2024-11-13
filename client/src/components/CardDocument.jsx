@@ -57,7 +57,7 @@ function CardDocument ({document, locationType, latitude, longitude, setShowCard
                 :
                 <div style={{marginTop:'40px'}}>
                 <Card.Text style={{ fontSize: '16px'}}>
-                <strong>Area:</strong> Whole Municipal Area 
+                <strong>Area:</strong> {areaName}
                 </Card.Text>
                 </div>
               }
