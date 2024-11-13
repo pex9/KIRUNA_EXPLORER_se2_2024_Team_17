@@ -65,6 +65,18 @@ exports.getDocumentById = (documentId) => {
             }) 
         });
     };
+exports.getDocumentByTitle = (title) => {
+      return new Promise((resolve, reject) => {
+          const sql = 'SELECT * FROM Document WHERE Title = ?';
+          db.get(sql, [title], (err, row) => {
+              if (err) {
+                  reject(err);
+              } else {
+                  resolve(row);
+              }
+          });
+      });
+  };  
 /**
  * Updating the document id of a document.
  * @param {Number} documentId - ID of the document to update.
