@@ -14,12 +14,6 @@ describe("Stakeholder API", () => {
       .post("/api/sessions")
       .send({ username: "mario@test.it", password: "pwd" });
   });
-  afterAll(async () => {
-    await new Promise((resolve) => {
-      server.close(resolve);
-    });
-   });
-
   describe("GET /api/stakeholders", () => {
     it("should retrieve all stakeholders", async () => {
       const mockStakeholders = [
@@ -83,12 +77,6 @@ describe("Stakeholder API", () => {
 
       expect(response.status).toBe(500);
       expect(response.body).toEqual({});
-    });
-  });
-
-  afterAll(async () => {
-    await new Promise((resolve) => {
-      server.close(resolve); // Close the server after tests
     });
   });
 });

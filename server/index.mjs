@@ -18,8 +18,7 @@ import locationDao from "./dao/location-dao.js";
 import { fileURLToPath } from "url";
 
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
 /*** Set up Passport ***/
 // set up the "username and password" login strategy
 passport.use(
@@ -516,10 +515,30 @@ app.patch("/api/locations/:locationId", isUrbanPlanner, async (req, res) => {
   }
 });
 
-// activate the server
-const server = app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
-});
+//check server using a port
+const isPortInUse = (port) => {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.unref();
+    server.on('error', () => resolve(true));  // Port is in use
+    server.on('listening', () => {
+      server.close();
+      resolve(false); // Port is free
+    });
+    server.listen(port);
+  });
+};
 
+
+const server = async () => {
+  const isInUse = await isPortInUse(port);
+  if (isInUse) {
+    console.log(`Port ${port} is already in use. Server not started.`);
+  } else {
+    const server = app.listen(port, () => {
+      console.log(`Server listening at http://localhost:${port}`);
+    });
+  }
+};
 // Export the app and server
 export { app, server };

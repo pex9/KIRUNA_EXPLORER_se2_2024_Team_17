@@ -7,11 +7,6 @@ describe('Document Type API', () => {
     beforeAll(async () => {
         agent = request.agent(app);
     });
-    afterAll(async () => {
-        await new Promise((resolve) => {
-          server.close(resolve);
-        });
-      });
 
     it('should retrieve all document types', async () => {
         const response = await agent.get('/api/types');
@@ -51,7 +46,5 @@ describe('Document Type API', () => {
         expect(response.body).toHaveProperty('error', 'Type not found.');
     });
 
-    afterAll(async () => {
-        await new Promise(resolve => server.close(resolve));
-    });
+
 });

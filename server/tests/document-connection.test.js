@@ -19,11 +19,7 @@ describe("Document Connections API", () => {
       .post("/api/sessions")
       .send({ username: "mario@test.it", password: "pwd" });
   });
-  afterAll(async () => {
-    await new Promise((resolve) => {
-      server.close(resolve);
-    });
-  });
+
   describe("GET /api/document-connections", () => {
     it("should retrieve all document connections", async () => {
       const mockConnections = [
@@ -228,13 +224,6 @@ describe("Document Connections API", () => {
 
       expect(response.status).toBe(500);
       expect(response.body).toEqual({ error: "Database error" });
-    });
-
-    // Close the server after all tests have run
-    afterAll(async () => {
-      await new Promise((resolve) => {
-        server.close(resolve);
-      });
     });
   });
 });
