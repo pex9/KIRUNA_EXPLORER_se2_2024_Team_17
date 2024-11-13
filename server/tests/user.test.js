@@ -2,12 +2,6 @@ import request from 'supertest'; // Import supertest for testing HTTP requests
 const { app,server } = require('../index.mjs'); // Use require for your app and server
 describe('User API', () => {
     // Test for login
-    afterAll(async () => {
-        await new Promise((resolve) => {
-          server.close(resolve);
-        });
-    });
-
     it('should login successfully with valid credentials', async () => {
         const response = await request(app)
             .post('/api/sessions')
@@ -56,12 +50,5 @@ describe('User API', () => {
         const response = await request(app).get('/api/sessions/current');
         expect(response.status).toBe(401);
         expect(response.body).toHaveProperty('error', 'Unauthenticated user!');
-    });
-
-    // Close the server after all tests have run
-    afterAll(async () => {
-        await new Promise(resolve => {
-            server.close(resolve); // Close the server
-        });
     });
 });

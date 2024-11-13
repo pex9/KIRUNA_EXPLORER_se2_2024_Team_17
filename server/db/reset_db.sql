@@ -7,5 +7,4 @@ DROP TABLE IF EXISTS Connection;
 DROP TABLE IF EXISTS Document;
 
 DELETE FROM DocumentConnection
-DELETE FROM Document
-
+DELETE FROM Location

@@ -15,12 +15,6 @@ describe("Document API with Session Authentication", () => {
     expect(loginResponse.status).toBe(200);
   });
 
-  afterAll(async () => {
-    await new Promise((resolve) => {
-      server.close(resolve);  // Ensure server is closed only once
-    });
-  });
-
   it("should retrieve all documents", async () => {
     const response = await agent.get("/api/documents");
     expect(response.status).toBe(200);

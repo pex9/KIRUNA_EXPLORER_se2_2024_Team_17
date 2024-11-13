@@ -16,9 +16,11 @@ import typeDocumentDao from "./dao/typeDocument-dao.js";
 import DocumentConnectionDao from "./dao/document-connection-dao.js";
 import locationDao from "./dao/location-dao.js";
 import { fileURLToPath } from "url";
+import net from 'net';  // Import the 'net' module
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
+
+
 /*** Set up Passport ***/
 // set up the "username and password" login strategy
 passport.use(
@@ -203,14 +205,7 @@ app.post("/api/documents", isUrbanPlanner, async (req, res) => {
       .json({ error: "The request body must contain all the fields" });
     return;
   }
-  const idLocation = document.idLocation
-    ? document.idLocation
-    : await locationDao.addLocation(
-        document.locationType,
-        document.latitude,
-        document.longitude,
-        document.area_coordinates
-      );
+  const idLocation= document.idLocation ? document.idLocation : await locationDao.addLocation(document.locationType, document.latitude, document.longitude, document.area_coordinates,'');
   if (!idLocation) {
     res.status(500).json({ error: "Failed to add location." });
     return;
@@ -487,7 +482,10 @@ app.get("/api/locations/:locationId", (req, res) => {
 });
 
 app.post("/api/locations", isUrbanPlanner, async (req, res) => {
-  const { locationType, latitude, longitude, areaCoordinates } = req.body;
+  console.log(req.body);
+  
+  const { location_type: locationType, center_lat: latitude, center_lng: longitude, area_coordinates: areaCoordinates,areaName: area_name } = req.body;
+
   if (!locationType) {
     return res.status(400).json({ error: "locationType is required." });
   }
@@ -510,11 +508,15 @@ app.post("/api/locations", isUrbanPlanner, async (req, res) => {
     }
   }
   try {
+    console.log("dio sabnto"+area_name);
+    const transformedCoordinates = JSON.parse(areaCoordinates).map(point => [point.lat, point.lng]);
+    console.log(transformedCoordinates);
     const result = await locationDao.addLocation(
       locationType,
       latitude,
       longitude,
-      areaCoordinates
+      transformedCoordinates,
+      area_name
     );
     if (result) {
       res.status(201).json({ message: "Location added successfully." });
@@ -578,10 +580,31 @@ app.patch("/api/locations/:locationId", isUrbanPlanner, async (req, res) => {
   }
 });
 
-// activate the server
-const server = app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
-});
+//check server using a port
+const isPortInUse = (port) => {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.unref();
+    server.on('error', () => resolve(true));  // Port is in use
+    server.on('listening', () => {
+      server.close();
+      resolve(false); // Port is free
+    });
+    server.listen(port);
+  });
+};
 
+
+const server = async () => {
+  const isInUse = await isPortInUse(port);
+  if (isInUse) {
+    console.log(`Port ${port} is already in use. Server not started.`);
+  } else {
+    const server = app.listen(port, () => {
+      console.log(`Server listening at http://localhost:${port}`);
+    });
+  }
+};
+server().catch(err => console.error(err));
 // Export the app and server
 export { app, server };

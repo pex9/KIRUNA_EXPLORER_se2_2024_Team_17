@@ -527,6 +527,38 @@ const addResourceToDocument = (idDocument, file) => {
   });
 };
 
-const API = { getUsers, login, logout, getUserInfo, getAllTypesDocument, getTypeDocument, getAllStakeholders, getStakeholder, addDocument, createDocumentConnection, getAllDocumentConnections, getDocumentConnection, getAllDocuments, getDocumentById, getAllLocations, updateLocationDocument, getLocationById, getAllTypeConnections,updateDocument,getAllLocationsArea,addDocumentArea,addResourceToDocument};
+const addArea = (areaName, area_coordinates,center_lat,center_lng) => {
+
+  return new Promise((resolve, reject) => {
+    fetch(URL + `/locations`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 
+        location_type: "Area",
+        center_lat,
+        center_lng,
+        area_coordinates,
+        areaName,
+      }),
+      credentials: "include",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          // Reject if response is not OK
+          return response.json().then((message) => reject(message));
+        }
+        return response.json();
+      })
+      .then((data) => resolve(data))
+      .catch(() => {
+        reject({ error: "Cannot communicate with the server." });
+      });
+  });
+};
+
+
+const API = { getUsers, login, logout, getUserInfo, getAllTypesDocument, getTypeDocument, getAllStakeholders, getStakeholder, addDocument, createDocumentConnection, getAllDocumentConnections, getDocumentConnection, getAllDocuments, getDocumentById, getAllLocations, updateLocationDocument, getLocationById, getAllTypeConnections,updateDocument,getAllLocationsArea,addDocumentArea,addResourceToDocument,addArea};
 
 export default API;
