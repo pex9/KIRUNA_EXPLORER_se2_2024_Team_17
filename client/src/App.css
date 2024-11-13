@@ -11,12 +11,11 @@
 }
 
 .leaflet-container {
-  height: 70vh;
-  border-radius: 2rem;
+  height: 85vh;
+  border-radius: 1rem;
 }
 
 .mapContainer {
-
   justify-content: center;
   align-items: center;
 }

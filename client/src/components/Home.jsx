@@ -6,18 +6,19 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import { FaFileAlt } from 'react-icons/fa'; // Import document icon
 import API from '../API'; // Import API module
-import context from 'react-bootstrap/esm/AccordionContext';
 import { Form } from 'react-bootstrap';
 import AppContext from '../AppContext';
 import '../App.css';
 import { Modal } from 'react-bootstrap';
+import CardDocument from './CardDocument';
 
 
 function Home(props) {
-  const [viewMode, setViewMode] = useState('map');
+  const viewMode = useContext(AppContext).viewMode.viewMode;
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDocument, setSelectedDocument] = useState(null);
+  const selectedDocument = useContext(AppContext).selectedDocument;
+  const setSelectedDocument = useContext(AppContext).setSelectedDocument;
   const [stakeholders, setStakeholders] = useState([]);
   const [locations, setLocations] = useState([]);
   const [locationsArea, setLocationsArea] = useState([]);
@@ -33,7 +34,6 @@ function Home(props) {
 
 
 
-  const navigate = useNavigate();
   const context = useContext(AppContext);
   const isLogged = context.loginState.loggedIn;
   const fetchDocuments = async () => {
@@ -124,11 +124,6 @@ function Home(props) {
       });
   }, []);
 
-  const handleToggle = (value) => {
-    setViewMode(value);
-    setSelectedDocument(null);
-  };
-
   const handleDocumentClick = async (doc) => {
     // Fetch the number of connections for the selected document
     const res = await API.getDocumentConnection(doc.IdDocument);
@@ -138,11 +133,6 @@ function Home(props) {
 
   };
 
-  const handleModifyClick = () => {
-    if (selectedDocument) {
-      navigate(`documents/modify-document/${selectedDocument.IdDocument}`);
-    }
-  };
   const handleAddConnection = async () => {
     if (selectedDocument && connectionType) {
       await API.createDocumentConnection(selectedDocument.IdDocument, selectDocumentSearch.IdDocument, connectionType);
@@ -181,67 +171,27 @@ function Home(props) {
 
   return (
     <>
-      {isLogged &&
-        <div className=' d-flex justify-content-center mt-3'>
-          <ToggleButtonGroup
-            type="radio"
-            name="options"
-            value={viewMode}
-            onChange={handleToggle}
-          >
-            <ToggleButton
-              id="tbg-map"
-              value="map"
-              variant="outline-primary"
-              className="px-4"
-              style={{
-                color: viewMode === "map" ? "white" : "#A89559",
-                borderColor: "#A89559",
-                backgroundColor: viewMode === "map" ? "#A89559" : "transparent",
-              }}
-            >
-              Map
-            </ToggleButton>
-            <ToggleButton
-              id="tbg-list"
-              value="list"
-              variant="outline-primary"
-              className="px-4"
-              style={{
-                color: viewMode === "list" ? "white" : "#A89559",
-                borderColor: "#A89559",
-                backgroundColor: viewMode === "list" ? "#A89559" : "transparent",
-              }}
-            >
-              List
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </div>
-      }
-
-      <Container fluid className='justify-content-center mt-3' style={{ width: '95vw' }} >
+      <Container fluid className='justify-content-center mt-3' style={{ width: '100vw' }} >
         {viewMode === 'map' ? (
           loading ? (
             <Spinner animation="border" variant="primary" />
           ) : (
-
-            <>
-              <MapComponent locations={locations} setLocations={setLocations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation } fetchLocationsArea={fetchLocationsArea} />
-            </>
+              <MapComponent locations={locations} setLocations={setLocations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation} handleDocumentClick={handleDocumentClick} numberofconnections={numberofconnections}/>
           )
 
         ) : (
+          
           loading ? (
             <Spinner animation="border" variant="primary" />
           ) : (
             <>
-              <Card className="mt-3">
+              <Card className="mt-3" style={{minHeight:'400px'}}>
                 <div className='d-flex p-3'>
-                  <div className='me-3' style={{ width: '30%', overflowY: 'auto', maxHeight: '600px' }}>
+                  <div className='me-3 col-md-4 col-sm-3' style={{maxHeight: '600px' }}>
                     {loading ? (
                       <Spinner animation="border" variant="primary" />
                     ) : (
-                      <Card>
+                      <Card style={{width:'100%'}}>
                         <Card.Header>Document List</Card.Header>
                         <ListGroup style={{ maxHeight: '355px', overflowY: 'auto' }}>
                           {documents.map((doc, index) => (
@@ -259,58 +209,22 @@ function Home(props) {
                   </div>
                   <div style={{ flexGrow: 1 }}>
                     {selectedDocument ? (
-                      <Card className="mb-3 document-card" style={{ height: '400px' }}>
-                        <Card.Header className='document'>
-                          <strong>{selectedDocument.Title}</strong>
-                          <img src={srcicon} alt="Document Icon" style={{ float: 'right', width: '24px', height: '24px' }} />
-                        </Card.Header>
-                        <Card.Body className='document-card text-start p-4'>
-                          <div className='d-flex'>
-
-                            <div className='col-6 px-5'>
-
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Date:</strong> {selectedDocument?.Issuance_Date}</Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Scale:</strong> {selectedDocument?.Scale}</Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Language:</strong> {selectedDocument?.Language}</Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Pages:</strong> {selectedDocument?.Pages}</Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}>
-                                <strong>Latitude:</strong> {locationsArea[selectedDocument?.IdLocation] ? locationsArea[selectedDocument?.IdLocation]?.Latitude.toFixed(2) : locations[selectedDocument?.IdLocation]?.Latitude.toFixed(2)}
-                              </Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}>
-                                <strong>Longitude:</strong> {locationsArea[selectedDocument?.IdLocation] ? locationsArea[selectedDocument?.IdLocation]?.Longitude.toFixed(2) : locations[selectedDocument?.IdLocation]?.Longitude.toFixed(2)}
-                              </Card.Text>
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Type </strong> {locationsArea[selectedDocument?.IdLocation] ? "Area" : "Point"}</Card.Text>
-
-                            </div>
-                            <div>
-                              <Card.Text style={{ fontSize: '16px' }}><strong>Description:</strong> {selectedDocument?.Description}</Card.Text>
-                            </div>
-                          </div>
-                        </Card.Body>
-                        <Card.Footer>
-                          <div className="text-center my-3">
-                            <Button variant="secondary" className="me-2 btn-document rounded-pill" onClick={handleModifyClick}>Modify</Button>
-                          </div>
-                        </Card.Footer>
-                      </Card>
+                      <CardDocument 
+                      document={selectedDocument} 
+                      locationType={locationsArea[selectedDocument?.IdLocation] ? "Area" : "Point"} 
+                      latitude={locations[selectedDocument?.IdLocation]?.Latitude.toFixed(4)} 
+                      longitude={locations[selectedDocument?.IdLocation]?.Longitude.toFixed(4)} 
+                      setSelectedDocument={setSelectedDocument} 
+                      isLogged={isLogged} 
+                      viewMode={viewMode}
+                      numberofconnections={numberofconnections}
+                      />
                     ) : (
                       <div className="text-muted">Select a document to view its specifications.</div>
                     )}
                   </div>
                 </div>
               </Card>
-              {/*<div className='text-end mt-4 me-5'>
-              <Button
-                variant="dark"
-                className='rounded-pill btn-document py-1'
-                size="lg"
-                onClick={() => navigate('documents/create-document', { state: { location: selectedLocation } })}
-              >
-                <h6>
-                  Add new document
-                </h6>
-              </Button>
-            </div>*/}
             </>
           )
         )
