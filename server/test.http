@@ -152,6 +152,14 @@ Content-Type: multipart/form-data
 #    "error": "Document not found",
 #}
 
+### test to retrieve resources from an existing document
+GET http://localhost:3001/api/documents/18/resources
+
+###
+GET http://localhost:3001/api/documents/19/resources
+
+### test to retrieve resources from a non-existent document
+GET http://localhost:3001/api/documents/1/resources
 
 
 ### test the get of all documents
