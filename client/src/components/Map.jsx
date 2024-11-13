@@ -29,6 +29,12 @@ function MapComponent({locations,setLocations,locationsArea,documents,setSelecte
   const [areaName, setAreaName] = useState("");
   const [selectedArea, setSelectedArea] = useState(null);
 
+
+  const getNumberOfDocumentsArea = (locationId) => {
+    if(!locations) return 0;
+    return Object.values(documents).filter((document) => document.IdLocation == locationId).length;
+
+  };
   // Custom hook to handle zooming behavior
   function CustomZoomHandler() {
     const map = useMap(); // Get the map instance
@@ -296,7 +302,10 @@ function MapComponent({locations,setLocations,locationsArea,documents,setSelecte
                           click: () => handleAreaClick(area),
                         }}
                       >
-                        <Popup>{area.Area_Name}</Popup>
+                      <Popup>
+                        {area.Area_Name} <br />
+                        {getNumberOfDocumentsArea(area.IdLocation)} documents
+                      </Popup>
                       </Polygon>
                       );
                     })}
@@ -318,6 +327,7 @@ function MapComponent({locations,setLocations,locationsArea,documents,setSelecte
                   }}
                   edit={{
                     edit: false,
+                    remove: false,
                   }}
                 />
               </FeatureGroup>
