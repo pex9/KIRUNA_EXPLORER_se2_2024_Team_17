@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.mjs",
   "scripts": {
-    "test": "jest"
+    "coverage": "jest --coverage"
   },
   "author": "",
   "license": "ISC",

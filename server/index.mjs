@@ -16,6 +16,8 @@ import typeDocumentDao from "./dao/typeDocument-dao.js";
 import DocumentConnectionDao from "./dao/document-connection-dao.js";
 import locationDao from "./dao/location-dao.js";
 import { fileURLToPath } from "url";
+import net from 'net';  // Import the 'net' module
+
 
 
 
@@ -540,5 +542,6 @@ const server = async () => {
     });
   }
 };
+server().catch(err => console.error(err));
 // Export the app and server
 export { app, server };
