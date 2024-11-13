@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Button, Form, Card, Row, Col, Modal, ListGroup, FloatingLabel, FormGroup } from 'react-bootstrap';
+import { Button, Form, Card, Row, Col, Modal, ListGroup, FloatingLabel, FormGroup, Alert } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import API from '../API';
 function ModifyDocument() {
     const { documentId } = useParams();
     const [showAddConnection, setShowAddConnection] = useState(false);
-  
+    const [message, setMessage] = useState('');
     const location = useLocation(); 
     const { location: selectedLocation } = location.state || {};
 
@@ -118,23 +118,36 @@ function ModifyDocument() {
           fetchDocument();
     },[]);
     const handleUpdate = async() => {
-      if(!title || !scale || !issuanceDate || !description  || !stakeholder || !type){
-        alert("Please complete all fields to add a document.");
+      if(!title || !scale || !issuanceDate.year || !description  || !stakeholder || !type){
+        setMessage("Please complete all fields to add a document.");
       } else {
+        let date;
+        console.log(issuanceDate);
+        if (issuanceDate.year && issuanceDate.month && issuanceDate.day) {
+          date = `${issuanceDate.year}/${issuanceDate.month}/${issuanceDate.day}`;
+        } else if (issuanceDate.year && issuanceDate.month && !issuanceDate.day) {
+          date = `${issuanceDate.year}/${issuanceDate.month}`;
+        } else if (issuanceDate.year && !issuanceDate.month && !issuanceDate.day) {
+          date = `${issuanceDate.year}`;
+        } else {
+          setMessage("Please provide a valid date format.");
+          return;
+        }
+        console.log(date);
         if (documentId) {
-          const result= await API.updateDocument(documentId, title,stakeholder.id ? stakeholder.id: stakeholder, scale, issuanceDate, language, pages,description,  type.id ? type.id: type); 
+          const result= await API.updateDocument(documentId, title,stakeholder.id ? stakeholder.id: stakeholder, scale, date, language, pages,description,  type.id ? type.id: type); 
           navigate('/');
         } else {
               if( selectedLocation!= null && selectedLocation.lat != null && selectedLocation.lng != null){
                 // insert the document which is a point 
                 //console.log(selectedLocation);
                 //console.log({ title, scale, issuanceDate, description, connections, language, pages, stakeholder: stakeholder, type: type, locationType : "Point", latitude : selectedLocation.lat , longitude: selectedLocation.lng, area_coordinates :"" });
-                const result= await API.addDocument( title,stakeholder, scale, issuanceDate, language, pages,description,  type,  "Point",  selectedLocation.lat , selectedLocation.lng, "" );
+                const result= await API.addDocument( title,stakeholder, scale, date, language, pages,description,  type,  "Point",  selectedLocation.lat , selectedLocation.lng, "" );
                 navigate('/');
               }
               else if (selectedLocation!= null && selectedLocation.Location_Type =="Area"){
                 //insert the document inside an area
-                const result = await API.addDocumentArea( title,stakeholder, scale, issuanceDate, language, pages,description,  type, selectedLocation.IdLocation );
+                const result = await API.addDocumentArea( title,stakeholder, scale, date, language, pages,description,  type, selectedLocation.IdLocation );
                 navigate('/');
             }
             // insert the document
@@ -186,10 +199,10 @@ function ModifyDocument() {
             <Row>
                 {/* Left Column: Document Fields and Connections */}
                 <Col md={6}>
-                  <Form>
-                      <Form.Group controlId="title" className="mb-3">
-                          <FloatingLabel controlId="title" label="Title" className="mb-3">
+                      <Form.Group controlid="title" className="mb-3">
+                          <FloatingLabel label="Title*" className="mb-3">
                             <Form.Control
+                                placeholder='title'
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
@@ -197,9 +210,10 @@ function ModifyDocument() {
                         </FloatingLabel>
                       </Form.Group>
                       
-                      <Form.Group controlId="scale" className="mb-3">
-                        <FloatingLabel controlId="scale" label="Scale" className="mb-3">
+                      <Form.Group controlid="scale" className="mb-3">
+                        <FloatingLabel label="Scale" className="mb-3">
                           <Form.Control
+                              placeholder='scale'
                               type="text"
                               value={scale}
                               onChange={(e) => setScale(e.target.value)}
@@ -207,57 +221,72 @@ function ModifyDocument() {
                         </FloatingLabel>
                       </Form.Group>
                       
-                      <Form.Group controlId="language" className="mb-3">
-                        <FloatingLabel controlId="language" label="Language" className="mb-3">
-                          <Form.Control
-                              type="text"
+                      <Form.Group controlid="language" className="mb-3">
+                        <FloatingLabel label="Language" className="mb-3">
+                          <Form.Select
+                              placeholder='language'
                               value={language}
                               onChange={(e) => setLanguage(e.target.value)}
+                            >
+                              <option>Select Language</option>
+                              <option value="English">English</option>
+                              <option value="Swedish">Swedish</option>
+                          </Form.Select>
+                        </FloatingLabel>
+                      </Form.Group>
+                      
+                      <div className='d-flex justify-content-between'>
+                      <Form.Group controlid="pages" className="">
+                        <FloatingLabel label="Pages" className="mb-3">
+                          <Form.Control
+                              placeholder='pages'
+                              size="sm"
+                              type="number"
+                              value={pages}
+                              onChange={(e) => setPages(e.target.value)}
+                              min={0}
                               />
                         </FloatingLabel>
                       </Form.Group>
                       
-                      <Form.Group controlId="pages" className="mb-3">
-                        <FloatingLabel controlId="pages" label="Pages" className="mb-3">
-                          <Form.Control
-                              type="number"
-                              value={pages}
-                              onChange={(e) => setPages(e.target.value)}
+                      <Form.Group controlid="issuanceDate" className="ms-1 mb-3 d-flex align-items-center justify-content-center">
+                        <label className='me-2'> Issuance Date:</label>
+                        <FloatingLabel label='year*'>
+
+                          <Form.Control 
+                            controlid='year' 
+                            className='mx-1' 
+                            type='number' 
+                            style={{width:'10ch'}} 
+                            placeholder='yyyy'
+                            maxLength={4} 
+                            min={2000} 
+                            max={2024} 
+                            value={issuanceDate.year}
+                            onChange={(e)=>setIssuanceDate({year: e.target.value, month: issuanceDate.month, day: issuanceDate.day})} required
                           />
                         </FloatingLabel>
-                      </Form.Group>
-                      
-                      <Form.Group controlId="issuanceDate" className="ms-1 mb-3 d-flex align-items-center justify-content-center">
-                        <label className='me-4'>Date:</label>
-                        <Form.Control 
-                          controlId='year' 
-                          className='mx-2' 
-                          type='number' 
-                          style={{width:'10ch'}} 
-                          placeholder='yyyy' 
-                          maxLength={4} 
-                          min={2000} 
-                          max={2024} 
-                          value={issuanceDate.year} 
-                          onChange={(e)=>setIssuanceDate({year: e.target.value, month: issuanceDate.month, day: issuanceDate.day})} required
-                        />
                         /
-                        <Form.Control 
-                          controlId='month' 
-                          className='mx-2' 
-                          type='number' 
-                          placeholder='mm' 
-                          maxLength={2} 
-                          style={{width:'8ch'}} 
-                          min={1} 
-                          max={12} 
-                          value={issuanceDate.month} 
-                          onChange={(e)=>setIssuanceDate({year: issuanceDate.year, month: e.target.value, day: issuanceDate.day})}
-                        />
+                        <FloatingLabel label='month'>
+                          <Form.Control 
+                            controlid='month' 
+                            className='mx-1' 
+                            type='number' 
+                            placeholder='mm' 
+                            maxLength={2} 
+                            style={{width:'8ch'}} 
+                            min={1} 
+                            max={12} 
+                            value={issuanceDate.month} 
+                            onInput={(e) => {if(e.target.value < 10) e.target.value = '0' + e.target.value}} 
+                            onChange={(e)=>setIssuanceDate({year: issuanceDate.year, month: e.target.value, day: issuanceDate.day})}
+                          />
+                        </FloatingLabel>
                         /
+                        <FloatingLabel label='day'>
                         <Form.Control 
-                          controlId='day' 
-                          className='mx-2' 
+                          controlid='day' 
+                          className='mx-1' 
                           type='number' 
                           placeholder='dd' 
                           maxLength={2} 
@@ -265,15 +294,18 @@ function ModifyDocument() {
                           min={1} 
                           max={31} 
                           value={issuanceDate.day}
+                          onInput={(e) => {if(e.target.value < 10) e.target.value = '0' + e.target.value}} 
                           onChange={(e)=>setIssuanceDate({year: issuanceDate.year, month: issuanceDate.month, day: e.target.value})}
-                        />
+                          />
+                        </FloatingLabel>
                       </Form.Group>
+                      </div>
 
                       {documentId &&
                         <div className="mb-3">
                           <Form.Label>Connections</Form.Label>
                           {connections.length > 0 ? (
-                              <ListGroup variant="flush" className="mb-2">
+                            <ListGroup variant="flush" className="mb-2">
                                   {connections.map((conn, index) => (
                                     <ListGroup.Item key={index}>
                                           {conn.IdDocument1 == documentId ? `${documents.find((document) => document.IdDocument == conn.IdDocument2).Title} - ${typeConnections[conn.IdConnection].Type}` : `${documents.find((document) => document.IdDocument == conn.IdDocument1).Title} - ${typeConnections[conn.IdConnection].Type}`}
@@ -287,25 +319,26 @@ function ModifyDocument() {
                               Add Connection
                           </Button>
                         </div>}
-                  </Form>
                 </Col>
 
                 {/* Right Column: Description and Action Buttons */}
                 <Col md={6}>
-                    <FormGroup controlId="stakeholder" className="mb-3">
-                          <FloatingLabel controlId="stakeholder" label="Stakeholder" className="mb-3">
+                    <FormGroup controlid="stakeholder" className="mb-3">
+                          <FloatingLabel  label="Stakeholder*" className="mb-3">
                             <Form.Select value={stakeholder.id} onChange={(e) => setStakeholder(e.target.value)}>
+                              <option>Select Stakeholder</option>
                               {stakeholders.map((stk) => 
                                 <option key={stk.id} value={stk.id}>{stk.name}</option>
-                                )
-                              }
+                              )
+                            }
                             </Form.Select>
                           </FloatingLabel>  
                         </FormGroup>
                         
-                        <FormGroup controlId="type" className="mb-3">
-                          <FloatingLabel controlId="type" label="Document Type" className="mb-3">
+                        <FormGroup controlid="type" className="mb-3">
+                          <FloatingLabel label="Document Type" className="mb-3">
                             <Form.Select value={type.id} onChange={(e) => setType(e.target.value)} >
+                              <option>Select Document Type</option>
                               {types.map((tp) => 
                                 <option key={tp.id} value={tp.id}>{tp.type}</option>
                               )
@@ -313,11 +346,11 @@ function ModifyDocument() {
                             </Form.Select>
                           </FloatingLabel>  
                     </FormGroup>
-                    <Form.Group controlId="description" className="mb-3">
-                      <FloatingLabel  
-                        controlId="description" label="Description" className="mb-3">
+                    <Form.Group controlid="description" className="mb-3">
+                      <FloatingLabel label="Description" className="mb-3">
                         <Form.Control
-                            className='py-3'
+                            placeholder='description'
+                            className='mt-auto'
                             as="textarea"
                             style={{height: '205px'}}
                             value={description}
@@ -326,7 +359,7 @@ function ModifyDocument() {
                       </FloatingLabel>
                     </Form.Group>
                     {!documentId ? ( 
-                        <>
+                      <>
                           {(latitude && longitude) ? (
                             <div className='mb-4 d-flex'>
                               <p className='mx-4 d-flex align-items-center'>
@@ -345,7 +378,7 @@ function ModifyDocument() {
                       ) : (
                         <>
                             {(selectedLocation && selectedLocation.lat != null && selectedLocation.lng != null) ? (
-                            <div className='mb-4 d-flex'>
+                              <div className='mb-4 d-flex'>
                               <p className='mx-4 d-flex align-items-center'>
                                 <strong className='me-2'>Latitude:</strong> <Form.Control value={latitude} onChange={(e) => setLatitude(e.target.value)}></Form.Control>
                               </p>
@@ -361,7 +394,11 @@ function ModifyDocument() {
                         </>
                       )}
                   
-                    <div className="d-flex justify-content-center my-2 mx-5">
+                </Col>
+                      {message && <Alert variant="danger" dismissible onClick={() => setMessage('')}>{message}</Alert>}
+            </Row>
+            </Card.Body>
+                    <div className="d-flex justify-content-center mb-4 mx-5">
                         <Button variant="outline-secondary" className='mx-2 rounded-pill px-4' onClick={() => navigate('/')}>
                             Cancel
                         </Button>
@@ -369,9 +406,6 @@ function ModifyDocument() {
                             Save
                         </Button>
                     </div>
-                </Col>
-            </Row>
-            </Card.Body>
           </Card>
 
         {/* Modal for Adding a Connection */}
@@ -380,7 +414,7 @@ function ModifyDocument() {
                 <Modal.Title>Add Connection</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form.Group controlId="formDocument" style={{ position: 'relative' }}>
+                <Form.Group controlid="formDocument" style={{ position: 'relative' }}>
                     <Form.Label>Document</Form.Label>
                     <Form.Control
                         type="text"
@@ -406,7 +440,7 @@ function ModifyDocument() {
                         </ListGroup>
                     )}
                 </Form.Group>
-                <Form.Group controlId="connectionTypeSelect" className="mb-3">
+                <Form.Group controlid="connectionTypeSelect" className="mb-3">
                     <Form.Label>Connection Type</Form.Label>
                     <Form.Select
                         value={connectionType}

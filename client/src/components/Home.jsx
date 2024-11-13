@@ -6,7 +6,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import { FaFileAlt } from 'react-icons/fa'; // Import document icon
 import API from '../API'; // Import API module
-import context from 'react-bootstrap/esm/AccordionContext';
 import { Form } from 'react-bootstrap';
 import AppContext from '../AppContext';
 import '../App.css';
@@ -15,10 +14,11 @@ import CardDocument from './CardDocument';
 
 
 function Home(props) {
-  const [viewMode, setViewMode] = useState('map');
+  const viewMode = useContext(AppContext).viewMode.viewMode;
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDocument, setSelectedDocument] = useState(null);
+  const selectedDocument = useContext(AppContext).selectedDocument;
+  const setSelectedDocument = useContext(AppContext).setSelectedDocument;
   const [stakeholders, setStakeholders] = useState([]);
   const [locations, setLocations] = useState([]);
   const [locationsArea, setLocationsArea] = useState([]);
@@ -122,11 +122,6 @@ function Home(props) {
       });
   }, []);
 
-  const handleToggle = (value) => {
-    setViewMode(value);
-    setSelectedDocument(null);
-  };
-
   const handleDocumentClick = async (doc) => {
     // Fetch the number of connections for the selected document
     const res = await API.getDocumentConnection(doc.IdDocument);
@@ -174,45 +169,7 @@ function Home(props) {
 
   return (
     <>
-      {isLogged &&
-        <div className=' d-flex justify-content-center mt-3'>
-          <ToggleButtonGroup
-            type="radio"
-            name="options"
-            value={viewMode}
-            onChange={handleToggle}
-          >
-            <ToggleButton
-              id="tbg-map"
-              value="map"
-              variant="outline-primary"
-              className="px-4"
-              style={{
-                color: viewMode === "map" ? "white" : "#A89559",
-                borderColor: "#A89559",
-                backgroundColor: viewMode === "map" ? "#A89559" : "transparent",
-              }}
-            >
-              Map
-            </ToggleButton>
-            <ToggleButton
-              id="tbg-list"
-              value="list"
-              variant="outline-primary"
-              className="px-4"
-              style={{
-                color: viewMode === "list" ? "white" : "#A89559",
-                borderColor: "#A89559",
-                backgroundColor: viewMode === "list" ? "#A89559" : "transparent",
-              }}
-            >
-              List
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </div>
-      }
-
-      <Container fluid className='justify-content-center mt-3' style={{ width: '95vw' }} >
+      <Container fluid className='justify-content-center mt-3' style={{ width: '100vw' }} >
         {viewMode === 'map' ? (
           loading ? (
             <Spinner animation="border" variant="primary" />
@@ -228,7 +185,7 @@ function Home(props) {
             <>
               <Card className="mt-3" style={{minHeight:'400px'}}>
                 <div className='d-flex p-3'>
-                  <div className='me-3 col-md-3 col-sm-1' style={{maxHeight: '600px' }}>
+                  <div className='me-3 col-md-4 col-sm-3' style={{maxHeight: '600px' }}>
                     {loading ? (
                       <Spinner animation="border" variant="primary" />
                     ) : (
@@ -257,7 +214,7 @@ function Home(props) {
                       longitude={locations[selectedDocument?.IdLocation]?.Longitude.toFixed(4)} 
                       setSelectedDocument={setSelectedDocument} 
                       isLogged={isLogged} 
-                      viewMode='list'
+                      viewMode={viewMode}
                       numberofconnections={numberofconnections}
                       />
                     ) : (
@@ -266,18 +223,6 @@ function Home(props) {
                   </div>
                 </div>
               </Card>
-              {/*<div className='text-end mt-4 me-5'>
-              <Button
-                variant="dark"
-                className='rounded-pill btn-document py-1'
-                size="lg"
-                onClick={() => navigate('documents/create-document', { state: { location: selectedLocation } })}
-              >
-                <h6>
-                  Add new document
-                </h6>
-              </Button>
-            </div>*/}
             </>
           )
         )

@@ -31,10 +31,10 @@ function CardDocument ({document, locationType, latitude, longitude, setShowCard
       <Card.Header className='document px-4'>
         <Card.Title><strong>{document?.Title}</strong></Card.Title>
       </Card.Header>
-      <Card.Body className='document-card text-start p-4'>
+      <Card.Body className='document-card text-start'>
         <div className='d-flex'>
 
-          <div className='col-6'>
+          <div className='col-6 m-1'>
 
             <Card.Text style={{ fontSize: '16px' }}><strong>Date:</strong> {document?.Issuance_Date}</Card.Text>
             <Card.Text style={{ fontSize: '16px' }}><strong>Scale:</strong> {document?.Scale}</Card.Text>
@@ -64,7 +64,7 @@ function CardDocument ({document, locationType, latitude, longitude, setShowCard
               </div>
             }
           </div>
-          <div> 
+          <div className="m-1"> 
             <strong style={{fontSize:'16px'}}>Description:</strong>
             <Card.Text style={{marginTop:'5px',height: '300px', overflowY: 'auto' , fontSize: '16px' }}>{document?.Description}</Card.Text>
           </div>
