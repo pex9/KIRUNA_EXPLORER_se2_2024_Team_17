@@ -36,84 +36,86 @@ function Home(props) {
   const navigate = useNavigate();
   const context = useContext(AppContext);
   const isLogged = context.loginState.loggedIn;
+  const fetchDocuments = async () => {
+    try {
+      const res = await API.getAllDocuments();
+      setDocuments(res);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const fetchDocumentTypes = async () => {
+    try {
+      const res = await API.getAllTypesDocument();
+      //console.log('Document Types:', res);
 
-  // get all documents, locations and stakeholders
-  useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        const res = await API.getAllDocuments();
-        setDocuments(res);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    const fetchDocumentTypes = async () => {
-      try {
-        const res = await API.getAllTypesDocument();
-        //console.log('Document Types:', res);
-
-        setDocumentTypes(res);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    const fetchLocations = async () => {
-      setLoading(true);
-      API.getAllLocations()
-        .then((res) => {
-          // Convert the array into an object with IdLocation as the key
-          const locationsById = res.reduce((acc, location) => {
-            acc[location.IdLocation] = location;
-            return acc;
-          }, {});
-          // Set the transformed object to state
-          setLocations(locationsById);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error(err);
-          setLoading(false);
-        });
-    };
-    const fetchLocationsArea = async () => {
-      setLoading(true);
-      API.getAllLocationsArea()
-        .then((res) => {
-          const locationsById = res.reduce((acc, location) => {
-            acc[location.IdLocation] = location;
-            return acc;
-          }, {});
-          // Set the transformed object to state
-          setLocationsArea(locationsById);
-        })
-        .catch((err) => {
-          console.error(err);
-          setLoading(false);
-        });
-    };
-    const getAllTypeConnections = async () => {
-      try {
-        const res = await API.getAllTypeConnections();
-
-        const typeConnectionId = res.reduce((acc, conn) => {
-          acc[conn.IdConnection] = conn;
+      setDocumentTypes(res);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const fetchLocations = async () => {
+    setLoading(true);
+    API.getAllLocations()
+      .then((res) => {
+        // Convert the array into an object with IdLocation as the key
+        const locationsById = res.reduce((acc, location) => {
+          acc[location.IdLocation] = location;
           return acc;
         }, {});
-        setTypeConnections(typeConnectionId);
-      } catch (err) {
+        // Set the transformed object to state
+        setLocations(locationsById);
+        setLoading(false);
+      })
+      .catch((err) => {
         console.error(err);
-      }
-    };
-
-    const fetchStakeholders = async () => {
-      try {
-        const res = await API.getAllStakeholders();
-        setStakeholders(res);
-      } catch (err) {
+        setLoading(false);
+      });
+  };
+  const fetchLocationsArea = async () => {
+    setLoading(true);
+    
+    API.getAllLocationsArea()
+      .then((res) => {
+        
+        const locationsById = res.reduce((acc, location) => {
+          acc[location.IdLocation] = location;
+          return acc;
+        }, {});
+        console.log(locationsById);
+        // Set the transformed object to state
+        setLocationsArea(locationsById);
+        setLoading(false);
+      })
+      .catch((err) => {
         console.error(err);
-      }
-    };
+        setLoading(false);
+      });
+  };
+  const getAllTypeConnections = async () => {
+    try {
+      const res = await API.getAllTypeConnections();
 
+      const typeConnectionId = res.reduce((acc, conn) => {
+        acc[conn.IdConnection] = conn;
+        return acc;
+      }, {});
+      setTypeConnections(typeConnectionId);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchStakeholders = async () => {
+    try {
+      const res = await API.getAllStakeholders();
+      setStakeholders(res);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  // get all documents, locations and stakeholders
+  useEffect(() => {
     Promise.all([fetchDocuments(), fetchLocations(), fetchStakeholders(), fetchDocumentTypes(), getAllTypeConnections(), fetchLocationsArea()])
       .then(() => setLoading(false))
       .catch(err => {
@@ -224,7 +226,7 @@ function Home(props) {
           ) : (
 
             <>
-              <MapComponent locations={locations} setLocations={setLocations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation} />
+              <MapComponent locations={locations} setLocations={setLocations} locationsArea={locationsArea} documents={documents} setSelectedLocation={setSelectedLocation} setSelectedDocument={setSelectedDocument} selectedLocation={selectedLocation } fetchLocationsArea={fetchLocationsArea} />
             </>
           )
 

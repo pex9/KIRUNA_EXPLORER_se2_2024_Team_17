@@ -31,6 +31,7 @@ function ModifyDocument() {
     const location = useLocation(); 
     const { location: selectedLocation } = location.state || {};
 
+
     useEffect(() => {
         const getStakeholders = async () => {
             try {
@@ -129,11 +130,7 @@ function ModifyDocument() {
                 //insert the document inside an area
                 const result = await API.addDocumentArea( title,stakeholder, scale, issuanceDate, language, pages,description,  type, selectedLocation.IdLocation );
                 navigate('/');
-            }
-            // insert the document
-            /*const result= await API.addDocument({ title, scale, issuanceDate, description, connections, language, pages, stakeholder: stakeholder.id, type: type.id });
-            console.log(result);
-            navigate('/');*/
+              }
           }
         }
         };
@@ -299,7 +296,7 @@ function ModifyDocument() {
                             </div>
                           ) : (
                             <p>
-                              <strong>Location: </strong> Whole Municipal Area
+                              <strong>Location: </strong> {selectedLocation?.Area_Name}
                             </p>
                           )}
                         </>
