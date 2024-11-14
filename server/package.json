@@ -5,7 +5,8 @@
   "main": "index.mjs",
   "scripts": {
     "coverage": "jest --coverage",
-    "test": "jest"
+    "test": "jest",
+    "start": "node index.mjs"
   },
   "author": "",
   "license": "ISC",

@@ -1,0 +1,16 @@
+services:
+  client:
+    image: pex9990/kirunaexplorer-client:latest
+    ports:
+      - "5173:5173"
+    networks:
+      - kirunaexplorer-network
+  server:
+    image: pex9990/kirunaexplorer-server:latest
+    ports:
+      - "3001:3001"
+    networks:
+      - kirunaexplorer-network
+networks:
+  kirunaexplorer-network:
+    driver: bridge

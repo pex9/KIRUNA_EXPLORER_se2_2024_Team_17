@@ -19,6 +19,51 @@ To run the web app refer to the following step:
 
 - Open a browser window, in the URL field, type `http://localhost:5173/` and press Enter. The client is loaded. The user can interact with the server through the client.
 
+## Docker 
+
+# How to Launch the Kiruna Explorer Application
+
+You can launch the Kiruna Explorer application using the image provided in docker.
+
+## Running the Application Using Docker Compose 
+
+This method uses Docker Compose to link two containers (client and server) for the application.
+
+### Steps:
+
+1. **Clone the repository**:
+    ```bash
+    git clone repourl
+    ```
+2. **Run Docker Compose**:
+
+    ```bash
+    docker-compose up -d
+    ```
+You will see the kiruna explore at address: http://localhost:5173/
+
+
+## Notes
+- Ensure you have Docker and Docker Compose installed on your machine.
+- Make sure you're logged into Docker Hub before pushing images:
+
+    ```bash
+    docker login
+    ```
+
+- You can stop the application with:
+
+    ```bash
+    docker-compose down
+    ```
+
+This setup will link the client and server containers, allowing the application to run seamlessly.
+
+
+
+Nb we pushed the server and client images using this command: `docker build -t my-node-app .`
+
+
 ## How to test the backend API's app
 
 - Open a terminal
