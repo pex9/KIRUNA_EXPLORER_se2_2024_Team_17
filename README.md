@@ -19,6 +19,9 @@ To run the web app refer to the following step:
 
 - Open a browser window, in the URL field, type `http://localhost:5173/` and press Enter. The client is loaded. The user can interact with the server through the client.
 
+## Docker 
+
+
 ## How to test the backend API's app
 
 - Open a terminal

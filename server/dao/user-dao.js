@@ -4,7 +4,7 @@
 
 const db = require("../db/db");
 const crypto = require('crypto');
-const User = require('../models/User'); // Import the User class
+const User = require('../models/user'); // Import the User class
 
 
 /**
