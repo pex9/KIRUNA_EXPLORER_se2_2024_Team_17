@@ -34,6 +34,34 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
   const [areaName, setAreaName] = useState("");
   const [selectedArea, setSelectedArea] = useState(null);
 
+  const [newCoordinates, setNewCoordinates] = useState([]);
+
+  useEffect(() => {
+    // Define an async function inside useEffect
+    const updateArea = async () => {
+      
+      if (selectedArea && newCoordinates.length > 0) {
+        console.log("sono dentro la usefefft");
+        console.log("Selected Area:", selectedArea);
+        console.log("Selected Area Coordinates:", newCoordinates);
+  
+        // Assuming getCenter is available and newCoordinates is a valid object
+        const { lat, lng } = getCenter(newCoordinates);
+        // Call the API function with the required parameters
+        await API.updateLocationDocument(
+          selectedArea.IdLocation,
+          "Area",
+          lat,
+          lng,
+          JSON.stringify(newCoordinates)
+        );
+        await fetchLocationsArea();
+      }
+    };
+    // Call the async function inside useEffect
+    updateArea();
+  }, [newCoordinates]);  // Make sure to include `selectedArea` in the dependency array
+
   const getNumberOfDocumentsArea = (locationId) => {
     if(!locations) return 0;
     return Object.values(documents).filter((document) => document.IdLocation == locationId).length;
@@ -92,28 +120,29 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
     setSelectedArea(area);
   };
 
+  const getCenter = (areaCoordinates) => {
+    let totalLat = 0;
+    let totalLng = 0;
+    const count = areaCoordinates[0].length;
+    console.log("Count:", count);
+
+    areaCoordinates[0].forEach((point) => {
+      totalLat += point.lat;
+      totalLng += point.lng;
+    });
+
+    // Calculate average of latitudes and longitudes
+    const centerLat = totalLat / count;
+    const centerLng = totalLng / count;
+
+    return { lat: centerLat, lng: centerLng };
+  };
 
   const handleAddArea = async () => {
     if (areaName) {
       console.log("Adding area:", areaName);
       console.log("Area coordinates:", areaCoordinates[0]);
-      const getCenter = (areaCoordinates) => {
-        let totalLat = 0;
-        let totalLng = 0;
-        const count = areaCoordinates[0].length;
-        console.log("Count:", count);
-
-        areaCoordinates[0].forEach((point) => {
-          totalLat += point.lat;
-          totalLng += point.lng;
-        });
-
-        // Calculate average of latitudes and longitudes
-        const centerLat = totalLat / count;
-        const centerLng = totalLng / count;
-
-        return { lat: centerLat, lng: centerLng };
-      };
+      
       console.log("Center:", getCenter(areaCoordinates));
       API.addArea(
         areaName,
@@ -209,6 +238,12 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
     });
     return null;
   }
+
+  const handleModifyArea = (e) => {
+    // update the new area coordinates and will case the useEffect to update the area
+    console.log(e.layers.getLayers()[0].getLatLngs()[0]);
+    setNewCoordinates(e.layers.getLayers()[0].getLatLngs());
+  };
 
 
   return (
@@ -328,6 +363,7 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
                 <EditControl
                   position="topright"
                   onCreated={handleDrawCreate}
+                  onEdited={handleModifyArea}
                   draw={{
                     rectangle: false,
                     polyline: false,
@@ -337,12 +373,26 @@ function MapComponent({ locations, setLocations, locationsArea, documents, setSe
                     polygon: true,
                   }}
                   edit={{
-                    edit: false,
-                    remove: false,
+                    remove: false
                   }}
                 />
+               {selectedArea && (
+            
+                <Polygon
+                  positions={
+                    Array.isArray(selectedArea.Area_Coordinates)
+                      ? selectedArea.Area_Coordinates
+                      : JSON.parse(selectedArea.Area_Coordinates) // Parse if not already an array
+                  }
+                  color="black"          // Border color
+                  fillColor="black"      // Fill color
+                  fillOpacity={0.6}      // Fill opacity
+                  weight={2}
+                  key={selectedArea.IdLocation}
+                />
+              )}
               </FeatureGroup>
-            ) : null}
+              ) : null}
 
               {locationsArea &&
               Object.values(locationsArea).map((area, index) => {
