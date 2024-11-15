@@ -1,15 +1,17 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './App.css'
+import "./WelcomePage.css";
 import { useState, useEffect } from 'react'
 import AppContext from './AppContext'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Login from './components/Authentication';
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Login from './components/Login';
 import Default from './components/Default';
 import Home from './components/Home';
 import API from './API';
 import ModifyDocument from './components/ModifyDocument';
 import MyNavbar from './components/MyNavbar';
+import WelcomePage from './components/WelcomePage';
 
 function App() {
   const [user, setUser] = useState(undefined);
@@ -43,9 +45,6 @@ function App() {
     setUser(undefined);
   }
 
-  
-
-
   return (
     <BrowserRouter>
       <AppContext.Provider value={{
@@ -63,33 +62,12 @@ function App() {
         setSelectedDocument: setSelectedDocument,
       }}>
         <Routes>
-          <Route path="/login" element={
-            <Login />} 
-          />
-          <Route path="/" element={
-            <>
-              <MyNavbar />
-              <Home />
-            </>
-          } />
-          <Route path="/documents/modify-document/:documentId" element={
-            <>
-              <MyNavbar />
-              <ModifyDocument />
-            </>
-          } />
-          <Route path="/documents/create-document" element={
-            <>
-            <MyNavbar />
-            <ModifyDocument />
-            </>
-          } />
-          <Route path="/*" element={
-            <>
-              <MyNavbar />
-              <Default />
-              </>
-          } />
+          <Route path="/" element={<WelcomePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/home" element={<><MyNavbar /><Home /></>} />
+          <Route path="/documents/modify-document/:documentId" element={<><MyNavbar /><ModifyDocument /></>} />
+          <Route path="/documents/create-document" element={<><MyNavbar /><ModifyDocument /></>} />
+          <Route path="/*" element={<><MyNavbar /><Default /></>} />
         </Routes>
       </AppContext.Provider>
     </BrowserRouter>

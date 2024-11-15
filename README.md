@@ -77,9 +77,8 @@ Nb we pushed the server and client images using this command: `docker build -t m
 
   ## React Client Application Routes
 
-- Route `/`: Home page of the kiruna explorer
+- Route `/`: Welcome page of the kiruna explorer
 - Route `/login`: Login page to access as urban planner
-- Route `/addDocument`: Route for adding a document.
 - Route `/documents`: Route for showing the documents.
 - Route `/documents/modify-document/:documentId`: Route for modifying the document given the id.
 - Route `/documents/create-document`: Route for create a document with all fields.

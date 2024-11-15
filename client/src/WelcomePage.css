@@ -1,0 +1,169 @@
+/* Welcome page container */
+.welcome-page {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white;
+    overflow: hidden;
+    transition: background 1s ease-in-out;
+}
+
+/* Fullscreen background image */
+.background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/kiruna1.webp');
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+    filter: blur(2px);
+    /* Reduced blur */
+}
+
+/* Navbar container for logo and breadcrumbs */
+.navbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 15px 30px;
+    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Optional background for navbar */
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    /* Subtle border for navbar */
+}
+
+/* Logo styling (circular logo) */
+.logo {
+    margin-right: 30px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.logo-img {
+    width: 150px;
+    height: 150px;
+    /* Ensuring logo is a perfect circle */
+    object-fit: cover;
+    border-radius: 50%;
+    /* Circular logo */
+    border: 5px solid white;
+    /* White border around logo */
+}
+
+/* Breadcrumbs container */
+.breadcrumb-nav {
+    margin: 0;
+    font-size: 1.2rem;
+    z-index: 1;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    /* Smooth transition for breadcrumb items */
+}
+
+.breadcrumb-nav a {
+    color: white !important;
+}
+
+/* Welcome message styling */
+.welcome-message {
+    margin-top: 100px;
+    text-align: center;
+    z-index: 1;
+    padding: 30px;
+    background: rgba(0, 0, 0, 0.5);
+    /* Transparent dark background */
+    border-radius: 12px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
+    /* Soft shadow */
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeIn 2s ease-out;
+}
+
+.welcome-message h1 {
+    font-size: 4em;
+    margin: 0;
+    font-weight: bold;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeIn 2s ease-out forwards;
+}
+
+/* Fade-in animation for sections */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.welcome-message p {
+    font-size: 1.5em;
+    margin-top: 20px;
+    opacity: 0;
+    animation: fadeIn 3s ease-out forwards 1s;
+    /* Delayed fade-in for the paragraph */
+}
+
+/* Breadcrumb hover pop-up box */
+.breadcrumb-nav .breadcrumb-item {
+    position: relative;
+}
+
+.breadcrumb-nav .breadcrumb-item:hover .popup-message {
+    display: block;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Pop-up styling for breadcrumb items */
+.popup-message {
+    display: none;
+    position: absolute;
+    top: 100%;
+    /* Position below the breadcrumb */
+    left: 0;
+    width: max-content;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Slightly transparent background */
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: white;
+    font-size: 1rem;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.6);
+    margin-top: 5px;
+    z-index: 2;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+    .logo-img {
+        width: 120px;
+    }
+
+    .breadcrumb-nav {
+        font-size: 1rem;
+    }
+
+    .welcome-message h1 {
+        font-size: 2.5em;
+    }
+
+    .welcome-message p {
+        font-size: 1.2em;
+    }
+}
