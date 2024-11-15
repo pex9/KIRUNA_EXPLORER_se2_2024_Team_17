@@ -63,7 +63,7 @@ function Login() {
     return (
         <div className="login-page" style={{
 
-            backgroundImage: `url('/kiruna0.png')`,
+            backgroundImage: `url('/kiruna0.webp')`,
             backgroundSize: 'cover', // Ensures the image covers the entire container
             backgroundPosition: 'center', // Centers the image within the container
             backgroundRepeat: 'no-repeat', // Prevents repeating the image
@@ -82,7 +82,7 @@ function Login() {
                 }}></i>
             </Link>
             <h1 style={{
-                fontSize: '80px',
+                fontSize: '100px',
                 fontWeight: 600,
                 fontFamily: 'Calibri',
                 color: '#fff',
@@ -90,7 +90,7 @@ function Login() {
             }}>Kiruna eXplorer</h1>
             <Container className="text-center">
                 <Row className="justify-content-center">
-                    <Col md={6} lg={4}>
+                    <Col md={6} lg={6}>
                         <LoginForm />
                     </Col>
                 </Row>
