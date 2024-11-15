@@ -43,7 +43,6 @@ function LoginForm(props) {
     }
 
     return (
-        
         <Card className='px-5 pb-3 form border-color-main bg-color-main-light'>
             <Form onSubmit={handleSubmit}>
                 <Form.Label as='h2' className='my-4 text-center'>Login</Form.Label>
